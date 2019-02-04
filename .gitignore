@@ -1,5 +1,6 @@
 *.iml
-.idea*
 **/target/
-**/target/**
+!.gitignore
+!.git/
+.idea/**
 .attach*
