@@ -20,7 +20,6 @@ public class MainMenuController {
         Scene gameScene = new Scene(root);
         stage.setScene(gameScene);
         GameFirstLevelController.init(root);
-        GameFirstLevelController.showText(root);
         stage.show();
     }
 
