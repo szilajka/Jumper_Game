@@ -30,11 +30,22 @@ public class Player extends Rectangle {
 
     private boolean inAir;
 
-    protected void setInAir(boolean value){
+    public void setInAir(boolean value){
         this.inAir = value;
     }
 
-    protected boolean getInAir(){
+    public boolean getInAir(){
         return this.inAir;
+    }
+
+    private Point oldPosition;
+
+    public Point getOldPosition() {
+        return oldPosition;
+    }
+
+    public void setOldPosition(Point oldPosition) {
+
+        this.oldPosition = new Point(oldPosition);
     }
 }

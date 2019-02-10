@@ -13,7 +13,7 @@ public abstract class Rectangle {
     public double height;
     public Point upperLeft;
     public Color color;
-    
+
     public void setColor(Color color) {
         this.color = color;
     }
@@ -22,23 +22,19 @@ public abstract class Rectangle {
         return this.color;
     }
 
-    private void setPosition(double x, double y) {
-        if (this.upperLeft != null) {
-            this.upperLeft.setPoint(x, y);
-        } else {
-            this.upperLeft = new Point(x, y);
-        }
+    public void setPosition(double x, double y) {
+        this.upperLeft = new Point(x, y);
     }
 
-    private void setWidth(double width) {
+    public void setWidth(double width) {
         this.width = width;
     }
 
-    private void setHeight(double height) {
+    public void setHeight(double height) {
         this.height = height;
     }
 
-    private void setWidthAndHeight(double width, double height) {
+    public void setWidthAndHeight(double width, double height) {
         this.width = width;
         this.height = height;
     }
