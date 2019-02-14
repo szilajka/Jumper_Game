@@ -2,11 +2,11 @@ package jumper.Model;
 
 import javafx.scene.paint.Color;
 
-public class FallingRectangle extends Rectangle {
-    public FallingRectangle(Point upperLeft, double width, double height){
-        this.upperLeft = new Point(upperLeft.getX(), upperLeft.getY());
-        this.width = width;
-        this.height = height;
-    }
+import java.util.Optional;
 
+public class FallingRectangle extends Rect {
+
+    public FallingRectangle(double v, double v1, double v2, double v3, Optional<Color> color) {
+        super(v, v1, v2, v3, color);
+    }
 }
