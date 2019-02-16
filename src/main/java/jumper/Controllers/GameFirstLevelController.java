@@ -23,6 +23,7 @@ public class GameFirstLevelController {
     private AnimationTimer timer;
     private Line startLine;
     private boolean rightPressed = false, leftPressed = false, upPressed = false;
+    private List<Line> borders;
 
     public void init(AnchorPane ap) {
         initUI(ap);
@@ -34,15 +35,24 @@ public class GameFirstLevelController {
         run();
     }
 
-    private void initObjects(){
+    private void initObjects() {
         startLine = new Line(0, (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50), firstLevelCanvas.getWidth(),
                 (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
+        startLine.setStrokeWidth(3.0);
+        startLine.setStroke(Color.BLACK);
+        borders = new ArrayList<>(2);
+        borders.add(new Line(1.5, startLine.getStartY() - 1.5, 1.5, 0));
+        borders.add(new Line(startLine.getEndX() - 1.5, startLine.getEndY() - 1.5, startLine.getEndX() - 1.5, 0));
+        for (var line : borders) {
+            line.setStrokeWidth(3.0);
+            line.setStroke(Color.BLACK);
+        }
         player = new Player(firstLevelCanvas.getWidth() / 2 - 50, startLine.getStartY() - 100, 100, 100);
         player.setColor(Color.BLUE);
         enemy = new ArrayList<>();
     }
 
-    private void initUI(AnchorPane ap){
+    private void initUI(AnchorPane ap) {
         Stage stage = (Stage) ap.getScene().getWindow();
         Scene scene = stage.getScene();
         firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight());
@@ -56,13 +66,17 @@ public class GameFirstLevelController {
             drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
         }
         drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
-        drawLine();
+        drawLine(startLine);
+        for (var line : borders) {
+            drawLine(line);
+        }
     }
 
-    private void drawLine() {
+    private void drawLine(Line line) {
         var gc = firstLevelCanvas.getGraphicsContext2D();
-        gc.strokeLine(startLine.getStartX(), startLine.getStartY(), startLine.getEndX(), startLine.getEndY());
-        gc.clearRect(startLine.getStartX(), startLine.getStartY() + 2, firstLevelCanvas.getWidth(), firstLevelCanvas.getHeight());
+        gc.setStroke(line.getStroke());
+        gc.setLineWidth(line.getStrokeWidth());
+        gc.strokeLine(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
     }
 
     private void drawRect(double minX, double minY, double width, double height, Color color) {
@@ -154,6 +168,11 @@ public class GameFirstLevelController {
                 player.setVelocityY(0.0);
                 player.setMoving(false);
             }
+        }
+        if ((player.getX() + player.getWidth()) >= borders.get(1).getStartX()) {
+            player.setX(borders.get(1).getStartX() - player.getWidth());
+        } else if (player.getX() <= borders.get(0).getStartX()) {
+            player.setX(borders.get(0).getStartX());
         }
 
     }
