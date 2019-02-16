@@ -25,20 +25,28 @@ public class GameFirstLevelController {
     private boolean rightPressed = false, leftPressed = false, upPressed = false;
 
     public void init(AnchorPane ap) {
+        initUI(ap);
+        //TODO: add falling objects
+        //TODO: add borders to ui, and should not go outside from view
+        initObjects();
+        keyListener();
+        paused = false;
+        run();
+    }
+
+    private void initObjects(){
+        startLine = new Line(0, (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50), firstLevelCanvas.getWidth(),
+                (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
+        player = new Player(firstLevelCanvas.getWidth() / 2 - 50, startLine.getStartY() - 100, 100, 100);
+        player.setColor(Color.BLUE);
+        enemy = new ArrayList<>();
+    }
+
+    private void initUI(AnchorPane ap){
         Stage stage = (Stage) ap.getScene().getWindow();
         Scene scene = stage.getScene();
         firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight());
         ap.getChildren().add(firstLevelCanvas);
-        startLine = new Line(0, (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50), firstLevelCanvas.getWidth(),
-                (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
-        drawLine();
-        player = new Player(firstLevelCanvas.getWidth() / 2 - 50, startLine.getStartY() - 100, 100, 100);
-        player.setColor(Color.BLUE);
-        drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
-        enemy = new ArrayList<>();
-        keyListener();
-        paused = false;
-        run();
     }
 
     private void draw() {
@@ -67,8 +75,8 @@ public class GameFirstLevelController {
     private void keyListener() {
         firstLevelCanvas.getScene().setOnKeyPressed(keyEvent -> {
             var kc = keyEvent.getCode();
-            if (kc == KeyCode.RIGHT) {
-                player.addVelocityX(player.getMoveSpeed());
+            if (kc == KeyCode.RIGHT && !paused) {
+                player.setVelocityX(player.getMoveSpeed());
                 rightPressed = true;
             }
             if (kc == KeyCode.UP && !paused && !upPressed && !player.isMoving()) {
@@ -77,14 +85,22 @@ public class GameFirstLevelController {
                 player.setMoving(true);
             }
             if (kc == KeyCode.LEFT && !paused) {
-                player.addVelocityX(-player.getMoveSpeed());
+                player.setVelocityX(-player.getMoveSpeed());
                 leftPressed = true;
             }
             if (kc == KeyCode.ESCAPE) {
                 if (paused) {
+                    player.addVelocityX(player.getOldVelocityX());
+                    player.addVelocityY(player.getOldVelocityY());
+                    player.setOldVelocityX(0.0);
+                    player.setOldVelocityY(0.0);
                     paused = false;
                     timer.start();
                 } else {
+                    player.setOldVelocityX(player.getVelocityX());
+                    player.setOldVelocityY(player.getVelocityY());
+                    player.setVelocityX(0.0);
+                    player.setVelocityY(0.0);
                     paused = true;
                     timer.stop();
                 }
@@ -96,20 +112,11 @@ public class GameFirstLevelController {
             if (kc == KeyCode.RIGHT) {
                 rightPressed = false;
             }
-            if (kc == KeyCode.LEFT && !paused) {
+            if (kc == KeyCode.LEFT) {
                 leftPressed = false;
             }
-            if (kc == KeyCode.UP && !paused) {
+            if (kc == KeyCode.UP) {
                 upPressed = false;
-            }
-            if (kc == KeyCode.ESCAPE) {
-                if (paused) {
-                    paused = false;
-                    timer.start();
-                } else {
-                    paused = true;
-                    timer.stop();
-                }
             }
         });
 
@@ -122,10 +129,9 @@ public class GameFirstLevelController {
 
     private void update(double time) {
         updatePlayer(time);
-        //TODO: add falling objects
         draw();
 
-        if (!rightPressed && !leftPressed) {
+        if (!rightPressed && !leftPressed && !paused) {
             if (player.getVelocityX() > 10e-6) {
                 if (player.getVelocityX() <= 1.0) {
                     player.setVelocityX(0.0);
@@ -140,16 +146,15 @@ public class GameFirstLevelController {
                 }
             }
         }
-        if (player.isMoving()) {
+        if (player.isMoving() && !paused) {
             if (player.getY() < startLine.getStartY() - player.getHeight()) {
                 player.addVelocityY(0.91);
-            } else if(player.getY() >= startLine.getStartY() - player.getHeight()){
+            } else if (player.getY() >= startLine.getStartY() - player.getHeight()) {
                 player.setY(startLine.getStartY() - player.getHeight());
                 player.setVelocityY(0.0);
                 player.setMoving(false);
             }
         }
-
 
     }
 

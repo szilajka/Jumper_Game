@@ -17,6 +17,8 @@ public abstract class Rect extends Rectangle {
     //speed
     private double velocityX = 0.0;
     private double velocityY = 0.0;
+    private double oldVelocityX = 0.0;
+    private double oldVelocityY = 0.0;
     private boolean isMoving = false;
 
     public boolean isMoving() {
@@ -62,6 +64,22 @@ public abstract class Rect extends Rectangle {
 
     public void addVelocityY(double velocityY){
         this.velocityY += velocityY;
+    }
+
+    public double getOldVelocityX() {
+        return oldVelocityX;
+    }
+
+    public void setOldVelocityX(double oldVelocityX) {
+        this.oldVelocityX = oldVelocityX;
+    }
+
+    public double getOldVelocityY() {
+        return oldVelocityY;
+    }
+
+    public void setOldVelocityY(double oldVelocityY) {
+        this.oldVelocityY = oldVelocityY;
     }
 
     private Rectangle2D getBoundaries(){

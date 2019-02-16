@@ -28,7 +28,7 @@ public class Player extends Rect {
 
     //---------------------Fields
 
-    private final double moveSpeed = 25.0;
+    private final double moveSpeed = 50.0;
 
     private boolean inAir;
 
