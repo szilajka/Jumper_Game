@@ -184,6 +184,9 @@ public class GameFirstLevelController
             }
         };
 
+        firstLevelCanvas.getScene().removeEventHandler(KeyEvent.KEY_PRESSED, firstPEH);
+        firstLevelCanvas.getScene().removeEventHandler(KeyEvent.KEY_RELEASED, firstREH);
+
         firstLevelCanvas.getScene().addEventHandler(KeyEvent.KEY_PRESSED, firstPEH);
         firstLevelCanvas.getScene().addEventHandler(KeyEvent.KEY_RELEASED, firstREH);
     }

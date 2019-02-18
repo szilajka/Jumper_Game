@@ -3,9 +3,10 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jumper.Controllers.MainMenuController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Button fx:id="btnStart" layoutX="512.0" layoutY="500.0" mnemonicParsing="false" onKeyPressed="#onBtnStartPressed" onMouseClicked="#onBtnStartClicked" prefHeight="86.0" prefWidth="274.0" text="Start" />
       <Button fx:id="btnExit" layoutX="14.0" layoutY="500.0" mnemonicParsing="false" onKeyPressed="#onBtnExitPressed" onMouseClicked="#onBtnExitClicked" prefHeight="86.0" prefWidth="263.0" text="Exit" />
+      <Button fx:id="btnOptions" layoutX="264.0" layoutY="147.0" mnemonicParsing="false" onKeyPressed="#onBtnOptionsPressed" onMouseClicked="#onBtnOptionsClicked" prefHeight="86.0" prefWidth="273.0" text="Options" />
    </children>
 </AnchorPane>
