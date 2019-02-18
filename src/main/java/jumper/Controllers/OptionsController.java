@@ -19,13 +19,12 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * The Option {@link Scene}'s {@code controller} class.
- * It gets a {@code generic parameter} that {@code extends} the {@link AbstractController}.
+ * The Option {@link Scene}'s {@code controller} class.<br>
+ * It gets a {@code generic parameter} that {@code extends} the {@link AbstractController}.<br>
  * We want to be sure, that this {@code scene} is available from all {@code scenes} and
- * we can go back to the previous {@code scene} without creating a new scene and lose any information about it.
- * <p>
+ * we can go back to the previous {@code scene} without creating a new scene and lose any information about it.<br>
  * These controller classes have a {@link Map} that contains {@link ChangeListener}s, in this {@code map} the {@code Value}
- * parameter is not type safety and while compiling, get some warning about the classes use unchecked operations.
+ * parameter is not type safety and while compiling, get some warning about the classes use unchecked operations.<br>
  * To avoid this, we ignored these warnings with an annotation.
  *
  * @param <T> The {@code controller} that called this {@code scene}.
@@ -47,7 +46,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     private Map<String, ChangeListener> changeListenerMap;
 
     /**
-     * {@code Constructor} of the class.
+     * {@code Constructor} of the class.<br>
      * This initializes the {@link Map}, that contains the {@link ChangeListener}s, as a {@link HashMap}.
      *
      * @param prevController The {@code controller} that called this {@link Scene}.
@@ -68,8 +67,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * THis method implements changing between full screen and windowed mode.
-     *
+     * This method implements changing between full screen and windowed mode.
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      */
     public void onChkFullScreenClicked(MouseEvent mouseEvent)
@@ -97,7 +95,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * Implementation of {@see jumper.Controllers.AbstractController#addResizeListener()}.
+     * Implementation of {@link AbstractController#addResizeListener()}.
      */
     protected void addResizeListener()
     {
@@ -105,8 +103,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * Removes the {@link ChangeListener}s from the main {@link javafx.stage.Stage}.
-     * This is used, when the application changes to another {@link Scene}.
+     * Removes the {@link ChangeListener}s from the main {@link javafx.stage.Stage}.<br>
+     * This is used, when the application changes to another {@link Scene}.<br>
      * Without this method, the {@code change listeners} would not be removed from the main {@code stage}
      * and the application would do some unnecessary operation.
      */
@@ -155,11 +153,10 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * Compute the X coordinates and Widths of the elements in this {@link Scene}.
-     * It compute a ratio by the given values.
-     * If it just a simple resize, then the parameters are the width of the {@code scene} before and after resizing.
-     * If the application changes between {@code scenes} then they are the original width of the scene and the resized width.
-     *
+     * Compute the X coordinates and Widths of the elements in this {@link Scene}.<br>
+     * It compute a ratio by the given values.<br>
+     * If it just a simple resize, then the parameters are the width of the {@code scene} before and after resizing.<br>
+     * If the application changes between {@code scenes} then they are the original width of the scene and the resized width.<br>
      * @param oldValue Width of the {@code scene} before resizing or the original width of the {@code scene}
      * @param newValue Width of the {@code scene} after resizing
      */
@@ -181,11 +178,10 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * Compute the Y coordinates and Heights of the elements in this {@link Scene}.
-     * It compute a ratio by the given values.
-     * If it just a simple resize, then the parameters are the height of the {@code scene} before and after resizing.
-     * If the application changes between {@code scenes} then they are the original height of the scene and the resized height.
-     *
+     * Compute the Y coordinates and Heights of the elements in this {@link Scene}.<br>
+     * It compute a ratio by the given values.<br>
+     * If it just a simple resize, then the parameters are the height of the {@code scene} before and after resizing.<br>
+     * If the application changes between {@code scenes} then they are the original height of the scene and the resized height.<br>
      * @param oldValue Height of the {@code scene} before resizing or the original height of the {@code scene}
      * @param newValue Height of the {@code scene} after resizing
      */
@@ -207,7 +203,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * This method implements the resolution changing.
+     * This method implements the resolution changing.<br>
      * This {@link ComboBox} only available if the application is in full screen mode.
      *
      * @param event The {@link ActionEvent} that triggers this method.
@@ -252,7 +248,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * Implements the back button's behaviour.
+     * Implements the back button's behaviour.<br>
      * If it is pressed/clicked it should navigate you back to the previous {@link Scene}.
      *
      * @throws IOException If the fxml file is not found.
@@ -277,7 +273,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     }
 
     /**
-     * Implementation of {@see AbstractController#resizeOnLoad(Number, Number, Number, Number)} method.
+     * Implementation of {@link AbstractController#resizeOnLoad(Number, Number, Number, Number)} method.<br>
      * The {@code applyCss()} method is necessary, because if we work with {@link Label}s then their width and
      * height are computed usually so we need to get it by this method.
      * @param oldValueX {@link }'s old X coordinate before change (if there was a change)
