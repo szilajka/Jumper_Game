@@ -13,7 +13,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +28,7 @@ public class MainMenuController extends AbstractController
 
     private Map<String, ChangeListener> changeListenerMap;
 
+    //region Constructors
 
     public MainMenuController()
     {
@@ -41,9 +41,12 @@ public class MainMenuController extends AbstractController
         this.oldValY = oldValueY;
         this.changeNewX = newValueX;
         this.changeNewY = newValueY;
-        System.out.println("itt is jártam");
         changeListenerMap = new HashMap<>();
     }
+
+    //endregion Constructors
+
+    //region Button Actions
 
     public void onBtnStartClicked(MouseEvent mouseEvent) throws IOException
     {
@@ -53,39 +56,20 @@ public class MainMenuController extends AbstractController
         }
     }
 
-    private void FirstLevelStart() throws IOException
+    public void onBtnStartPressed(KeyEvent keyEvent) throws IOException
     {
-        removeResizeListener();
-        var root = (AnchorPane) FXMLLoader.load(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
-        Stage stage = (Stage) btnStart.getScene().getWindow();
-        Scene gameScene = new Scene(root);
-        stage.setScene(gameScene);
-        var gflC = new GameFirstLevelController();
-        gflC.init(root);
-        stage.show();
-        gflC.run();
+        if (keyEvent.getCode() == KeyCode.ENTER)
+        {
+            FirstLevelStart();
+        }
     }
+
 
     public void onBtnExitClicked(MouseEvent mouseEvent)
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
             MenuExit();
-        }
-    }
-
-    private void MenuExit()
-    {
-        removeResizeListener();
-        Stage stage = Main.getPrimaryStage();
-        stage.close();
-    }
-
-    public void onBtnStartPressed(KeyEvent keyEvent) throws IOException
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
-            FirstLevelStart();
         }
     }
 
@@ -97,6 +81,15 @@ public class MainMenuController extends AbstractController
         }
     }
 
+
+    public void onBtnOptionsClicked(MouseEvent mouseEvent) throws IOException
+    {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY)
+        {
+            OptionsMenu();
+        }
+    }
+
     public void onBtnOptionsPressed(KeyEvent keyEvent) throws IOException
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
@@ -105,10 +98,35 @@ public class MainMenuController extends AbstractController
         }
     }
 
-    public void onBtnOptionsClicked(MouseEvent mouseEvent) throws IOException
+    //endregion Button Actions
+
+    //region Implementations of Button Actions
+
+    private void FirstLevelStart() throws IOException
     {
-        OptionsMenu();
+        removeResizeListener();
+        Stage stage = Main.getPrimaryStage();
+
+        var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
+        var gameFirstLC = new GameFirstLevelController();
+        fl.setController(gameFirstLC);
+        var root = (AnchorPane) fl.load();
+
+        Scene gameScene = btnStart.getScene();
+        gameScene.setRoot(root);
+        setNewAndStageXY(root, stage);
+        gameFirstLC.init(root);
+        gameFirstLC.addResizeListener();
     }
+
+
+    private void MenuExit()
+    {
+        removeResizeListener();
+        Stage stage = Main.getPrimaryStage();
+        stage.close();
+    }
+
 
     private void OptionsMenu() throws IOException
     {
@@ -123,17 +141,19 @@ public class MainMenuController extends AbstractController
         optionsScene.setRoot(ap);
         setNewAndStageXY(ap, stage);
         optionsController.setChkFullScreen(Main.getPrimaryStage().isFullScreen());
-        optionsController.setComboBox();
         optionsController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
         optionsController.addResizeListener();
     }
+
+    //endregion Implementations of Button Actions
+
+    //region Resize Methods
 
     private void removeResizeListener()
     {
         var stage = Main.getPrimaryStage();
         stage.widthProperty().removeListener(changeListenerMap.get("width"));
         stage.heightProperty().removeListener(changeListenerMap.get("height"));
-        stage.fullScreenProperty().removeListener(changeListenerMap.get("fullscreen"));
     }
 
     public void addResizeListener()
@@ -144,8 +164,8 @@ public class MainMenuController extends AbstractController
     @Override
     protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
     {
-        resizeXandWidth(oldValueX, newValueX);
-        resizeYandHeight(oldValueY, newValueY);
+        resizeXAndWidth(oldValueX, newValueX);
+        resizeYAndHeight(oldValueY, newValueY);
     }
 
     private void resize()
@@ -155,7 +175,7 @@ public class MainMenuController extends AbstractController
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
             {
-                resizeXandWidth(oldValue, newValue);
+                resizeXAndWidth(oldValue, newValue);
             }
         };
 
@@ -164,42 +184,24 @@ public class MainMenuController extends AbstractController
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
             {
-                resizeYandHeight(oldValue, newValue);
+                resizeYAndHeight(oldValue, newValue);
             }
         };
 
-        var fullScreenResize = new ChangeListener<Boolean>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1)
-            {
-                //WARNING: This java.awt methods, like this, give some kind of warning
-                //link: https://bugs.openjdk.java.net/browse/JDK-8156779?focusedCommentId=14213204&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14213204
-                //they fix it in openjfx12 if they can
-                var dp = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
-                var fsWidth = dp.getWidth();
-                var fsHeight = dp.getHeight();
-                var stage = Main.getPrimaryStage();
-                resizeXandWidth(stage.getWidth(), fsWidth);
-                resizeYandHeight(stage.getHeight(), fsHeight);
-            }
-        };
 
         var stage = Main.getPrimaryStage();
 
         changeListenerMap.put("width", widthResize);
         changeListenerMap.put("height", heightResize);
-        changeListenerMap.put("fullscreen", fullScreenResize);
 
         removeResizeListener();
 
         stage.widthProperty().addListener(changeListenerMap.get("width"));
         stage.heightProperty().addListener(changeListenerMap.get("height"));
-        stage.fullScreenProperty().addListener(changeListenerMap.get("fullscreen"));
 
     }
 
-    private void resizeXandWidth(Number oldValue, Number newValue)
+    private void resizeXAndWidth(Number oldValue, Number newValue)
     {
         btnStart.setLayoutX(btnStart.getLayoutX() * newValue.doubleValue() / oldValue.doubleValue());
         btnExit.setLayoutX(btnExit.getLayoutX() * newValue.doubleValue() / oldValue.doubleValue());
@@ -210,7 +212,7 @@ public class MainMenuController extends AbstractController
         btnOptions.setPrefWidth(btnOptions.getPrefWidth() * newValue.doubleValue() / oldValue.doubleValue());
     }
 
-    private void resizeYandHeight(Number oldValue, Number newValue)
+    private void resizeYAndHeight(Number oldValue, Number newValue)
     {
         btnStart.setLayoutY(btnStart.getLayoutY() * newValue.doubleValue() / oldValue.doubleValue());
         btnExit.setLayoutY(btnExit.getLayoutY() * newValue.doubleValue() / oldValue.doubleValue());
@@ -220,5 +222,7 @@ public class MainMenuController extends AbstractController
         btnExit.setPrefHeight(btnExit.getPrefHeight() * newValue.doubleValue() / oldValue.doubleValue());
         btnOptions.setPrefHeight(btnOptions.getPrefHeight() * newValue.doubleValue() / oldValue.doubleValue());
     }
+
+    //endregion Resize Methods
 
 }

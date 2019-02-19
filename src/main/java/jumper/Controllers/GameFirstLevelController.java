@@ -1,6 +1,8 @@
 package jumper.Controllers;
 
 import javafx.animation.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -14,11 +16,14 @@ import javafx.stage.Stage;
 import jumper.Model.FallingRectangle;
 import jumper.Model.Player;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class GameFirstLevelController
+public class GameFirstLevelController extends AbstractController
 {
     private Canvas firstLevelCanvas;
     private boolean paused = false;
@@ -29,6 +34,19 @@ public class GameFirstLevelController
     private boolean rightPressed = false, leftPressed = false, upPressed = false;
     private List<Line> borders;
     private Scene gameScene;
+    private double extractStartLineWidth;
+    private Map<String, ChangeListener> changeListenerMap;
+
+    //region Constructor
+
+    public GameFirstLevelController()
+    {
+        changeListenerMap = new HashMap<>();
+    }
+
+    //endregion Constructor
+
+    //region Initialization
 
     public void init(AnchorPane ap)
     {
@@ -52,9 +70,12 @@ public class GameFirstLevelController
                 (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
         startLine.setStrokeWidth(3.0);
         startLine.setStroke(Color.BLACK);
+        extractStartLineWidth = startLine.getStrokeWidth() / 2;
         borders = new ArrayList<>(2);
-        borders.add(new Line(1.5, startLine.getStartY() - 1.5, 1.5, 0));
-        borders.add(new Line(startLine.getEndX() - 1.5, startLine.getEndY() - 1.5, startLine.getEndX() - 1.5, 0));
+        borders.add(new Line(extractStartLineWidth, 0,
+                extractStartLineWidth, startLine.getStartY() - extractStartLineWidth));
+        borders.add(new Line(startLine.getEndX() - extractStartLineWidth, 0,
+                startLine.getEndX() - extractStartLineWidth, startLine.getEndY() - extractStartLineWidth));
         for (var line : borders)
         {
             line.setStrokeWidth(3.0);
@@ -75,6 +96,10 @@ public class GameFirstLevelController
         firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight());
         ap.getChildren().add(firstLevelCanvas);
     }
+
+    //endregion Initialization
+
+    //region Drawing
 
     private void draw()
     {
@@ -107,6 +132,9 @@ public class GameFirstLevelController
         gc.fillRect(minX, minY, width, height);
     }
 
+    //endregion Drawing
+
+    //region Key Listener
 
     private void keyListenerFirstLevel()
     {
@@ -191,6 +219,120 @@ public class GameFirstLevelController
         firstLevelCanvas.getScene().addEventHandler(KeyEvent.KEY_RELEASED, firstREH);
     }
 
+    //endregion Key Listener
+
+    //region Resize Methods
+
+    @Override
+    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
+    {
+        resizeXAndWidth(oldValueX, newValueX);
+        resizeYAndHeight(oldValueY, newValueY);
+    }
+
+    @Override
+    protected void addResizeListener()
+    {
+        resize();
+    }
+
+    private void removeResizeListener()
+    {
+        var stage = Main.getPrimaryStage();
+        stage.widthProperty().removeListener(changeListenerMap.get("width"));
+        stage.heightProperty().removeListener(changeListenerMap.get("height"));
+    }
+
+    private void resize()
+    {
+        var widthResize = new ChangeListener<Number>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
+            {
+                resizeXAndWidth(oldValue, newValue);
+            }
+        };
+
+        var heightResize = new ChangeListener<Number>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
+            {
+                resizeYAndHeight(oldValue, newValue);
+            }
+        };
+
+
+        var stage = Main.getPrimaryStage();
+
+        changeListenerMap.put("width", widthResize);
+        changeListenerMap.put("height", heightResize);
+
+        removeResizeListener();
+
+        stage.widthProperty().addListener(changeListenerMap.get("width"));
+        stage.heightProperty().addListener(changeListenerMap.get("height"));
+
+    }
+
+    private void resizeXAndWidth(Number oldValue, Number newValue)
+    {
+        double ratio = newValue.doubleValue() / oldValue.doubleValue();
+
+        firstLevelCanvas.setLayoutX(0);
+        firstLevelCanvas.setWidth(firstLevelCanvas.getWidth() * ratio);
+
+        startLine.setStartX(0);
+        startLine.setEndX(firstLevelCanvas.getWidth());
+
+        borders.get(0).setStartX(extractStartLineWidth);
+        borders.get(0).setEndX(extractStartLineWidth);
+
+        borders.get(1).setStartX(startLine.getEndX() - extractStartLineWidth);
+        borders.get(1).setEndX(startLine.getEndX() - extractStartLineWidth);
+
+        player.setX(player.getX() * ratio);
+        player.setWidth(player.getWidth() * ratio);
+
+        for (var rect : enemy)
+        {
+            rect.setX(rect.getX() * ratio);
+            rect.setWidth(rect.getWidth() * ratio);
+        }
+    }
+
+    private void resizeYAndHeight(Number oldValue, Number newValue)
+    {
+        double ratio = newValue.doubleValue() / oldValue.doubleValue();
+
+        firstLevelCanvas.setLayoutY(0);
+        firstLevelCanvas.setHeight(firstLevelCanvas.getHeight() * ratio);
+
+        startLine.setStartY((firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
+        startLine.setEndY((firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
+
+        borders.get(0).setStartY(0);
+        borders.get(0).setEndY(startLine.getStartY() - extractStartLineWidth);
+
+        borders.get(1).setStartY(0);
+        borders.get(1).setEndY(startLine.getEndY() - extractStartLineWidth);
+
+        player.setY(player.getY() * ratio);
+        player.setHeight(player.getHeight() * ratio);
+
+        for (var rect : enemy)
+        {
+            rect.setY(rect.getY() * ratio);
+            rect.setHeight(rect.getHeight() * ratio);
+        }
+
+    }
+
+    //endregion Resize Methods
+
+    //region Update
+
     protected void letsContinue(AnchorPane ap)
     {
         player.setVelocityX(player.getOldVelocityX());
@@ -257,6 +399,10 @@ public class GameFirstLevelController
 
     }
 
+    //endregion Update
+
+    //region Run
+
     public void run()
     {
         timer = new AnimationTimer()
@@ -271,5 +417,6 @@ public class GameFirstLevelController
         timer.start();
     }
 
+    //endregion Run
 
 }
