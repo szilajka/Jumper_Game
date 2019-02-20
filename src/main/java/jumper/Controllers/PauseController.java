@@ -1,6 +1,9 @@
 package jumper.Controllers;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -12,17 +15,24 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.security.Key;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is the {@code controller} of the Pause menu.
  * This {@link Scene} is only available while the user is playing.
  */
-public class PauseController
+public class PauseController extends AbstractController
 {
     public Button btnContinue;
     public Button btnExit;
     public Button btnMenu;
-    private GameFirstLevelController gflc;
+
+    private GameFirstLevelController gameFirstLC;
+    private Map<String, ChangeListener<Number>> changeListenerMap;
+    private boolean paused = true;
+    private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
 
     //region Constructor
 
@@ -30,20 +40,118 @@ public class PauseController
      * The constructor of this class.
      * We give the game level controller as parameter, so later we can continue the game from where we paused.
      *
-     * @param gflc The {@link GameFirstLevelController} that paused the game.
+     * @param gameFirstLevelController The {@link GameFirstLevelController} that paused the game.
      */
-    public PauseController(GameFirstLevelController gflc)
+    public PauseController(GameFirstLevelController gameFirstLevelController)
     {
-        this.gflc = gflc;
+        this.gameFirstLC = gameFirstLevelController;
+        this.changeListenerMap = new HashMap<>();
+        this.keyEventHandlerMap = new HashMap<>();
     }
 
     //endregion Constructor
 
     //region Resize Methods
 
+    @Override
+    protected void addResizeListener()
+    {
+        resize();
+    }
+
+    private void removeResizeListener()
+    {
+        var stage = Main.getPrimaryStage();
+
+        if (changeListenerMap.get("width") != null)
+        {
+            stage.widthProperty().addListener(changeListenerMap.get("width"));
+        }
+        if (changeListenerMap.get("height") != null)
+        {
+            stage.heightProperty().addListener(changeListenerMap.get("height"));
+        }
+    }
+
+    private void resize()
+    {
+        var widthResize = new ChangeListener<Number>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
+            {
+                resizeXAndWidth(oldValue, newValue);
+            }
+        };
+
+        var heightResize = new ChangeListener<Number>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
+            {
+                resizeYAndHeight(oldValue, newValue);
+            }
+        };
+
+        removeResizeListener();
+
+        changeListenerMap.put("width", widthResize);
+        changeListenerMap.put("height", heightResize);
+
+        var stage = Main.getPrimaryStage();
+
+        stage.widthProperty().addListener(changeListenerMap.get("width"));
+        stage.heightProperty().addListener(changeListenerMap.get("height"));
+
+    }
+
+    @Override
+    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
+    {
+        resizeXAndWidth(oldValueX, newValueX);
+        resizeYAndHeight(oldValueY, newValueY);
+    }
+
+    private void resizeXAndWidth(Number oldValue, Number newValue)
+    {
+        double ratio = newValue.doubleValue() / oldValue.doubleValue();
+
+        btnContinue.setLayoutX(btnContinue.getLayoutX() * ratio);
+        btnMenu.setLayoutX(btnMenu.getLayoutX() * ratio);
+        btnExit.setLayoutX(btnExit.getLayoutX() * ratio);
+
+        btnContinue.setPrefWidth(btnContinue.getPrefWidth() * ratio);
+        btnMenu.setPrefWidth(btnMenu.getPrefWidth() * ratio);
+        btnExit.setPrefWidth(btnExit.getPrefWidth() * ratio);
+
+    }
+
+    private void resizeYAndHeight(Number oldValue, Number newValue)
+    {
+        double ratio = newValue.doubleValue() / oldValue.doubleValue();
+
+        btnContinue.setLayoutY(btnContinue.getLayoutY() * ratio);
+        btnMenu.setLayoutY(btnMenu.getLayoutY() * ratio);
+        btnExit.setLayoutY(btnExit.getLayoutY() * ratio);
+
+        btnContinue.setPrefHeight(btnContinue.getPrefHeight() * ratio);
+        btnMenu.setPrefHeight(btnMenu.getPrefHeight() * ratio);
+        btnExit.setPrefHeight(btnExit.getPrefHeight() * ratio);
+
+    }
+
     //endregion Resize Methods
 
     //region Key Listener
+
+    private void removeKeyListener()
+    {
+        var stage = Main.getPrimaryStage();
+        if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null)
+        {
+            stage.removeEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
+        }
+    }
 
     /**
      * This method adds an {@link EventHandler} to the {@link Scene}.
@@ -57,20 +165,31 @@ public class PauseController
             public void handle(KeyEvent keyEvent)
             {
                 var kc = keyEvent.getCode();
-                if (kc == KeyCode.ESCAPE)
+                if (kc == KeyCode.ESCAPE && !paused)
                 {
                     try
                     {
+                        var stage = Main.getPrimaryStage();
                         continueFirstLevel();
-                        btnMenu.getScene().removeEventHandler(KeyEvent.KEY_PRESSED, this);
+                        stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);
                     } catch (IOException e)
                     {
                         e.printStackTrace();
                     }
+                } else if (kc == KeyCode.ESCAPE)
+                {
+                    gameFirstLC.removeKeyListener();
+                    paused = false;
                 }
             }
         };
-        btnMenu.getScene().addEventHandler(KeyEvent.KEY_PRESSED, pauseEH);
+
+        removeKeyListener();
+
+        keyEventHandlerMap.put(KeyEvent.KEY_PRESSED, pauseEH);
+
+        var stage = Main.getPrimaryStage();
+        stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
     }
 
     //endregion Key Listener
@@ -168,6 +287,7 @@ public class PauseController
      */
     private void AppExit()
     {
+        removeResizeListener();
         Stage stage = (Stage) btnExit.getScene().getWindow();
         stage.close();
     }
@@ -179,12 +299,18 @@ public class PauseController
      */
     private void loadMainMenu() throws IOException
     {
-        var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
-        fl.setController(new MainMenuController());
-        var mainMenu = (AnchorPane) fl.load();
         var stage = Main.getPrimaryStage();
-        stage.setScene(new Scene(mainMenu));
-        stage.show();
+        var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
+        var mainController = new MainMenuController();
+        fl.setController(mainController);
+        var ap = (AnchorPane) fl.load();
+        var mainScene = btnMenu.getScene();
+        mainScene.setRoot(ap);
+        setNewAndStageXY(ap, stage);
+        removeKeyListener();
+        removeResizeListener();
+        mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
+        mainController.addResizeListener();
     }
 
     /**
@@ -194,14 +320,16 @@ public class PauseController
      */
     private void continueFirstLevel() throws IOException
     {
-        var stage = (Stage) btnContinue.getScene().getWindow();
+        var stage = Main.getPrimaryStage();
         var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
-        fl.setController(gflc);
+        fl.setController(gameFirstLC);
         var ap = (AnchorPane) fl.load();
-        var gameScene = new Scene(ap);
-        stage.setScene(gameScene);
-        stage.show();
-        gflc.letsContinue(ap);
+        var gameScene = btnContinue.getScene();
+        gameScene.setRoot(ap);
+        setNewAndStageXY(ap, stage);
+        removeKeyListener();
+        removeResizeListener();
+        gameFirstLC.letsContinue(ap);
     }
 
     //endregion Implementation of Button Actions

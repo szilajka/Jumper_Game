@@ -4,6 +4,7 @@ import javafx.animation.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -25,22 +26,23 @@ import java.util.Map;
 public class GameFirstLevelController extends AbstractController
 {
     private Canvas firstLevelCanvas;
-    private boolean paused = false;
+    protected boolean paused = false;
     private Player player;
     private List<FallingRectangle> enemy;
     private AnimationTimer timer;
     private Line startLine;
     private boolean rightPressed = false, leftPressed = false, upPressed = false;
     private List<Line> borders;
-    private Scene gameScene;
     private double extractStartLineWidth;
     private Map<String, ChangeListener<Number>> changeListenerMap;
+    private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
 
     //region Constructor
 
     public GameFirstLevelController()
     {
         changeListenerMap = new HashMap<>();
+        keyEventHandlerMap = new HashMap<>();
     }
 
     //endregion Constructor
@@ -53,15 +55,10 @@ public class GameFirstLevelController extends AbstractController
         //TODO: add falling objects
         initObjects();
         keyListenerFirstLevel();
-        initScenes();
         paused = false;
         run();
     }
 
-    private void initScenes()
-    {
-        gameScene = firstLevelCanvas.getScene();
-    }
 
     private void initObjects()
     {
@@ -82,7 +79,11 @@ public class GameFirstLevelController extends AbstractController
         }
         if (player == null)
         {
-            player = new Player(firstLevelCanvas.getWidth() / 2 - 50, startLine.getStartY() - 100, 100, 100);
+            var stage = Main.getPrimaryStage();
+            double  width = stage.getWidth() / 10, height = width;
+            var x = firstLevelCanvas.getWidth() / 2 - (width / 2);
+            var y = startLine.getStartY() - height;
+            player = new Player(x, y, width, height);
         }
         player.setColor(Color.BLUE);
         enemy = new ArrayList<>();
@@ -90,7 +91,7 @@ public class GameFirstLevelController extends AbstractController
 
     private void initUI(AnchorPane ap)
     {
-        Stage stage = (Stage) ap.getScene().getWindow();
+        Stage stage = Main.getPrimaryStage();
         Scene scene = stage.getScene();
         firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight());
         ap.getChildren().add(firstLevelCanvas);
@@ -99,7 +100,7 @@ public class GameFirstLevelController extends AbstractController
     //endregion Initialization
 
     /**
-     * @param stage
+     * @param
      * @throws Exception
      */
     //region Drawing
@@ -138,6 +139,19 @@ public class GameFirstLevelController extends AbstractController
 
     //region Key Listener
 
+    protected void removeKeyListener()
+    {
+        var stage = Main.getPrimaryStage();
+        if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null)
+        {
+            stage.removeEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
+        }
+        if (keyEventHandlerMap.get(KeyEvent.KEY_RELEASED) != null)
+        {
+            stage.removeEventHandler(KeyEvent.KEY_RELEASED, keyEventHandlerMap.get(KeyEvent.KEY_RELEASED));
+        }
+    }
+
     private void keyListenerFirstLevel()
     {
         var firstPEH = new EventHandler<KeyEvent>()
@@ -162,9 +176,8 @@ public class GameFirstLevelController extends AbstractController
                     player.setVelocityX(-player.getMoveSpeed());
                     leftPressed = true;
                 }
-                if (kc == KeyCode.ESCAPE)
+                if (kc == KeyCode.ESCAPE && !paused)
                 {
-                    gameScene = firstLevelCanvas.getScene();
                     player.setOldVelocityX(player.getVelocityX());
                     player.setOldVelocityY(player.getVelocityY());
                     player.setVelocityX(0.0);
@@ -176,15 +189,19 @@ public class GameFirstLevelController extends AbstractController
                     timer.stop();
                     try
                     {
-                        var stage = (Stage) firstLevelCanvas.getScene().getWindow();
+                        var stage = Main.getPrimaryStage();
                         var fl = new FXMLLoader(getClass().getClassLoader().getResource("Pause.fxml"));
                         var pauseC = new PauseController(GameFirstLevelController.this);
                         fl.setController(pauseC);
                         var ap = (AnchorPane) fl.load();
-                        var pauseScene = new Scene(ap);
-                        stage.setScene(pauseScene);
-                        stage.show();
+                        Scene pauseScene = firstLevelCanvas.getScene();
+                        pauseScene.setRoot(ap);
+                        setNewAndStageXY(ap, stage);
+                        pauseC.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
+                        pauseC.addResizeListener();
                         pauseC.keyListenerPause();
+                        removeKeyListener();
+                        removeResizeListener();
                     } catch (IOException e)
                     {
                         e.printStackTrace();
@@ -214,11 +231,15 @@ public class GameFirstLevelController extends AbstractController
             }
         };
 
-        firstLevelCanvas.getScene().removeEventHandler(KeyEvent.KEY_PRESSED, firstPEH);
-        firstLevelCanvas.getScene().removeEventHandler(KeyEvent.KEY_RELEASED, firstREH);
 
-        firstLevelCanvas.getScene().addEventHandler(KeyEvent.KEY_PRESSED, firstPEH);
-        firstLevelCanvas.getScene().addEventHandler(KeyEvent.KEY_RELEASED, firstREH);
+        removeKeyListener();
+
+        keyEventHandlerMap.put(KeyEvent.KEY_PRESSED, firstPEH);
+        keyEventHandlerMap.put(KeyEvent.KEY_RELEASED, firstREH);
+
+        var stage = Main.getPrimaryStage();
+        stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
+        stage.addEventHandler(KeyEvent.KEY_RELEASED, keyEventHandlerMap.get(KeyEvent.KEY_RELEASED));
     }
 
     //endregion Key Listener
