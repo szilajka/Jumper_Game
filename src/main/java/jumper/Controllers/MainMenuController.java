@@ -12,6 +12,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ public class MainMenuController extends AbstractController
     public Button btnOptions;
 
     private Map<String, ChangeListener<Number>> changeListenerMap;
+    private static final Logger logger = LogManager.getLogger("MainMenuController");
 
     //region Constructors
 
@@ -144,6 +147,7 @@ public class MainMenuController extends AbstractController
      */
     private void FirstLevelStart() throws IOException
     {
+        logger.debug("FirstLevelStart method called.");
         removeResizeListener();
         Stage stage = Main.getPrimaryStage();
 
@@ -157,6 +161,7 @@ public class MainMenuController extends AbstractController
         setNewAndStageXY(root, stage);
         gameFirstLC.init(root);
         gameFirstLC.addResizeListener();
+        logger.debug("FirstLevelStart method has finished.");
     }
 
     /**

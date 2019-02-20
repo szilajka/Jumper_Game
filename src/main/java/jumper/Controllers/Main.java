@@ -5,6 +5,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+
 
 /**
  * This is the Main {@code class} of the application.
@@ -12,12 +16,13 @@ import javafx.stage.Stage;
  */
 public class Main extends Application
 {
-
+    private static final Logger logger = LogManager.getLogger("Main");
     private static Stage primaryStage;
 
     @Override
     public void start(Stage stage) throws Exception
     {
+        logger.debug("Application started. Start function called.");
         primaryStage = stage;
         var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
         var mainMenuController = new MainMenuController();
