@@ -17,37 +17,46 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-//This is needed to remove warning about Map warnings, that is about that I use ChangeListener there without type,
-//so type safety is not possible
-@SuppressWarnings("unchecked")
+/**
+ * This class is the {@code controller} of the Main Menu.
+ */
 public class MainMenuController extends AbstractController
 {
     public Button btnStart;
     public Button btnExit;
     public Button btnOptions;
 
-    private Map<String, ChangeListener> changeListenerMap;
+    private Map<String, ChangeListener<Number>> changeListenerMap;
 
     //region Constructors
 
+    /**
+     * Constructor of the class.<br>
+     */
     public MainMenuController()
     {
         changeListenerMap = new HashMap<>();
     }
 
-    public MainMenuController(double oldValueX, double oldValueY, double newValueX, double newValueY)
+    /*public MainMenuController(double oldValueX, double oldValueY, double newValueX, double newValueY)
     {
         this.oldValX = oldValueX;
         this.oldValY = oldValueY;
         this.changeNewX = newValueX;
         this.changeNewY = newValueY;
         changeListenerMap = new HashMap<>();
-    }
+    }*/
 
     //endregion Constructors
 
     //region Button Actions
 
+    /**
+     * Handles the button click on button Start.
+     *
+     * @param mouseEvent The {@link MouseEvent} that triggers this method.
+     * @throws IOException If the FXML file is not existing.
+     */
     public void onBtnStartClicked(MouseEvent mouseEvent) throws IOException
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
@@ -56,6 +65,12 @@ public class MainMenuController extends AbstractController
         }
     }
 
+    /**
+     * Handles the key press on button Start.
+     *
+     * @param keyEvent The {@link KeyEvent} that triggers this method.
+     * @throws IOException If the FXML file is not existing.
+     */
     public void onBtnStartPressed(KeyEvent keyEvent) throws IOException
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
@@ -64,7 +79,11 @@ public class MainMenuController extends AbstractController
         }
     }
 
-
+    /**
+     * Handles the button click on button Exit.
+     *
+     * @param mouseEvent The {@link MouseEvent} that triggers this method.
+     */
     public void onBtnExitClicked(MouseEvent mouseEvent)
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
@@ -73,6 +92,11 @@ public class MainMenuController extends AbstractController
         }
     }
 
+    /**
+     * Handles the key press on button Exit.
+     *
+     * @param keyEvent The {@link KeyEvent} that triggers this method.
+     */
     public void onBtnExitPressed(KeyEvent keyEvent)
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
@@ -81,7 +105,12 @@ public class MainMenuController extends AbstractController
         }
     }
 
-
+    /**
+     * Handles the button click on button Options.
+     *
+     * @param mouseEvent The {@link MouseEvent} that triggers this method.
+     * @throws IOException If the FXML file is not existing.
+     */
     public void onBtnOptionsClicked(MouseEvent mouseEvent) throws IOException
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
@@ -90,6 +119,12 @@ public class MainMenuController extends AbstractController
         }
     }
 
+    /**
+     * Handles the key press on button Options.
+     *
+     * @param keyEvent The {@link KeyEvent} that triggers this method.
+     * @throws IOException If the FXML file is not existing.
+     */
     public void onBtnOptionsPressed(KeyEvent keyEvent) throws IOException
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
@@ -102,6 +137,11 @@ public class MainMenuController extends AbstractController
 
     //region Implementations of Button Actions
 
+    /**
+     * Implements the loading of the first level.
+     *
+     * @throws IOException If the FXML file is not existing.
+     */
     private void FirstLevelStart() throws IOException
     {
         removeResizeListener();
@@ -119,7 +159,9 @@ public class MainMenuController extends AbstractController
         gameFirstLC.addResizeListener();
     }
 
-
+    /**
+     * Implements exiting the application.
+     */
     private void MenuExit()
     {
         removeResizeListener();
@@ -127,7 +169,11 @@ public class MainMenuController extends AbstractController
         stage.close();
     }
 
-
+    /**
+     * Implements the loading of the Options menu.
+     *
+     * @throws IOException If the FXML file is not existing.
+     */
     private void OptionsMenu() throws IOException
     {
         removeResizeListener();
@@ -149,18 +195,38 @@ public class MainMenuController extends AbstractController
 
     //region Resize Methods
 
+    /**
+     * Removes the current {@link Scene}'s resize {@link ChangeListener}s from the {@link Stage}.
+     */
     private void removeResizeListener()
     {
         var stage = Main.getPrimaryStage();
-        stage.widthProperty().removeListener(changeListenerMap.get("width"));
-        stage.heightProperty().removeListener(changeListenerMap.get("height"));
+        if (changeListenerMap.get("width") != null)
+        {
+            stage.widthProperty().removeListener(changeListenerMap.get("width"));
+        }
+        if (changeListenerMap.get("height") != null)
+        {
+            stage.heightProperty().removeListener(changeListenerMap.get("height"));
+        }
     }
 
+    /**
+     * Adds the current {@link Scene}'s resize {@link ChangeListener}s from the {@link Stage}.
+     */
     public void addResizeListener()
     {
         resize();
     }
 
+    /**
+     * Implementation of {@link AbstractController#resizeOnLoad(Number, Number, Number, Number)} method.<br>
+     *
+     * @param oldValueX {@link Stage}'s old X coordinate before change (if there was a change)
+     * @param oldValueY {@link Stage}'s old Y coordinate before change (if there was a change)
+     * @param newValueX {@link Stage}'s new X coordinate after change (if there was a change)
+     * @param newValueY {@link Stage}'s new Y coordinate after change (if there was a change)
+     */
     @Override
     protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
     {
@@ -168,6 +234,9 @@ public class MainMenuController extends AbstractController
         resizeYAndHeight(oldValueY, newValueY);
     }
 
+    /**
+     * Implements resizing to this {@link Scene}.
+     */
     private void resize()
     {
         var widthResize = new ChangeListener<Number>()
@@ -201,6 +270,15 @@ public class MainMenuController extends AbstractController
 
     }
 
+    /**
+     * Compute the X coordinates and Widths of the elements in this {@link Scene}.<br>
+     * Computes a ratio by the given values.<br>
+     * If it just a simple resize, then the parameters are the width of the {@code scene} before and after resizing.<br>
+     * If the application changes between {@code scenes} then they are the original width of the scene and the resized width.<br>
+     *
+     * @param oldValue Width of the {@code scene} before resizing or the original width of the {@code scene}
+     * @param newValue Width of the {@code scene} after resizing
+     */
     private void resizeXAndWidth(Number oldValue, Number newValue)
     {
         btnStart.setLayoutX(btnStart.getLayoutX() * newValue.doubleValue() / oldValue.doubleValue());
@@ -212,6 +290,15 @@ public class MainMenuController extends AbstractController
         btnOptions.setPrefWidth(btnOptions.getPrefWidth() * newValue.doubleValue() / oldValue.doubleValue());
     }
 
+    /**
+     * Compute the Y coordinates and Heights of the elements in this {@link Scene}.<br>
+     * It compute a ratio by the given values.<br>
+     * If it just a simple resize, then the parameters are the height of the {@code scene} before and after resizing.<br>
+     * If the application changes between {@code scenes} then they are the original height of the scene and the resized height.<br>
+     *
+     * @param oldValue Height of the {@code scene} before resizing or the original height of the {@code scene}
+     * @param newValue Height of the {@code scene} after resizing
+     */
     private void resizeYAndHeight(Number oldValue, Number newValue)
     {
         btnStart.setLayoutY(btnStart.getLayoutY() * newValue.doubleValue() / oldValue.doubleValue());

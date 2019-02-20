@@ -16,7 +16,6 @@ import javafx.stage.Stage;
 import jumper.Model.FallingRectangle;
 import jumper.Model.Player;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +34,7 @@ public class GameFirstLevelController extends AbstractController
     private List<Line> borders;
     private Scene gameScene;
     private double extractStartLineWidth;
-    private Map<String, ChangeListener> changeListenerMap;
+    private Map<String, ChangeListener<Number>> changeListenerMap;
 
     //region Constructor
 
@@ -99,8 +98,11 @@ public class GameFirstLevelController extends AbstractController
 
     //endregion Initialization
 
+    /**
+     * @param stage
+     * @throws Exception
+     */
     //region Drawing
-
     private void draw()
     {
         var gc = firstLevelCanvas.getGraphicsContext2D();
@@ -239,8 +241,14 @@ public class GameFirstLevelController extends AbstractController
     private void removeResizeListener()
     {
         var stage = Main.getPrimaryStage();
-        stage.widthProperty().removeListener(changeListenerMap.get("width"));
-        stage.heightProperty().removeListener(changeListenerMap.get("height"));
+        if (changeListenerMap.get("width") != null)
+        {
+            stage.widthProperty().removeListener(changeListenerMap.get("width"));
+        }
+        if (changeListenerMap.get("height") != null)
+        {
+            stage.heightProperty().removeListener(changeListenerMap.get("height"));
+        }
     }
 
     private void resize()

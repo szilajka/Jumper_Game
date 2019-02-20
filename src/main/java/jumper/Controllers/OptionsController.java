@@ -12,7 +12,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 import java.awt.*;
 import java.io.IOException;
@@ -24,15 +23,9 @@ import java.util.Map;
  * It gets a {@code generic parameter} that {@code extends} the {@link AbstractController}.<br>
  * We want to be sure, that this {@code scene} is available from all {@code scenes} and
  * we can go back to the previous {@code scene} without creating a new scene and lose any information about it.<br>
- * These controller classes have a {@link Map} that contains {@link ChangeListener}s, in this {@code map} the {@code Value}
- * parameter is not type safety and while compiling, get some warning about the classes use unchecked operations.<br>
- * To avoid this, we ignored these warnings with an annotation.
  *
  * @param <T> The {@code controller} that called this {@code scene}.
  */
-//This is needed to remove warning about Map warnings, that is about that I use ChangeListener there without type,
-//so type safety is not possible
-@SuppressWarnings("unchecked")
 public class OptionsController<T extends AbstractController> extends AbstractController
 {
     public CheckBox chkFullScreen;
@@ -44,7 +37,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     private static double oldStageXBeforeFS, oldStageYBeforeFS, oldSceneXBeforeFS, oldSceneYBeforeFS;
 
     private Map<String, ChangeListener<Number>> changeListenerMap;
-    private ChangeListener<Boolean> fullSCreenChangeListener;
+    private ChangeListener<Boolean> fullScreenChangeListener;
 
     //region Constructor
 
@@ -109,8 +102,9 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * This causes some warning when compiling, due to some javafx issues.<br>
      * They should fix it in javafx12/openjfx12.<br>
      * Link to this issue:
+     *
      * @see <a href="https://bugs.openjdk.java.net/browse/JDK-8156779?focusedCommentId=14213204&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14213204"
-     *  target="_blank">Issue</a>
+     * target="_blank">Issue</a>
      */
     private void setFullScreenResizeX()
     {
@@ -135,8 +129,9 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * This causes some warning when compiling, due to some javafx issues.<br>
      * They should fix it in javafx12/openjfx12.<br>
      * Link to this issue:
+     *
      * @see <a href="https://bugs.openjdk.java.net/browse/JDK-8156779?focusedCommentId=14213204&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14213204"
-     *  target="_blank">Issue</a>
+     * target="_blank">Issue</a>
      */
     private void setFullScreenResizeY()
     {
@@ -172,9 +167,18 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     private void removeResizeListener()
     {
         var stage = Main.getPrimaryStage();
-        stage.widthProperty().removeListener(changeListenerMap.get("width"));
-        stage.heightProperty().removeListener(changeListenerMap.get("height"));
-        stage.fullScreenProperty().removeListener(fullSCreenChangeListener);
+        if (changeListenerMap.get("width") != null)
+        {
+            stage.widthProperty().removeListener(changeListenerMap.get("width"));
+        }
+        if (changeListenerMap.get("height") != null)
+        {
+            stage.heightProperty().removeListener(changeListenerMap.get("height"));
+        }
+        if (fullScreenChangeListener != null)
+        {
+            stage.fullScreenProperty().removeListener(fullScreenChangeListener);
+        }
     }
 
     /**
@@ -214,7 +218,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
             }
         };
 
-        fullSCreenChangeListener = (observableValue, aBoolean, t1) -> {
+        fullScreenChangeListener = (observableValue, aBoolean, t1) -> {
             var stage = Main.getPrimaryStage();
             oldStageXBeforeFS = stage.getWidth();
             oldStageYBeforeFS = stage.getHeight();
@@ -238,13 +242,13 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
 
         stage.widthProperty().addListener(changeListenerMap.get("width"));
         stage.heightProperty().addListener(changeListenerMap.get("height"));
-        stage.fullScreenProperty().addListener(fullSCreenChangeListener);
+        stage.fullScreenProperty().addListener(fullScreenChangeListener);
 
     }
 
     /**
      * Compute the X coordinates and Widths of the elements in this {@link Scene}.<br>
-     * It compute a ratio by the given values.<br>
+     * Computes a ratio by the given values.<br>
      * If it just a simple resize, then the parameters are the width of the {@code scene} before and after resizing.<br>
      * If the application changes between {@code scenes} then they are the original width of the scene and the resized width.<br>
      *
