@@ -6,6 +6,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Camera;
+import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
@@ -25,6 +27,7 @@ import java.util.Map;
 
 public class GameFirstLevelController extends AbstractController
 {
+    private Camera cam;
     private Canvas firstLevelCanvas;
     protected boolean paused = false;
     private Player player;
@@ -43,6 +46,7 @@ public class GameFirstLevelController extends AbstractController
     {
         changeListenerMap = new HashMap<>();
         keyEventHandlerMap = new HashMap<>();
+        cam = new ParallelCamera();
     }
 
     //endregion Constructor
@@ -93,16 +97,13 @@ public class GameFirstLevelController extends AbstractController
     {
         Stage stage = Main.getPrimaryStage();
         Scene scene = stage.getScene();
-        firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight());
+        firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight() * 10);
         ap.getChildren().add(firstLevelCanvas);
+        scene.setCamera(cam);
     }
 
     //endregion Initialization
 
-    /**
-     * @param
-     * @throws Exception
-     */
     //region Drawing
     private void draw()
     {
@@ -195,6 +196,9 @@ public class GameFirstLevelController extends AbstractController
                         fl.setController(pauseC);
                         var ap = (AnchorPane) fl.load();
                         Scene pauseScene = firstLevelCanvas.getScene();
+                        ParallelCamera newCam = new ParallelCamera();
+                        newCam.setLayoutY(0);
+                        pauseScene.setCamera(newCam);
                         pauseScene.setRoot(ap);
                         setNewAndStageXY(ap, stage);
                         pauseC.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
@@ -377,6 +381,9 @@ public class GameFirstLevelController extends AbstractController
     {
         player.setX(player.getX() + player.getVelocityX() * time);
         player.setY(player.getY() + player.getVelocityY() * time);
+        var scene = firstLevelCanvas.getScene();
+        //Camera follows the player, it is necessary that the canvas must be higher than the scene itself.
+        cam.setLayoutY(player.getY() - (scene.getHeight() * 0.8) + player.getHeight());
     }
 
     private void update(double time)
