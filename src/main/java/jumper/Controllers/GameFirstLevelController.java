@@ -84,7 +84,7 @@ public class GameFirstLevelController extends AbstractController
         if (player == null)
         {
             var stage = Main.getPrimaryStage();
-            double  width = stage.getWidth() / 10, height = width;
+            double width = stage.getWidth() / 10, height = width;
             var x = firstLevelCanvas.getWidth() / 2 - (width / 2);
             var y = startLine.getStartY() - height;
             player = new Player(x, y, width, height);
@@ -418,7 +418,7 @@ public class GameFirstLevelController extends AbstractController
             if (player.getY() < startLine.getStartY() - player.getHeight())
             {
                 player.addVelocityY(0.91);
-            } else if (player.getY() >= startLine.getStartY() - player.getHeight())
+            } else if (player.getLayoutBounds().intersects(startLine.getLayoutBounds()))
             {
                 player.setY(startLine.getStartY() - player.getHeight());
                 player.setVelocityY(0.0);
