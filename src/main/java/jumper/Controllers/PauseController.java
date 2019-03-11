@@ -13,9 +13,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ public class PauseController extends AbstractController
     public Button btnExit;
     public Button btnMenu;
 
+    private static final Logger logger = LogManager.getLogger("PauseController");
     private GameFirstLevelController gameFirstLC;
     private Map<String, ChangeListener<Number>> changeListenerMap;
     private boolean paused = true;
@@ -44,9 +46,11 @@ public class PauseController extends AbstractController
      */
     public PauseController(GameFirstLevelController gameFirstLevelController)
     {
+        logger.debug("PauseController constructor started.");
         this.gameFirstLC = gameFirstLevelController;
         this.changeListenerMap = new HashMap<>();
         this.keyEventHandlerMap = new HashMap<>();
+        logger.debug("PauseController constructor finished.");
     }
 
     //endregion Constructor
@@ -167,15 +171,10 @@ public class PauseController extends AbstractController
                 var kc = keyEvent.getCode();
                 if (kc == KeyCode.ESCAPE && !paused)
                 {
-                    try
-                    {
-                        var stage = Main.getPrimaryStage();
-                        continueFirstLevel();
-                        stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
+                    var stage = Main.getPrimaryStage();
+                    continueFirstLevel();
+                    stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);
+
                 } else if (kc == KeyCode.ESCAPE)
                 {
                     gameFirstLC.removeKeyListener();
@@ -206,6 +205,7 @@ public class PauseController extends AbstractController
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
         {
+            logger.debug("BtnContinue pressed.");
             continueFirstLevel();
         }
     }
@@ -220,6 +220,7 @@ public class PauseController extends AbstractController
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
+            logger.debug("BtnContinue clicked.");
             continueFirstLevel();
         }
     }
@@ -233,6 +234,7 @@ public class PauseController extends AbstractController
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
         {
+            logger.debug("BtnExit pressed.");
             AppExit();
         }
     }
@@ -246,6 +248,7 @@ public class PauseController extends AbstractController
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
+            logger.debug("BtnExit clicked.");
             AppExit();
         }
     }
@@ -260,6 +263,7 @@ public class PauseController extends AbstractController
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
         {
+            logger.debug("BtnMenu pressed.");
             loadMainMenu();
         }
     }
@@ -274,6 +278,7 @@ public class PauseController extends AbstractController
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
+            logger.debug("BtnMenu clicked.");
             loadMainMenu();
         }
     }
@@ -287,6 +292,7 @@ public class PauseController extends AbstractController
      */
     private void AppExit()
     {
+        logger.debug("AppExit() method called.");
         removeResizeListener();
         Stage stage = (Stage) btnExit.getScene().getWindow();
         stage.close();
@@ -297,20 +303,32 @@ public class PauseController extends AbstractController
      *
      * @throws IOException If the fxml file is not found.
      */
-    private void loadMainMenu() throws IOException
+    private void loadMainMenu()
     {
-        var stage = Main.getPrimaryStage();
-        var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
-        var mainController = new MainMenuController();
-        fl.setController(mainController);
-        var ap = (AnchorPane) fl.load();
-        var mainScene = btnMenu.getScene();
-        mainScene.setRoot(ap);
-        setNewAndStageXY(ap, stage);
-        removeKeyListener();
-        removeResizeListener();
-        mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
-        mainController.addResizeListener();
+        try
+        {
+            logger.debug("loadMainMenu() method called.");
+            var stage = Main.getPrimaryStage();
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
+            var mainController = new MainMenuController();
+            fl.setController(mainController);
+            var ap = (AnchorPane) fl.load();
+            var mainScene = btnMenu.getScene();
+            mainScene.setRoot(ap);
+            setNewAndStageXY(ap, stage);
+            removeKeyListener();
+            removeResizeListener();
+            mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
+            mainController.addResizeListener();
+        } catch (IOException io)
+        {
+            logger.error("MainMenu.fxml has not founded, closing the application.", io);
+            AppExit();
+        } catch (Exception ex)
+        {
+            logger.error("Some error occured during loading the main menu, closing the application.", ex);
+            AppExit();
+        }
     }
 
     /**
@@ -318,18 +336,30 @@ public class PauseController extends AbstractController
      *
      * @throws IOException If the fxml file is not found.
      */
-    private void continueFirstLevel() throws IOException
+    private void continueFirstLevel()
     {
-        var stage = Main.getPrimaryStage();
-        var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
-        fl.setController(gameFirstLC);
-        var ap = (AnchorPane) fl.load();
-        var gameScene = btnContinue.getScene();
-        gameScene.setRoot(ap);
-        setNewAndStageXY(ap, stage);
-        removeKeyListener();
-        removeResizeListener();
-        gameFirstLC.letsContinue(ap);
+        try
+        {
+            logger.debug("continueFirstLevel() method called.");
+            var stage = Main.getPrimaryStage();
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
+            fl.setController(gameFirstLC);
+            var ap = (AnchorPane) fl.load();
+            var gameScene = btnContinue.getScene();
+            gameScene.setRoot(ap);
+            setNewAndStageXY(ap, stage);
+            removeKeyListener();
+            removeResizeListener();
+            gameFirstLC.letsContinue(ap);
+        } catch (IOException io)
+        {
+            logger.error("MainMenu.fxml has not founded, closing the application.", io);
+            AppExit();
+        } catch (Exception ex)
+        {
+            logger.error("Some error occured during loading the main menu, closing the application.", ex);
+            AppExit();
+        }
     }
 
     //endregion Implementation of Button Actions

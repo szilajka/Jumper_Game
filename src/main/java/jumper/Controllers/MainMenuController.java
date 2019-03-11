@@ -38,6 +38,7 @@ public class MainMenuController extends AbstractController
      */
     public MainMenuController()
     {
+        logger.debug("MainMenuController constructor called.");
         changeListenerMap = new HashMap<>();
     }
 
@@ -64,6 +65,7 @@ public class MainMenuController extends AbstractController
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
+            logger.debug("BtnStart clicked.");
             FirstLevelStart();
         }
     }
@@ -78,6 +80,7 @@ public class MainMenuController extends AbstractController
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
         {
+            logger.debug("BtnStart pressed.");
             FirstLevelStart();
         }
     }
@@ -91,6 +94,7 @@ public class MainMenuController extends AbstractController
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
+            logger.debug("BtnExit clicked.");
             MenuExit();
         }
     }
@@ -104,6 +108,7 @@ public class MainMenuController extends AbstractController
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
         {
+            logger.debug("BtnExit pressed.");
             MenuExit();
         }
     }
@@ -118,6 +123,7 @@ public class MainMenuController extends AbstractController
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
+            logger.debug("BtnOptions clicked.");
             OptionsMenu();
         }
     }
@@ -132,6 +138,7 @@ public class MainMenuController extends AbstractController
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
         {
+            logger.debug("BtnOptions pressed.");
             OptionsMenu();
         }
     }
@@ -145,23 +152,34 @@ public class MainMenuController extends AbstractController
      *
      * @throws IOException If the FXML file is not existing.
      */
-    private void FirstLevelStart() throws IOException
+    private void FirstLevelStart()
     {
-        logger.debug("FirstLevelStart method called.");
-        removeResizeListener();
-        Stage stage = Main.getPrimaryStage();
+        try
+        {
+            logger.debug("FirstLevelStart method called.");
+            removeResizeListener();
+            Stage stage = Main.getPrimaryStage();
 
-        var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
-        var gameFirstLC = new GameFirstLevelController();
-        fl.setController(gameFirstLC);
-        var root = (AnchorPane) fl.load();
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
+            var gameFirstLC = new GameFirstLevelController();
+            fl.setController(gameFirstLC);
+            var root = (AnchorPane) fl.load();
 
-        Scene gameScene = btnStart.getScene();
-        gameScene.setRoot(root);
-        setNewAndStageXY(root, stage);
-        gameFirstLC.init(root);
-        gameFirstLC.addResizeListener();
-        logger.debug("FirstLevelStart method has finished.");
+            Scene gameScene = btnStart.getScene();
+            gameScene.setRoot(root);
+            setNewAndStageXY(root, stage);
+            gameFirstLC.init(root);
+            gameFirstLC.addResizeListener();
+            logger.debug("FirstLevelStart method has finished.");
+        } catch (IOException io)
+        {
+            logger.error("GameFirstLevel.fxml has not found, closing application.", io);
+            MenuExit();
+        } catch (Exception ex)
+        {
+            logger.error("Some error occured, closing application.", ex);
+            MenuExit();
+        }
     }
 
     /**
@@ -169,6 +187,7 @@ public class MainMenuController extends AbstractController
      */
     private void MenuExit()
     {
+        logger.debug("MenuExit() method called.");
         removeResizeListener();
         Stage stage = Main.getPrimaryStage();
         stage.close();
@@ -181,19 +200,31 @@ public class MainMenuController extends AbstractController
      */
     private void OptionsMenu() throws IOException
     {
-        removeResizeListener();
-        var stage = Main.getPrimaryStage();
-        Scene optionsScene;
-        var fl = new FXMLLoader(getClass().getClassLoader().getResource("Options.fxml"));
-        var optionsController = new OptionsController<MainMenuController>(MainMenuController.this, oldValX, oldValY, changeNewX, changeNewY);
-        fl.setController(optionsController);
-        var ap = (AnchorPane) fl.load();
-        optionsScene = btnOptions.getScene();
-        optionsScene.setRoot(ap);
-        setNewAndStageXY(ap, stage);
-        optionsController.setChkFullScreen(Main.getPrimaryStage().isFullScreen());
-        optionsController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
-        optionsController.addResizeListener();
+        try
+        {
+            logger.debug("OptionsMenu() method called.");
+            removeResizeListener();
+            var stage = Main.getPrimaryStage();
+            Scene optionsScene;
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource("Options.fxml"));
+            var optionsController = new OptionsController<MainMenuController>(MainMenuController.this, oldValX, oldValY, changeNewX, changeNewY);
+            fl.setController(optionsController);
+            var ap = (AnchorPane) fl.load();
+            optionsScene = btnOptions.getScene();
+            optionsScene.setRoot(ap);
+            setNewAndStageXY(ap, stage);
+            optionsController.setChkFullScreen(Main.getPrimaryStage().isFullScreen());
+            optionsController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
+            optionsController.addResizeListener();
+        } catch (IOException io)
+        {
+            logger.error("Options.fxml has not found, closing application.", io);
+            MenuExit();
+        } catch (Exception ex)
+        {
+            logger.error("Some error occured, closing application.", ex);
+            MenuExit();
+        }
     }
 
     //endregion Implementations of Button Actions

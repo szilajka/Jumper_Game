@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.io.IOException;
@@ -29,6 +31,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     public Label lblFullScreen;
     public Button btnBack;
 
+    private static final Logger logger = LogManager.getLogger("OptionsController");
     private T prevSceneController;
     private boolean fullScreenChangingX = false, fullScreenChangingY = false;
     private static double oldStageXBeforeFS, oldStageYBeforeFS, oldSceneXBeforeFS, oldSceneYBeforeFS;
@@ -50,6 +53,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      */
     public OptionsController(T prevController, double oldValueX, double oldValueY, double newValueX, double newValueY)
     {
+        logger.debug("OptionsController constructed called. T: {}", prevController.getClass());
         this.prevSceneController = prevController;
         this.oldValX = oldValueX;
         this.oldValY = oldValueY;
@@ -69,6 +73,23 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      */
     public void onChkFullScreenClicked(MouseEvent mouseEvent)
     {
+        ChkFullScreenChange();
+    }
+
+
+    /**
+     * This method implements changing between full screen and windowed mode.
+     *
+     * @param keyEvent The {@link KeyEvent} that triggers this method.
+     */
+    public void onChkFullScreenPressed(KeyEvent keyEvent)
+    {
+        ChkFullScreenChange();
+    }
+
+    private void ChkFullScreenChange()
+    {
+        logger.debug("ChkFullScreenChange() method called. FullScreen property: {}", Main.getPrimaryStage().isFullScreen());
         if (chkFullScreen.isSelected())
         {
             var stage = Main.getPrimaryStage();
@@ -78,6 +99,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
             var stage = Main.getPrimaryStage();
             stage.setFullScreen(false);
         }
+        logger.debug("FullScreen property after change: {}", Main.getPrimaryStage().isFullScreen());
     }
 
     /**
@@ -321,6 +343,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     {
         if (keyEvent.getCode() == KeyCode.ENTER)
         {
+            logger.debug("BtnBack pressed.");
             BackToPreviousScene();
         }
     }
@@ -335,6 +358,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     {
         if (mouseEvent.getButton() == MouseButton.PRIMARY)
         {
+            logger.debug("BtnBack clicked.");
             BackToPreviousScene();
         }
     }
@@ -349,26 +373,66 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      *
      * @throws IOException If the fxml file is not found.
      */
-    private void BackToPreviousScene() throws IOException
+    private void BackToPreviousScene()
     {
-        removeResizeListener();
-        var className = prevSceneController.getClass().getName();
-        var fullFxmlName = className.substring(0, className.length() - "Controller".length());
-        var fxmlName = fullFxmlName.substring(fullFxmlName.lastIndexOf('.') + 1);
-        var stage = Main.getPrimaryStage();
-        Scene scene;
-        var fl = new FXMLLoader(getClass().getClassLoader().getResource(fxmlName + ".fxml"));
-        fl.setController(prevSceneController);
-        var root = (AnchorPane) fl.load();
-        stage.setFullScreen(Main.getPrimaryStage().isFullScreen());
-        scene = btnBack.getScene();
-        scene.setRoot(root);
-        setNewAndStageXY(root, stage);
-        prevSceneController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
-        prevSceneController.addResizeListener();
+        try
+        {
+            logger.debug("BackToPreviousScene() method called.");
+            removeResizeListener();
+            var className = prevSceneController.getClass().getName();
+            var fullFxmlName = className.substring(0, className.length() - "Controller".length());
+            var fxmlName = fullFxmlName.substring(fullFxmlName.lastIndexOf('.') + 1);
+            var stage = Main.getPrimaryStage();
+            Scene scene;
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource(fxmlName + ".fxml"));
+            fl.setController(prevSceneController);
+            var root = (AnchorPane) fl.load();
+            stage.setFullScreen(Main.getPrimaryStage().isFullScreen());
+            scene = btnBack.getScene();
+            scene.setRoot(root);
+            setNewAndStageXY(root, stage);
+            prevSceneController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
+            prevSceneController.addResizeListener();
+        } catch
+        (IOException io)
+        {
+            logger.error("MainMenu.fxml has not founded, closing the application.", io);
+            errorGoToMainMenu();
+        } catch (Exception ex)
+        {
+            logger.error("Some error occured during loading the main menu, closing the application.", ex);
+            errorGoToMainMenu();
+        }
     }
 
     //endregion Back to Previous Scene
 
+    private void errorGoToMainMenu()
+    {
+        try
+        {
+            var stage = Main.getPrimaryStage();
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
+            var mainController = new MainMenuController();
+            fl.setController(mainController);
+            var ap = (AnchorPane) fl.load();
+            var mainScene = Main.getPrimaryStage().getScene();
+            mainScene.setRoot(ap);
+            setNewAndStageXY(ap, stage);
+            removeResizeListener();
+            mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
+            mainController.addResizeListener();
+        } catch (IOException io)
+        {
+            logger.error("MainMenu.fxml not founded, closing application.", io);
+            removeResizeListener();
+            Main.getPrimaryStage().close();
+        } catch (Exception ex)
+        {
+            logger.error("Something bad happened, closing application.", ex);
+            removeResizeListener();
+            Main.getPrimaryStage().close();
+        }
+    }
 
 }

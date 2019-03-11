@@ -18,6 +18,8 @@ import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import jumper.Model.FallingRectangle;
 import jumper.Model.Player;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import java.util.Map;
 
 public class GameFirstLevelController extends AbstractController
 {
+    private static final Logger logger = LogManager.getLogger("GameFirstLevelController");
     private Camera cam;
     private Canvas firstLevelCanvas;
     protected boolean paused = false;
@@ -44,6 +47,7 @@ public class GameFirstLevelController extends AbstractController
 
     public GameFirstLevelController()
     {
+        logger.debug("GameFirstLevelController constructor called.");
         changeListenerMap = new HashMap<>();
         keyEventHandlerMap = new HashMap<>();
         cam = new ParallelCamera();
@@ -55,6 +59,7 @@ public class GameFirstLevelController extends AbstractController
 
     public void init(AnchorPane ap)
     {
+        logger.debug("init() method called.");
         initUI(ap);
         //TODO: add falling objects
         initObjects();
@@ -66,40 +71,58 @@ public class GameFirstLevelController extends AbstractController
 
     private void initObjects()
     {
-        startLine = new Line(0, (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50), firstLevelCanvas.getWidth(),
-                (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
-        startLine.setStrokeWidth(3.0);
-        startLine.setStroke(Color.BLACK);
-        extractStartLineWidth = startLine.getStrokeWidth() / 2;
-        borders = new ArrayList<>(2);
-        borders.add(new Line(extractStartLineWidth, 0,
-                extractStartLineWidth, startLine.getStartY() - extractStartLineWidth));
-        borders.add(new Line(startLine.getEndX() - extractStartLineWidth, 0,
-                startLine.getEndX() - extractStartLineWidth, startLine.getEndY() - extractStartLineWidth));
-        for (var line : borders)
+        try
         {
-            line.setStrokeWidth(3.0);
-            line.setStroke(Color.BLACK);
-        }
-        if (player == null)
+            logger.debug("initObjects() method called.");
+            startLine = new Line(0, (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50), firstLevelCanvas.getWidth(),
+                    (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
+            startLine.setStrokeWidth(3.0);
+            startLine.setStroke(Color.BLACK);
+            extractStartLineWidth = startLine.getStrokeWidth() / 2;
+            borders = new ArrayList<>(2);
+            borders.add(new Line(extractStartLineWidth, 0,
+                    extractStartLineWidth, startLine.getStartY() - extractStartLineWidth));
+            borders.add(new Line(startLine.getEndX() - extractStartLineWidth, 0,
+                    startLine.getEndX() - extractStartLineWidth, startLine.getEndY() - extractStartLineWidth));
+            for (var line : borders)
+            {
+                line.setStrokeWidth(3.0);
+                line.setStroke(Color.BLACK);
+            }
+            if (player == null)
+            {
+                var stage = Main.getPrimaryStage();
+                double width = stage.getWidth() / 10, height = width;
+                var x = firstLevelCanvas.getWidth() / 2 - (width / 2);
+                var y = startLine.getStartY() - height;
+                player = new Player(x, y, width, height);
+            }
+            player.setColor(Color.BLUE);
+            enemy = new ArrayList<>();
+            logger.debug("initObjects() method finished. player {}, enemies size: {}", player, enemy.size());
+        } catch (Exception ex)
         {
-            var stage = Main.getPrimaryStage();
-            double width = stage.getWidth() / 10, height = width;
-            var x = firstLevelCanvas.getWidth() / 2 - (width / 2);
-            var y = startLine.getStartY() - height;
-            player = new Player(x, y, width, height);
+            logger.error("Exception occured in initObjects.", ex);
+            errorGoToMainMenu();
         }
-        player.setColor(Color.BLUE);
-        enemy = new ArrayList<>();
     }
 
     private void initUI(AnchorPane ap)
     {
-        Stage stage = Main.getPrimaryStage();
-        Scene scene = stage.getScene();
-        firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight() * 10);
-        ap.getChildren().add(firstLevelCanvas);
-        scene.setCamera(cam);
+        try
+        {
+            logger.debug("initUI() method called.");
+            Stage stage = Main.getPrimaryStage();
+            Scene scene = stage.getScene();
+            firstLevelCanvas = new Canvas(scene.getWidth(), scene.getHeight() * 10);
+            ap.getChildren().add(firstLevelCanvas);
+            scene.setCamera(cam);
+            logger.debug("initUI method finished.");
+        } catch (Exception ex)
+        {
+            logger.error("Error occured in initUI.", ex);
+            errorGoToMainMenu();
+        }
     }
 
     //endregion Initialization
@@ -368,13 +391,51 @@ public class GameFirstLevelController extends AbstractController
 
     protected void letsContinue(AnchorPane ap)
     {
-        player.setVelocityX(player.getOldVelocityX());
-        player.setVelocityY(player.getOldVelocityY());
-        player.setOldVelocityX(0.0);
-        player.setOldVelocityY(0.0);
-        paused = false;
-        this.init(ap);
-        timer.start();
+        try
+        {
+            player.setVelocityX(player.getOldVelocityX());
+            player.setVelocityY(player.getOldVelocityY());
+            player.setOldVelocityX(0.0);
+            player.setOldVelocityY(0.0);
+            paused = false;
+            this.init(ap);
+            timer.start();
+        } catch (Exception ex)
+        {
+            logger.error("Can not continue the game, due to error.", ex);
+            errorGoToMainMenu();
+        }
+    }
+
+    private void errorGoToMainMenu()
+    {
+        try
+        {
+            var stage = Main.getPrimaryStage();
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
+            var mainController = new MainMenuController();
+            fl.setController(mainController);
+            var ap = (AnchorPane) fl.load();
+            var mainScene = Main.getPrimaryStage().getScene();
+            mainScene.setRoot(ap);
+            setNewAndStageXY(ap, stage);
+            removeKeyListener();
+            removeResizeListener();
+            mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
+            mainController.addResizeListener();
+        } catch (IOException io)
+        {
+            logger.error("MainMenu.fxml not founded, closing application.", io);
+            removeKeyListener();
+            removeResizeListener();
+            Main.getPrimaryStage().close();
+        } catch (Exception ex)
+        {
+            logger.error("Something bad happened, closing application.", ex);
+            removeKeyListener();
+            removeResizeListener();
+            Main.getPrimaryStage().close();
+        }
     }
 
     private void updatePlayer(double time)
@@ -441,6 +502,7 @@ public class GameFirstLevelController extends AbstractController
 
     public void run()
     {
+        logger.debug("run() method called.");
         timer = new AnimationTimer()
         {
             @Override

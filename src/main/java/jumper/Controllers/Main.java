@@ -36,6 +36,7 @@ public class Main extends Application
         mainMenuController.addResizeListenerToStage();
         mainMenuController.setOldAndNewValues(stage.getWidth(), stage.getHeight(), stage.getWidth(), stage.getHeight());
         stage.setOnCloseRequest((event) -> {
+            logger.debug("Application closes.");
             stage.close();
         });
     }
