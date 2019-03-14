@@ -13,7 +13,7 @@ public class Player extends Rect {
      * @param height height of the square
      */
     public Player(double x, double y, double width, double height){
-        super(x, y, width, height, Optional.empty());
+        super(x, y, width, height);
     }
 
     /**
@@ -23,12 +23,12 @@ public class Player extends Rect {
      * @param height height of the square
      */
     public Player(Point2D upperLeft, double width, double height){
-        super(upperLeft.getX(), upperLeft.getY(), width, height, Optional.empty());
+        super(upperLeft.getX(), upperLeft.getY(), width, height);
     }
 
     //---------------------Fields
 
-    private final double moveSpeed = 50.0;
+    private final double moveSpeed = 100.0;
 
     private boolean inAir;
 

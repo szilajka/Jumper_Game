@@ -1,11 +1,11 @@
 package jumper.Controllers;
 
-import javafx.animation.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.CacheHint;
 import javafx.scene.Camera;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
@@ -22,10 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameFirstLevelController extends AbstractController
 {
@@ -35,13 +32,15 @@ public class GameFirstLevelController extends AbstractController
     protected boolean paused = false;
     private Player player;
     private List<FallingRectangle> enemy;
-    private AnimationTimer timer;
     private Line startLine;
     private boolean rightPressed = false, leftPressed = false, upPressed = false;
     private List<Line> borders;
     private double extractStartLineWidth;
     private Map<String, ChangeListener<Number>> changeListenerMap;
     private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
+    private Timer tr, trGenerate;
+    private TimerTask ts, tsGenerate;
+    private double ratioX = 1.0, ratioY = 1.0;
 
     //region Constructor
 
@@ -100,7 +99,8 @@ public class GameFirstLevelController extends AbstractController
             player.setColor(Color.BLUE);
             enemy = new ArrayList<>();
             logger.debug("initObjects() method finished. player {}, enemies size: {}", player, enemy.size());
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Exception occured in initObjects.", ex);
             errorGoToMainMenu();
@@ -118,7 +118,8 @@ public class GameFirstLevelController extends AbstractController
             ap.getChildren().add(firstLevelCanvas);
             scene.setCamera(cam);
             logger.debug("initUI method finished.");
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Error occured in initUI.", ex);
             errorGoToMainMenu();
@@ -132,10 +133,21 @@ public class GameFirstLevelController extends AbstractController
     {
         var gc = firstLevelCanvas.getGraphicsContext2D();
         gc.clearRect(0, 0, firstLevelCanvas.getWidth(), firstLevelCanvas.getHeight());
+        var toRemoveFR = new ArrayList<FallingRectangle>();
         for (var rect : enemy)
         {
             drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
+            if (FallingRectangle.shouldStopFallingRectangle(player, rect))
+            {
+                rect.setVelocityY(0.0);
+                rect.setStopped(true);
+            }
+            if (FallingRectangle.shouldDestroyFallingRectangle(rect, startLine))
+            {
+                toRemoveFR.add(rect);
+            }
         }
+        toRemoveFR.forEach(fr -> enemy.remove(fr));
         drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
         drawLine(startLine);
         for (var line : borders)
@@ -186,7 +198,7 @@ public class GameFirstLevelController extends AbstractController
                 var kc = keyEvent.getCode();
                 if (kc == KeyCode.RIGHT && !paused)
                 {
-                    player.setVelocityX(player.getMoveSpeed());
+                    player.setVelocityX(player.getMoveSpeed() * 10);
                     rightPressed = true;
                 }
                 if (kc == KeyCode.UP && !paused && !upPressed && !player.isMoving())
@@ -197,7 +209,7 @@ public class GameFirstLevelController extends AbstractController
                 }
                 if (kc == KeyCode.LEFT && !paused)
                 {
-                    player.setVelocityX(-player.getMoveSpeed());
+                    player.setVelocityX(-player.getMoveSpeed() * 10);
                     leftPressed = true;
                 }
                 if (kc == KeyCode.ESCAPE && !paused)
@@ -210,7 +222,8 @@ public class GameFirstLevelController extends AbstractController
                     leftPressed = false;
                     upPressed = false;
                     rightPressed = false;
-                    timer.stop();
+                    tr.cancel();
+                    trGenerate.cancel();
                     try
                     {
                         var stage = Main.getPrimaryStage();
@@ -229,7 +242,8 @@ public class GameFirstLevelController extends AbstractController
                         pauseC.keyListenerPause();
                         removeKeyListener();
                         removeResizeListener();
-                    } catch (IOException e)
+                    }
+                    catch (IOException e)
                     {
                         e.printStackTrace();
                     }
@@ -334,10 +348,10 @@ public class GameFirstLevelController extends AbstractController
 
     private void resizeXAndWidth(Number oldValue, Number newValue)
     {
-        double ratio = newValue.doubleValue() / oldValue.doubleValue();
+        ratioX = newValue.doubleValue() / oldValue.doubleValue();
 
         firstLevelCanvas.setLayoutX(0);
-        firstLevelCanvas.setWidth(firstLevelCanvas.getWidth() * ratio);
+        firstLevelCanvas.setWidth(firstLevelCanvas.getWidth() * ratioX);
 
         startLine.setStartX(0);
         startLine.setEndX(firstLevelCanvas.getWidth());
@@ -348,22 +362,22 @@ public class GameFirstLevelController extends AbstractController
         borders.get(1).setStartX(startLine.getEndX() - extractStartLineWidth);
         borders.get(1).setEndX(startLine.getEndX() - extractStartLineWidth);
 
-        player.setX(player.getX() * ratio);
-        player.setWidth(player.getWidth() * ratio);
+        player.setX(player.getX() * ratioX);
+        player.setWidth(player.getWidth() * ratioX);
 
         for (var rect : enemy)
         {
-            rect.setX(rect.getX() * ratio);
-            rect.setWidth(rect.getWidth() * ratio);
+            rect.setX(rect.getX() * ratioX);
+            rect.setWidth(rect.getWidth() * ratioX);
         }
     }
 
     private void resizeYAndHeight(Number oldValue, Number newValue)
     {
-        double ratio = newValue.doubleValue() / oldValue.doubleValue();
+        ratioY = newValue.doubleValue() / oldValue.doubleValue();
 
         firstLevelCanvas.setLayoutY(0);
-        firstLevelCanvas.setHeight(firstLevelCanvas.getHeight() * ratio);
+        firstLevelCanvas.setHeight(firstLevelCanvas.getHeight() * ratioY);
 
         startLine.setStartY((firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
         startLine.setEndY((firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
@@ -374,13 +388,13 @@ public class GameFirstLevelController extends AbstractController
         borders.get(1).setStartY(0);
         borders.get(1).setEndY(startLine.getEndY() - extractStartLineWidth);
 
-        player.setY(player.getY() * ratio);
-        player.setHeight(player.getHeight() * ratio);
+        player.setY(player.getY() * ratioY);
+        player.setHeight(player.getHeight() * ratioY);
 
         for (var rect : enemy)
         {
-            rect.setY(rect.getY() * ratio);
-            rect.setHeight(rect.getHeight() * ratio);
+            rect.setY(rect.getY() * ratioY);
+            rect.setHeight(rect.getHeight() * ratioY);
         }
 
     }
@@ -399,8 +413,8 @@ public class GameFirstLevelController extends AbstractController
             player.setOldVelocityY(0.0);
             paused = false;
             this.init(ap);
-            timer.start();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Can not continue the game, due to error.", ex);
             errorGoToMainMenu();
@@ -423,13 +437,15 @@ public class GameFirstLevelController extends AbstractController
             removeResizeListener();
             mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             mainController.addResizeListener();
-        } catch (IOException io)
+        }
+        catch (IOException io)
         {
             logger.error("MainMenu.fxml not founded, closing application.", io);
             removeKeyListener();
             removeResizeListener();
             Main.getPrimaryStage().close();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Something bad happened, closing application.", ex);
             removeKeyListener();
@@ -447,9 +463,23 @@ public class GameFirstLevelController extends AbstractController
         cam.setLayoutY(player.getY() - (scene.getHeight() * 0.8) + player.getHeight());
     }
 
+    private void updateEnemy(double time)
+    {
+        Iterator<FallingRectangle> itFR = enemy.iterator();
+        while (itFR.hasNext())
+        {
+            var rect = itFR.next();
+            if (!rect.isStopped())
+            {
+                rect.setY(rect.getY() + rect.getVelocityY() * time);
+            }
+        }
+    }
+
     private void update(double time)
     {
         updatePlayer(time);
+        updateEnemy(time);
         draw();
 
         if (!rightPressed && !leftPressed && !paused)
@@ -459,18 +489,27 @@ public class GameFirstLevelController extends AbstractController
                 if (player.getVelocityX() <= 1.0)
                 {
                     player.setVelocityX(0.0);
-                } else
-                {
-                    player.addVelocityX(-1.0);
                 }
-            } else if (player.getVelocityX() <= 10e-6)
+                else
+                {
+                    if (!rightPressed)
+                    {
+                        player.addVelocityX(-50.0);
+                    }
+                }
+            }
+            else if (player.getVelocityX() <= 10e-6)
             {
                 if (player.getVelocityX() > -1.0)
                 {
                     player.setVelocityX(0.0);
-                } else
+                }
+                else
                 {
-                    player.addVelocityX(1.0);
+                    if (!leftPressed)
+                    {
+                        player.addVelocityX(50.0);
+                    }
                 }
             }
         }
@@ -478,8 +517,9 @@ public class GameFirstLevelController extends AbstractController
         {
             if (player.getY() < startLine.getStartY() - player.getHeight())
             {
-                player.addVelocityY(0.91);
-            } else if (player.getLayoutBounds().intersects(startLine.getLayoutBounds()))
+                player.addVelocityY(9.1);
+            }
+            else if (player.getLayoutBounds().intersects(startLine.getLayoutBounds()))
             {
                 player.setY(startLine.getStartY() - player.getHeight());
                 player.setVelocityY(0.0);
@@ -489,7 +529,8 @@ public class GameFirstLevelController extends AbstractController
         if ((player.getX() + player.getWidth()) >= borders.get(1).getStartX())
         {
             player.setX(borders.get(1).getStartX() - player.getWidth());
-        } else if (player.getX() <= borders.get(0).getStartX())
+        }
+        else if (player.getX() <= borders.get(0).getStartX())
         {
             player.setX(borders.get(0).getStartX());
         }
@@ -503,16 +544,49 @@ public class GameFirstLevelController extends AbstractController
     public void run()
     {
         logger.debug("run() method called.");
-        timer = new AnimationTimer()
+        ts = new TimerTask()
         {
             @Override
-            public void handle(long l)
+            public void run()
             {
                 var delta = 2 * 10e-4;  //if it were time based, it wouldn't be a constant
                 update(delta);
             }
         };
-        timer.start();
+
+        tsGenerate = new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                FallingRectangle lastRect;
+                if (enemy.size() != 0)
+                {
+                    lastRect = enemy.get(enemy.size() - 1);
+                }
+                else
+                {
+                    lastRect = null;
+                }
+                var newRect = FallingRectangle.generateFallingRectangle(player, ratioX, ratioY, lastRect, cam);
+                if (newRect != null)
+                {
+                    enemy.add(newRect);
+                }
+            }
+        };
+
+        tr = new Timer();
+        tr.schedule(ts, 0, 17);
+        trGenerate = new Timer();
+        trGenerate.schedule(tsGenerate, 0, 4000);
+        var stage = Main.getPrimaryStage();
+        stage.setOnCloseRequest(windowEvent -> {
+            tr.cancel();
+            trGenerate.cancel();
+            logger.debug("Application closes from Game.");
+            stage.close();
+        });
     }
 
     //endregion Run

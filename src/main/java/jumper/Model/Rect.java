@@ -4,8 +4,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import java.util.Optional;
-
 /**
  * Rectangle abstract class
  * x and y are the upper left position of the rectangle.
@@ -29,9 +27,14 @@ public abstract class Rect extends Rectangle {
         isMoving = moving;
     }
 
-    public Rect(double v, double v1, double v2, double v3, Optional<Color> color) {
-        super(v, v1, v2, v3);
-        color.ifPresent(c -> this.color = c);
+    public Rect(double x, double y, double width, double height) {
+        super(x, y, width, height);
+        this.color = Color.BLACK;
+    }
+
+    public Rect(double x, double y, double width, double height, Color color) {
+        super(x, y, width, height);
+        this.color = color;
     }
 
     public void setColor(Color color) {
