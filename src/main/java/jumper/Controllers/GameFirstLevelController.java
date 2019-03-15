@@ -97,7 +97,10 @@ public class GameFirstLevelController extends AbstractController
                 player = new Player(x, y, width, height);
             }
             player.setColor(Color.BLUE);
-            enemy = new ArrayList<>();
+            if (enemy == null)
+            {
+                enemy = new ArrayList<>();
+            }
             logger.debug("initObjects() method finished. player {}, enemies size: {}", player, enemy.size());
         }
         catch (Exception ex)
@@ -137,6 +140,10 @@ public class GameFirstLevelController extends AbstractController
         for (var rect : enemy)
         {
             drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
+            if (cam.getLayoutY() - 100 <= rect.getY())
+            {
+                rect.setVelocityY(250.0);
+            }
             if (FallingRectangle.shouldStopFallingRectangle(player, rect))
             {
                 rect.setVelocityY(0.0);
@@ -456,7 +463,24 @@ public class GameFirstLevelController extends AbstractController
 
     private void updatePlayer(double time)
     {
-        player.setX(player.getX() + player.getVelocityX() * time);
+        boolean crashedLeft = false, crashedRight = false;
+        for (var rect : enemy)
+        {
+            if (rect.leftIntersects(player))
+            {
+                crashedRight = true;
+            }
+            if (rect.rightIntersects(player))
+            {
+                crashedLeft = true;
+            }
+        }
+        if ((!crashedLeft && !crashedRight)
+                || (crashedLeft && player.getVelocityX() > 0)
+                || (crashedRight && player.getVelocityX() < 0))
+        {
+            player.setX(player.getX() + player.getVelocityX() * time);
+        }
         player.setY(player.getY() + player.getVelocityY() * time);
         var scene = firstLevelCanvas.getScene();
         //Camera follows the player, it is necessary that the canvas must be higher than the scene itself.
