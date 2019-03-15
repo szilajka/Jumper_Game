@@ -313,7 +313,7 @@ public class FallingRectangle extends Rect
     //endregion Intersection
 
     //region Static Methods
-    public static FallingRectangle generateFallingRectangle(Player player, double ratioX, double ratioY, FallingRectangle lastRect, Camera cam)
+    public static FallingRectangle generateFallingRectangle(Player player, FallingRectangle lastRect, Camera cam)
     {
         try
         {
@@ -324,8 +324,8 @@ public class FallingRectangle extends Rect
 
             //rectX = player.getX();
             //rectWidth = player.getWidth();
-            width = fallRectWidth * ratioX;
-            height = fallRectHeight * ratioY;
+            width = player.getWidth() * 1.2;
+            height = player.getHeight() * 0.3;
             //leftSpace = player.getX() - radiusBetween;
             //rightSpace = scene.getWidth() - (player.getX() + player.getWidth()) + radiusBetween;
             color = Color.AQUAMARINE;

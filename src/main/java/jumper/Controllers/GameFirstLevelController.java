@@ -571,7 +571,7 @@ public class GameFirstLevelController extends AbstractController
         ts = new TimerTask()
         {
             @Override
-            public void run()
+            public synchronized void run()
             {
                 var delta = 2 * 10e-4;  //if it were time based, it wouldn't be a constant
                 update(delta);
@@ -581,7 +581,7 @@ public class GameFirstLevelController extends AbstractController
         tsGenerate = new TimerTask()
         {
             @Override
-            public void run()
+            public synchronized void run()
             {
                 FallingRectangle lastRect;
                 if (enemy.size() != 0)
@@ -592,7 +592,7 @@ public class GameFirstLevelController extends AbstractController
                 {
                     lastRect = null;
                 }
-                var newRect = FallingRectangle.generateFallingRectangle(player, ratioX, ratioY, lastRect, cam);
+                var newRect = FallingRectangle.generateFallingRectangle(player, lastRect, cam);
                 if (newRect != null)
                 {
                     enemy.add(newRect);
