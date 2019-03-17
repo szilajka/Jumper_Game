@@ -5,7 +5,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.CacheHint;
 import javafx.scene.Camera;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
@@ -16,6 +15,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
+import jumper.Helpers.MathH;
 import jumper.Model.FallingRectangle;
 import jumper.Model.Player;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +41,7 @@ public class GameFirstLevelController extends AbstractController
     private Timer tr, trGenerate;
     private TimerTask ts, tsGenerate;
     private double ratioX = 1.0, ratioY = 1.0;
+    private final double constG = 9.81;
 
     //region Constructor
 
@@ -99,7 +100,7 @@ public class GameFirstLevelController extends AbstractController
             player.setColor(Color.BLUE);
             if (enemy == null)
             {
-                enemy = new ArrayList<>();
+                enemy = Collections.synchronizedList(new ArrayList<FallingRectangle>());
             }
             logger.debug("initObjects() method finished. player {}, enemies size: {}", player, enemy.size());
         }
@@ -136,25 +137,10 @@ public class GameFirstLevelController extends AbstractController
     {
         var gc = firstLevelCanvas.getGraphicsContext2D();
         gc.clearRect(0, 0, firstLevelCanvas.getWidth(), firstLevelCanvas.getHeight());
-        var toRemoveFR = new ArrayList<FallingRectangle>();
         for (var rect : enemy)
         {
             drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
-            if (cam.getLayoutY() - 100 <= rect.getY())
-            {
-                rect.setVelocityY(250.0);
-            }
-            if (FallingRectangle.shouldStopFallingRectangle(player, rect))
-            {
-                rect.setVelocityY(0.0);
-                rect.setStopped(true);
-            }
-            if (FallingRectangle.shouldDestroyFallingRectangle(rect, startLine))
-            {
-                toRemoveFR.add(rect);
-            }
         }
-        toRemoveFR.forEach(fr -> enemy.remove(fr));
         drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
         drawLine(startLine);
         for (var line : borders)
@@ -210,7 +196,8 @@ public class GameFirstLevelController extends AbstractController
                 }
                 if (kc == KeyCode.UP && !paused && !upPressed && !player.isMoving())
                 {
-                    player.addVelocityY(-player.getMoveSpeed() * 10);
+                    player.setVelocityY(-Math.sqrt(2 * constG * player.getHeight() * 3.5) * 10);
+                    //player.setVelocityY(-Main.getPrimaryStage().getScene().getHeight());
                     upPressed = true;
                     player.setMoving(true);
                 }
@@ -395,12 +382,12 @@ public class GameFirstLevelController extends AbstractController
         borders.get(1).setStartY(0);
         borders.get(1).setEndY(startLine.getEndY() - extractStartLineWidth);
 
-        player.setY(player.getY() * ratioY);
+        player.setY(MathH.round(player.getY() * ratioY, 3));
         player.setHeight(player.getHeight() * ratioY);
 
         for (var rect : enemy)
         {
-            rect.setY(rect.getY() * ratioY);
+            rect.setY(MathH.round(rect.getY() * ratioY, 3));
             rect.setHeight(rect.getHeight() * ratioY);
         }
 
@@ -463,25 +450,115 @@ public class GameFirstLevelController extends AbstractController
 
     private void updatePlayer(double time)
     {
-        boolean crashedLeft = false, crashedRight = false;
-        for (var rect : enemy)
+        boolean crashedLeft = false, crashedRight = false, standingOn = false, crashedUp = false;
+        Iterator<FallingRectangle> frIt = enemy.iterator();
+        Map<String, FallingRectangle> crashedRect = new HashMap<>();
+        //for (var rect : enemy)
+        while (frIt.hasNext())
         {
+            var rect = frIt.next();
+            if (cam.getLayoutY() - 100 <= rect.getY())
+            {
+                rect.setVelocityY(250.0);
+            }
+            if (FallingRectangle.shouldStopFallingRectangle(player, rect))
+            {
+                rect.setVelocityY(0.0);
+                rect.setStopped(true);
+            }
+            if (FallingRectangle.shouldDestroyFallingRectangle(rect, startLine))
+            {
+                frIt.remove();
+            }
+            if (enemy.stream().anyMatch(f -> f != rect && f.getY() < rect.getY() && FallingRectangle.shouldDestroyFallingRectangle(f, rect)))
+            {
+                frIt.remove();
+            }
+
             if (rect.leftIntersects(player))
             {
                 crashedRight = true;
+                crashedRect.put("right", rect);
             }
             if (rect.rightIntersects(player))
             {
                 crashedLeft = true;
+                crashedRect.put("left", rect);
+            }
+            if (rect.getSomethingIsStandingOn(player))
+            {
+                standingOn = true;
+                crashedRect.put("down", rect);
+            }
+            if (rect.getIsStandingOnSomething(player))
+            {
+                frIt.remove();
+                crashedUp = true;
             }
         }
+
+
         if ((!crashedLeft && !crashedRight)
-                || (crashedLeft && player.getVelocityX() > 0)
-                || (crashedRight && player.getVelocityX() < 0))
+                || (crashedLeft && player.getVelocityX() > 0 && !crashedRight)
+                || (crashedRight && player.getVelocityX() < 0 && !crashedLeft))
         {
+            if (player.getOldVelocityX() != 0.0)
+            {
+                if ((crashedLeft && player.getOldVelocityX() > 0.0)
+                        || (crashedRight && player.getOldVelocityX() < 0.0)
+                        || (!crashedLeft && !crashedRight))
+                {
+                    player.setVelocityX(player.getOldVelocityX());
+                }
+
+                player.setOldVelocityX(0.0);
+            }
             player.setX(player.getX() + player.getVelocityX() * time);
         }
-        player.setY(player.getY() + player.getVelocityY() * time);
+        else if (crashedLeft && player.getVelocityX() <= 0.0 && !crashedRight)
+        {
+            var rect = crashedRect.get("left");
+            if (rect != null && player.getOldVelocityX() == 0.0)
+            {
+                player.setX(rect.getX() + rect.getWidth());
+                player.setOldVelocityX(player.getVelocityX());
+                player.setVelocityX(0.0);
+            }
+        }
+        else if (crashedRight && player.getVelocityX() >= 0 && !crashedLeft)
+        {
+            var rect = crashedRect.get("right");
+            if (rect != null && player.getOldVelocityX() == 0.0)
+            {
+                player.setX(rect.getX() - player.getWidth());
+                player.setOldVelocityX(player.getVelocityX());
+                player.setVelocityX(0.0);
+            }
+        }
+
+        if (!crashedLeft && !crashedRight && !crashedUp && !standingOn && player.getVelocityY() == 0.0 && !player.isStandingOnStartLine()
+                && !player.isMoving())
+        {
+            player.addVelocityY(constG);
+            player.setMoving(true);
+        }
+//        else if ((!standingOn && !crashedUp)
+//                || (standingOn && player.getVelocityY() < 0 && !crashedUp))
+//        {
+//            // player.setY(MathH.round(player.getY() + player.getVelocityY() * time, 3));
+//        }
+        else if (crashedUp && player.getVelocityY() < 0.0)
+        {
+            player.setVelocityY(0.0);
+        }
+        else if (standingOn && player.getVelocityY() >= 0.0)
+        {
+            player.setVelocityY(0.0);
+            player.setMoving(false);
+        }
+
+        player.setY(MathH.round(player.getY() + player.getVelocityY() * time, 3));
+
         var scene = firstLevelCanvas.getScene();
         //Camera follows the player, it is necessary that the canvas must be higher than the scene itself.
         cam.setLayoutY(player.getY() - (scene.getHeight() * 0.8) + player.getHeight());
@@ -489,13 +566,14 @@ public class GameFirstLevelController extends AbstractController
 
     private void updateEnemy(double time)
     {
-        Iterator<FallingRectangle> itFR = enemy.iterator();
-        while (itFR.hasNext())
+        Iterator<FallingRectangle> frIt = enemy.iterator();
+        for (var rect : enemy)
+        //while(frIt.hasNext())
         {
-            var rect = itFR.next();
+            //var rect = frIt.next();
             if (!rect.isStopped())
             {
-                rect.setY(rect.getY() + rect.getVelocityY() * time);
+                rect.setY(MathH.round(rect.getY() + rect.getVelocityY() * time, 3));
             }
         }
     }
@@ -539,15 +617,17 @@ public class GameFirstLevelController extends AbstractController
         }
         if (player.isMoving() && !paused)
         {
-            if (player.getY() < startLine.getStartY() - player.getHeight())
+            if (player.getY() + player.getHeight() < startLine.getStartY() + 0.5)
             {
-                player.addVelocityY(9.1);
+                player.addVelocityY(constG);
+                player.setStandingOnStartLine(false);
             }
-            else if (player.getLayoutBounds().intersects(startLine.getLayoutBounds()))
+            else if (player.getY() + player.getHeight() >= startLine.getStartY() + 0.5)
             {
-                player.setY(startLine.getStartY() - player.getHeight());
+                player.setY(MathH.round(startLine.getStartY() - player.getHeight(), 3));
                 player.setVelocityY(0.0);
                 player.setMoving(false);
+                player.setStandingOnStartLine(true);
             }
         }
         if ((player.getX() + player.getWidth()) >= borders.get(1).getStartX())

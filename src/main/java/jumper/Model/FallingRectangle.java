@@ -4,6 +4,7 @@ import javafx.scene.Camera;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import jumper.Controllers.Main;
+import jumper.Helpers.MathH;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,9 +48,14 @@ public class FallingRectangle extends Rect
      * @param rect
      * @return
      */
-    public boolean intersectsWithSide(FallingRectangle this, Rect rect)
+    public boolean intersectsWithLeftOrRightSide(FallingRectangle this, Rect rect)
     {
         return this.leftIntersects(rect) || this.rightIntersects(rect);
+    }
+
+    public boolean intersectsWithUpperOrBottomSide(FallingRectangle this, Rect rect)
+    {
+        return this.upIntersects(rect) || this.downIntersects(rect);
     }
 
     /**
@@ -60,7 +66,9 @@ public class FallingRectangle extends Rect
      */
     public boolean leftIntersects(FallingRectangle this, Rect rect)
     {
-        return this.inWidthLeft(rect) && this.inHeight(rect);
+        return Math.abs(MathH.round(this.getX(), 3) - MathH.round(rect.getX() + rect.getWidth(), 3)) <= 2.0
+                && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
+        //return this.inWidthLeft(rect) && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
     }
 
     /**
@@ -71,7 +79,9 @@ public class FallingRectangle extends Rect
      */
     public boolean rightIntersects(FallingRectangle this, Rect rect)
     {
-        return this.inWidthRight(rect) && this.inHeight(rect);
+        return Math.abs(MathH.round(this.getX() + this.getWidth(),3) - MathH.round(rect.getX(), 3)) <= 2.0
+                && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
+        //return this.inWidthRight(rect) && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
     }
 
     /**
@@ -94,6 +104,28 @@ public class FallingRectangle extends Rect
     public boolean downIntersects(FallingRectangle this, Rect rect)
     {
         return this.inWidth(rect) && this.inHeightDown(rect);
+    }
+
+    /**
+     * If something is standing on the falling rectangle
+     *
+     * @param rect
+     * @return
+     */
+    public boolean getSomethingIsStandingOn(FallingRectangle this, Rect rect)
+    {
+        return this.inWidth(rect) && this.somethingIsStandingOn(rect);
+    }
+
+    /**
+     * If the falling rectangle is standing on something
+     *
+     * @param rect
+     * @return
+     */
+    public boolean getIsStandingOnSomething(FallingRectangle this, Rect rect)
+    {
+        return this.inWidth(rect) && this.isStandingOnSomething(rect);
     }
 
     /**
@@ -130,8 +162,9 @@ public class FallingRectangle extends Rect
          *
          * */
 
-        return rect.getX() <= x && (rect.getX() + rect.getWidth()) >= x
-                && (rect.getX() + rect.getWidth()) <= (x + width);
+        return MathH.round(rect.getX(), 3) <= MathH.round(x, 3)
+                && (MathH.round(rect.getX() + rect.getWidth(), 3)) >= MathH.round(x, 3)
+                && MathH.round(rect.getX() + rect.getWidth(), 3) <= MathH.round(x + width, 3);
     }
 
     /**
@@ -168,8 +201,9 @@ public class FallingRectangle extends Rect
          *
          * */
 
-        return x <= rect.getX() && (x + width) >= rect.getX()
-                && (x + width) <= (rect.getX() + rect.getWidth());
+        return MathH.round(x, 3) <= MathH.round(rect.getX(), 3)
+                && MathH.round(x + width, 3) >= MathH.round(rect.getX(), 3)
+                && MathH.round(x + width, 3) <= MathH.round(rect.getX() + rect.getWidth(), 3);
     }
 
     /**
@@ -205,7 +239,8 @@ public class FallingRectangle extends Rect
          *
          * */
 
-        return x <= rect.getX() && (x + width) >= (rect.getX() + rect.getWidth());
+        return MathH.round(x, 3) <= MathH.round(rect.getX(), 3)
+                && MathH.round(x + width, 3) >= MathH.round(rect.getX() + rect.getWidth(), 3);
     }
 
     private boolean inWidth(FallingRectangle this, Rect rect)
@@ -241,8 +276,48 @@ public class FallingRectangle extends Rect
          *
          * */
 
-        return rect.getY() <= y && (rect.getY() + rect.getHeight()) >= y
-                && (rect.getY() + rect.getHeight()) <= (y + height);
+        return MathH.round(rect.getY(), 3) <= MathH.round(y, 3)
+                && MathH.round(rect.getY() + rect.getHeight(), 3) >= MathH.round(y, 3)
+                && MathH.round(rect.getY() + rect.getHeight(), 3) <= MathH.round(y + height, 3);
+    }
+
+    /**
+     * If some shape is standing on the falling rectangle.
+     *
+     * @param rect
+     * @return
+     */
+    private boolean somethingIsStandingOn(FallingRectangle this, Rect rect)
+    {
+        return this.somethingIsStandingOn(rect.getY(), rect.getHeight(), this);
+    }
+
+
+    private boolean somethingIsStandingOn(double y, double height, Rect rect)
+    {
+        var ret = MathH.round(y + height, 3) <= MathH.round(rect.getY() + 2.0, 3)
+                && MathH.round(y + height, 3) >= MathH.round(rect.getY() - 2.0, 3);
+        if (ret)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        //return MathH.round(y + height, 3) <= MathH.round(rect.getY() + 0.5, 3)
+        //        && MathH.round(y + height, 3) >= MathH.round(rect.getY() - 0.5, 3);
+    }
+
+    /**
+     * If the falling rectangle is standing on some shape.
+     *
+     * @param rect
+     * @return
+     */
+    private boolean isStandingOnSomething(FallingRectangle this, Rect rect)
+    {
+        return this.somethingIsStandingOn(this.getY(), this.getHeight(), rect);
     }
 
     /**
@@ -272,8 +347,9 @@ public class FallingRectangle extends Rect
          *
          */
 
-        return y <= rect.getY() && (y + height) >= rect.getY()
-                && (y + height) <= (rect.getY() + rect.getHeight());
+        return MathH.round(y, 3) <= MathH.round(rect.getY(), 3)
+                && MathH.round(y + height, 3) >= MathH.round(rect.getY(), 3)
+                && MathH.round(y + height, 3) <= MathH.round(rect.getY() + rect.getHeight(), 3);
     }
 
     /**
@@ -301,7 +377,8 @@ public class FallingRectangle extends Rect
          *
          * */
 
-        return rect.getY() <= y && (rect.getY() + rect.getHeight()) >= (y + height);
+        return MathH.round(rect.getY(), 3) <= MathH.round(y, 3)
+                && MathH.round(rect.getY() + rect.getHeight(), 3) >= MathH.round(y + height, 3);
     }
 
     private boolean inHeight(FallingRectangle this, Rect rect)
@@ -332,7 +409,7 @@ public class FallingRectangle extends Rect
 
             var rand = new Random();
             x = rand.nextDouble() * (scene.getWidth() - width) + 10;
-            return new FallingRectangle(x, 0.0, width, height, color);
+            return new FallingRectangle(MathH.round(x, 3), 0.0, width, height, color);
 
             /*if (leftSpace > rightSpace)
             {
@@ -359,11 +436,9 @@ public class FallingRectangle extends Rect
     {
         if (!fRect.isStopped())
         {
-            if (((player.getX() - 100 <= fRect.getX() + fRect.getWidth()
-                    && fRect.getX() + fRect.getWidth() <= player.getX())
-                    || (player.getX() + player.getWidth() <= fRect.getX()
-                    && player.getX() + player.getWidth() + 100 >= fRect.getX()))
-                    && (player.getY() + player.getHeight() <= fRect.getY() - 20))
+            if (MathH.round(fRect.getY(), 3) >= MathH.round(player.getY() + player.getHeight(), 3)
+                    && MathH.round(player.getX() - radiusBetween, 3) <= MathH.round(fRect.getX() + fRect.getWidth(), 3)
+                    && MathH.round(player.getX() + radiusBetween, 3) >= MathH.round(fRect.getX(), 3))
             {
                 return true;
             }
@@ -384,6 +459,26 @@ public class FallingRectangle extends Rect
 
         return false;
     }
+
+    public static boolean shouldDestroyFallingRectangle(FallingRectangle rect1, Rect rect2)
+    {
+        return rect1.intersectsWithLeftOrRightSide(rect2) || rect1.intersectsWithUpperOrBottomSide(rect2);
+    }
+
+    public static FallingRectangle whichFallingRectangleShouldBeDestroyed(FallingRectangle fRect1, FallingRectangle fRect2)
+    {
+        if (shouldDestroyFallingRectangle(fRect1, fRect2))
+        {
+            return fRect1;
+        }
+        else if (shouldDestroyFallingRectangle(fRect2, fRect1))
+        {
+            return fRect2;
+        }
+
+        return null;
+    }
+
 
     //endregion Static Methods
 

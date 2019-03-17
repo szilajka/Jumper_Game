@@ -2,8 +2,6 @@ package jumper.Model;
 
 import javafx.geometry.Point2D;
 
-import java.util.Optional;
-
 public class Player extends Rect {
     /**
      * Public constructor for Player class.
@@ -28,6 +26,17 @@ public class Player extends Rect {
 
     //---------------------Fields
 
+    public boolean isStandingOnStartLine()
+    {
+        return standingOnStartLine;
+    }
+
+    public void setStandingOnStartLine(boolean standingOnStartLine)
+    {
+        this.standingOnStartLine = standingOnStartLine;
+    }
+
+    private boolean standingOnStartLine = true;
     private final double moveSpeed = 100.0;
 
     private boolean inAir;
