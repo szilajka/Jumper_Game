@@ -14,20 +14,28 @@ public class FallingRectangle extends Rect
 {
     private static final Logger logger = LogManager.getLogger("FallingRectangle");
     private static final double radiusBetween = 50.0;
-    private static final double fallRectWidth = 100.0;
-    private static final double fallRectHeight = 50.0;
     private boolean stopped = false;
+
+
+    public double getStartY()
+    {
+        return startY;
+    }
+
+    private double startY = 0.0;
 
     public FallingRectangle(double x, double y, double width, double height)
     {
         super(x, y, width, height);
-        super.setVelocityY(5000.0);
+        this.startY = y;
+        super.setVelocityY(250.0);
     }
 
     public FallingRectangle(double x, double y, double width, double height, Color color)
     {
         super(x, y, width, height, color);
-        super.setVelocityY(5000.0);
+        this.startY = y;
+        super.setVelocityY(250.0);
     }
 
     public boolean isStopped()
@@ -79,7 +87,7 @@ public class FallingRectangle extends Rect
      */
     public boolean rightIntersects(FallingRectangle this, Rect rect)
     {
-        return Math.abs(MathH.round(this.getX() + this.getWidth(),3) - MathH.round(rect.getX(), 3)) <= 2.0
+        return Math.abs(MathH.round(this.getX() + this.getWidth(), 3) - MathH.round(rect.getX(), 3)) <= 2.0
                 && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
         //return this.inWidthRight(rect) && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
     }
@@ -390,39 +398,54 @@ public class FallingRectangle extends Rect
     //endregion Intersection
 
     //region Static Methods
+
     public static FallingRectangle generateFallingRectangle(Player player, FallingRectangle lastRect, Camera cam)
     {
         try
         {
             logger.debug("generateFallingRectangle() method called.");
-            var scene = Main.getPrimaryStage().getScene();
-            double x, leftSpace, rightSpace, width, height, rectX, rectWidth;
+            var sceneWidth = Main.getPrimaryStage().getScene().getWidth();
+            double x = 0.0, y, width, height;
             Color color;
 
-            //rectX = player.getX();
-            //rectWidth = player.getWidth();
             width = player.getWidth() * 1.2;
             height = player.getHeight() * 0.3;
-            //leftSpace = player.getX() - radiusBetween;
-            //rightSpace = scene.getWidth() - (player.getX() + player.getWidth()) + radiusBetween;
             color = Color.AQUAMARINE;
 
-            var rand = new Random();
-            x = rand.nextDouble() * (scene.getWidth() - width) + 10;
-            return new FallingRectangle(MathH.round(x, 3), 0.0, width, height, color);
-
-            /*if (leftSpace > rightSpace)
+            if (lastRect == null)
             {
-                x = Math.random() * (leftSpace - width) + (radiusBetween / 2);
-                //return new FallingRectangle(x, cam.getLayoutY() - 100.0, width, height, color);
-                return new FallingRectangle(x, 0.0, width, height, color);
+                y = Math.floor(cam.getLayoutY() - 100);
+                x = Math.floor(new Random().nextDouble() * (sceneWidth - width));
             }
             else
             {
-                x = Math.random() * (rightSpace - width) + (rectX + rectWidth) - (radiusBetween / 2);
-                //return new FallingRectangle(x, cam.getLayoutY() - 100.0, width, height, color);
-                return new FallingRectangle(x, 0.0, width, height, color);
-            }*/
+                y = Math.floor(lastRect.getStartY() - 50);
+                double remainingSpace = sceneWidth - lastRect.getX() - lastRect.getWidth();
+                if (remainingSpace < lastRect.getWidth() * 1.5)
+                {
+                    boolean xHasCorrectValue = false;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        x = Math.floor(new Random().nextDouble() * lastRect.getX());
+                        if (x + lastRect.getWidth() < lastRect.getX())
+                        {
+                            xHasCorrectValue = true;
+                            break;
+                        }
+                    }
+                    if (!xHasCorrectValue)
+                    {
+                        x = Math.floor(lastRect.getX() - lastRect.getWidth() - 50);
+                    }
+                }
+                else
+                {
+                    x = Math.floor(new Random().nextDouble() * (remainingSpace) + lastRect.getX() + lastRect.getWidth());
+                }
+            }
+
+            return new FallingRectangle(MathH.round(x, 3), y, width, height, color);
+
 
         }
         catch (NullPointerException npEx)
