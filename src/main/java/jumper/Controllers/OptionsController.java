@@ -73,7 +73,10 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      */
     public void onChkFullScreenClicked(MouseEvent mouseEvent)
     {
-        ChkFullScreenChange();
+        if (mouseEvent.getButton() == MouseButton.PRIMARY)
+        {
+            ChkFullScreenChange();
+        }
     }
 
 
@@ -84,17 +87,21 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      */
     public void onChkFullScreenPressed(KeyEvent keyEvent)
     {
-        ChkFullScreenChange();
+        if (keyEvent.getCode() == KeyCode.ENTER)
+        {
+            ChkFullScreenChange();
+        }
     }
 
     private void ChkFullScreenChange()
     {
         logger.debug("ChkFullScreenChange() method called. FullScreen property: {}", Main.getPrimaryStage().isFullScreen());
-        if (chkFullScreen.isSelected())
+        if (!Main.getPrimaryStage().isFullScreen())
         {
             var stage = Main.getPrimaryStage();
             stage.setFullScreen(true);
-        } else
+        }
+        else
         {
             var stage = Main.getPrimaryStage();
             stage.setFullScreen(false);
@@ -136,11 +143,15 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
         //if we call this method from width property changelistener, then the stage's width will be the full screen's width
         if (stage.getWidth() == fsWidth)    //if changing to full screen
         {
-            resizeXAndWidth(oldStageXBeforeFS, fsWidth);
-        } else
-        {
-            resizeXAndWidth(fsWidth, oldSceneXBeforeFS);
+            //resizeXAndWidth(oldStageXBeforeFS, fsWidth);
+            resizeXAndWidth(oldStageX, fsWidth);
         }
+        else
+        {
+            //resizeXAndWidth(fsWidth, oldSceneXBeforeFS);
+            resizeXAndWidth(fsWidth, oldStageX);
+        }
+        changeNewX = fsWidth;
     }
 
     /**
@@ -162,11 +173,15 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
         var stage = Main.getPrimaryStage();
         if (stage.getHeight() == fsHeight)
         {
-            resizeYAndHeight(oldStageYBeforeFS, fsHeight);
-        } else
-        {
-            resizeYAndHeight(fsHeight, oldSceneYBeforeFS);
+            //resizeYAndHeight(oldStageYBeforeFS, fsHeight);
+            resizeYAndHeight(oldStageY, fsHeight);
         }
+        else
+        {
+            //resizeYAndHeight(fsHeight, oldSceneYBeforeFS);
+            resizeYAndHeight(fsHeight, oldStageY);
+        }
+        changeNewY = fsHeight;
     }
 
     /**
@@ -213,7 +228,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
                 if (!fullScreenChangingX)
                 {
                     resizeXAndWidth(oldValue, newValue);
-                } else
+                }
+                else
                 {
                     setFullScreenResizeX();
                     fullScreenChangingX = false;
@@ -229,7 +245,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
                 if (!fullScreenChangingY)
                 {
                     resizeYAndHeight(oldValue, newValue);
-                } else
+                }
+                else
                 {
                     setFullScreenResizeY();
                     fullScreenChangingY = false;
@@ -393,12 +410,13 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
             setNewAndStageXY(root, stage);
             prevSceneController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             prevSceneController.addResizeListener();
-        } catch
-        (IOException io)
+        }
+        catch (IOException io)
         {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             errorGoToMainMenu();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Some error occured during loading the main menu, closing the application.", ex);
             errorGoToMainMenu();
@@ -422,12 +440,14 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
             removeResizeListener();
             mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             mainController.addResizeListener();
-        } catch (IOException io)
+        }
+        catch (IOException io)
         {
             logger.error("MainMenu.fxml not founded, closing application.", io);
             removeResizeListener();
             Main.getPrimaryStage().close();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Something bad happened, closing application.", ex);
             removeResizeListener();

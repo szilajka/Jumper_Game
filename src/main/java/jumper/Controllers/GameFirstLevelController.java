@@ -88,15 +88,17 @@ public class GameFirstLevelController extends AbstractController
                 line.setStrokeWidth(3.0);
                 line.setStroke(Color.BLACK);
             }
+
             if (player == null)
             {
                 var stage = Main.getPrimaryStage();
-                double width = stage.getWidth() / 10, height = width;
-                var x = firstLevelCanvas.getWidth() / 2 - (width / 2);
-                var y = startLine.getStartY() - height;
-                player = new Player(x, y, width, height);
+                double playerWidth = stage.getWidth() / 10, playerHeight = playerWidth;
+                var playerX = firstLevelCanvas.getWidth() / 2 - (playerWidth / 2);
+                var playerY = startLine.getStartY() - playerHeight;
+                player = new Player(playerX, playerY, playerWidth, playerHeight);
             }
             player.setColor(Color.BLUE);
+
             if (enemy == null)
             {
                 enemy = Collections.synchronizedList(new ArrayList<FallingRectangle>());
@@ -134,24 +136,33 @@ public class GameFirstLevelController extends AbstractController
     //region Drawing
     private void draw()
     {
-        var gc = firstLevelCanvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, firstLevelCanvas.getWidth(), firstLevelCanvas.getHeight());
-        var sceneHeight = Main.getPrimaryStage().getScene().getHeight();
-        for (var rect : enemy)
+        try
         {
-            if (shouldDrawIt(cam, rect.getY(), rect.getHeight(), sceneHeight))
+            var gc = firstLevelCanvas.getGraphicsContext2D();
+            gc.clearRect(0, 0, firstLevelCanvas.getWidth(), firstLevelCanvas.getHeight());
+            var sceneHeight = Main.getPrimaryStage().getScene().getHeight();
+            for (int i = 0; i < enemy.size(); i++)
             {
-                drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
+                var rect = enemy.get(i);
+                if (shouldDrawIt(cam, rect.getY(), rect.getHeight(), sceneHeight))
+                {
+                    drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
+                }
+            }
+            drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
+            if (shouldDrawIt(cam, startLine.getStartY(), startLine.getStrokeWidth(), sceneHeight))
+            {
+                drawLine(startLine);
+            }
+            for (var line : borders)
+            {
+                drawLine(line);
             }
         }
-        drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
-        if (shouldDrawIt(cam, startLine.getStartY(), startLine.getStrokeWidth(), sceneHeight))
+        catch (Exception ex)
         {
-            drawLine(startLine);
-        }
-        for (var line : borders)
-        {
-            drawLine(line);
+            logger.error("Some error occured during drawing.", ex);
+            errorGoToMainMenu();
         }
     }
 
@@ -236,7 +247,7 @@ public class GameFirstLevelController extends AbstractController
                         var pauseC = new PauseController(GameFirstLevelController.this);
                         fl.setController(pauseC);
                         var ap = (AnchorPane) fl.load();
-                        Scene pauseScene = firstLevelCanvas.getScene();
+                        Scene pauseScene = stage.getScene();
                         ParallelCamera newCam = new ParallelCamera();
                         newCam.setLayoutY(0);
                         pauseScene.setCamera(newCam);
@@ -378,8 +389,9 @@ public class GameFirstLevelController extends AbstractController
         player.setX(player.getX() * ratioX);
         player.setWidth(player.getWidth() * ratioX);
 
-        for (var rect : enemy)
+        for (int i = 0; i < enemy.size(); i++)
         {
+            var rect = enemy.get(i);
             rect.setX(rect.getX() * ratioX);
             rect.setWidth(rect.getWidth() * ratioX);
         }
@@ -404,8 +416,9 @@ public class GameFirstLevelController extends AbstractController
         player.setY(MathH.round(player.getY() * ratioY, 3));
         player.setHeight(player.getHeight() * ratioY);
 
-        for (var rect : enemy)
+        for (int i = 0; i < enemy.size(); i++)
         {
+            var rect = enemy.get(i);
             rect.setY(MathH.round(rect.getY() * ratioY, 3));
             rect.setHeight(rect.getHeight() * ratioY);
         }
@@ -438,6 +451,8 @@ public class GameFirstLevelController extends AbstractController
     {
         try
         {
+            tr.cancel();
+            trGenerate.cancel();
             var stage = Main.getPrimaryStage();
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
             var mainController = new MainMenuController();
@@ -470,12 +485,11 @@ public class GameFirstLevelController extends AbstractController
     private void updatePlayer(double time)
     {
         boolean crashedLeft = false, crashedRight = false, standingOn = false, crashedUp = false;
-        Iterator<FallingRectangle> frIt = enemy.iterator();
         Map<String, FallingRectangle> crashedRect = new HashMap<>();
         double sceneHeight = Main.getPrimaryStage().getScene().getHeight();
-        while (frIt.hasNext())
+        for (int i = 0; i < enemy.size(); i++)
         {
-            var rect = frIt.next();
+            var rect = enemy.get(i);
             if (FallingRectangle.shouldStopFallingRectangle(player, rect))
             {
                 rect.setVelocityY(0.0);
@@ -483,15 +497,21 @@ public class GameFirstLevelController extends AbstractController
             }
             if (FallingRectangle.shouldDestroyFallingRectangle(rect, startLine))
             {
-                frIt.remove();
+                enemy.remove(i);
+                i--;
+                continue;
             }
             if (enemy.stream().anyMatch(f -> f != rect && f.getY() < rect.getY() && FallingRectangle.shouldDestroyFallingRectangle(f, rect)))
             {
-                frIt.remove();
+                enemy.remove(i);
+                i--;
+                continue;
             }
             if (rect.getY() > (cam.getLayoutY() + (sceneHeight * 1.2)))
             {
-                frIt.remove();
+                enemy.remove(i);
+                i--;
+                continue;
             }
 
             if (rect.leftIntersects(player))
@@ -511,7 +531,8 @@ public class GameFirstLevelController extends AbstractController
             }
             if (rect.getIsStandingOnSomething(player))
             {
-                frIt.remove();
+                enemy.remove(i);
+                i--;
                 crashedUp = true;
             }
         }
@@ -591,11 +612,9 @@ public class GameFirstLevelController extends AbstractController
 
     private void updateEnemy(double time)
     {
-        Iterator<FallingRectangle> frIt = enemy.iterator();
-        for (var rect : enemy)
-        //while(frIt.hasNext())
+        for (int i = 0; i < enemy.size(); i++)
         {
-            //var rect = frIt.next();
+            var rect = enemy.get(i);
             if (!rect.isStopped())
             {
                 rect.setY(MathH.round(rect.getY() + rect.getVelocityY() * time, 3));

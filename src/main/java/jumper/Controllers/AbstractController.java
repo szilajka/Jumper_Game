@@ -42,8 +42,8 @@ public abstract class AbstractController
      */
     protected void setOldAndNewValues(double oldValueX, double oldValueY, double newValueX, double newValueY)
     {
-        this.oldStageX = oldValueX;
-        this.oldStageY = oldValueY;
+        oldStageX = oldValueX;
+        oldStageY = oldValueY;
         this.changeNewX = newValueX;
         this.changeNewY = newValueY;
     }

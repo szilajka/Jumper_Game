@@ -175,7 +175,8 @@ public class PauseController extends AbstractController
                     continueFirstLevel();
                     stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);
 
-                } else if (kc == KeyCode.ESCAPE)
+                }
+                else if (kc == KeyCode.ESCAPE)
                 {
                     gameFirstLC.removeKeyListener();
                     paused = false;
@@ -320,11 +321,13 @@ public class PauseController extends AbstractController
             removeResizeListener();
             mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             mainController.addResizeListener();
-        } catch (IOException io)
+        }
+        catch (IOException io)
         {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Some error occured during loading the main menu, closing the application.", ex);
             AppExit();
@@ -351,11 +354,13 @@ public class PauseController extends AbstractController
             removeKeyListener();
             removeResizeListener();
             gameFirstLC.letsContinue(ap);
-        } catch (IOException io)
+        }
+        catch (IOException io)
         {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Some error occured during loading the main menu, closing the application.", ex);
             AppExit();

@@ -216,11 +216,13 @@ public class MainMenuController extends AbstractController
             optionsController.setChkFullScreen(Main.getPrimaryStage().isFullScreen());
             optionsController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             optionsController.addResizeListener();
-        } catch (IOException io)
+        }
+        catch (IOException io)
         {
             logger.error("Options.fxml has not found, closing application.", io);
             MenuExit();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             logger.error("Some error occured, closing application.", ex);
             MenuExit();
