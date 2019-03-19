@@ -61,7 +61,6 @@ public class GameFirstLevelController extends AbstractController
     {
         logger.debug("init() method called.");
         initUI(ap);
-        //TODO: add falling objects
         initObjects();
         keyListenerFirstLevel();
         paused = false;
@@ -137,16 +136,28 @@ public class GameFirstLevelController extends AbstractController
     {
         var gc = firstLevelCanvas.getGraphicsContext2D();
         gc.clearRect(0, 0, firstLevelCanvas.getWidth(), firstLevelCanvas.getHeight());
+        var sceneHeight = Main.getPrimaryStage().getScene().getHeight();
         for (var rect : enemy)
         {
-            drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
+            if (shouldDrawIt(cam, rect.getY(), rect.getHeight(), sceneHeight))
+            {
+                drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
+            }
         }
         drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
-        drawLine(startLine);
+        if (shouldDrawIt(cam, startLine.getStartY(), startLine.getStrokeWidth(), sceneHeight))
+        {
+            drawLine(startLine);
+        }
         for (var line : borders)
         {
             drawLine(line);
         }
+    }
+
+    private boolean shouldDrawIt(Camera cam, double drawY, double drawHeight, double sceneHeight)
+    {
+        return ((drawY + drawHeight) >= cam.getLayoutY()) && (drawY <= (cam.getLayoutY() + sceneHeight));
     }
 
     private void drawLine(Line line)
@@ -254,10 +265,18 @@ public class GameFirstLevelController extends AbstractController
                 if (kc == KeyCode.RIGHT)
                 {
                     rightPressed = false;
+                    if (!paused)
+                    {
+                        player.setOldVelocityX(0.0);
+                    }
                 }
                 if (kc == KeyCode.LEFT)
                 {
                     leftPressed = false;
+                    if (!paused)
+                    {
+                        player.setOldVelocityX(0.0);
+                    }
                 }
                 if (kc == KeyCode.UP)
                 {
@@ -453,14 +472,10 @@ public class GameFirstLevelController extends AbstractController
         boolean crashedLeft = false, crashedRight = false, standingOn = false, crashedUp = false;
         Iterator<FallingRectangle> frIt = enemy.iterator();
         Map<String, FallingRectangle> crashedRect = new HashMap<>();
-        //for (var rect : enemy)
+        double sceneHeight = Main.getPrimaryStage().getScene().getHeight();
         while (frIt.hasNext())
         {
             var rect = frIt.next();
-            if (cam.getLayoutY() - 100 <= rect.getY())
-            {
-                rect.setVelocityY(250.0);
-            }
             if (FallingRectangle.shouldStopFallingRectangle(player, rect))
             {
                 rect.setVelocityY(0.0);
@@ -471,6 +486,10 @@ public class GameFirstLevelController extends AbstractController
                 frIt.remove();
             }
             if (enemy.stream().anyMatch(f -> f != rect && f.getY() < rect.getY() && FallingRectangle.shouldDestroyFallingRectangle(f, rect)))
+            {
+                frIt.remove();
+            }
+            if (rect.getY() > (cam.getLayoutY() + (sceneHeight * 1.2)))
             {
                 frIt.remove();
             }
@@ -521,7 +540,10 @@ public class GameFirstLevelController extends AbstractController
             if (rect != null && player.getOldVelocityX() == 0.0)
             {
                 player.setX(rect.getX() + rect.getWidth());
-                player.setOldVelocityX(player.getVelocityX());
+                if (leftPressed || rightPressed)
+                {
+                    player.setOldVelocityX(player.getVelocityX());
+                }
                 player.setVelocityX(0.0);
             }
         }
@@ -531,7 +553,10 @@ public class GameFirstLevelController extends AbstractController
             if (rect != null && player.getOldVelocityX() == 0.0)
             {
                 player.setX(rect.getX() - player.getWidth());
-                player.setOldVelocityX(player.getVelocityX());
+                if (leftPressed || rightPressed)
+                {
+                    player.setOldVelocityX(player.getVelocityX());
+                }
                 player.setVelocityX(0.0);
             }
         }
