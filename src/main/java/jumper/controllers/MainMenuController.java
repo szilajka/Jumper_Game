@@ -1,4 +1,4 @@
-package jumper.Controllers;
+package jumper.controllers;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -22,8 +22,7 @@ import java.util.Map;
 /**
  * This class is the {@code controller} of the Main Menu.
  */
-public class MainMenuController extends AbstractController
-{
+public class MainMenuController extends AbstractController {
     public Button btnStart;
     public Button btnExit;
     public Button btnOptions;
@@ -36,8 +35,7 @@ public class MainMenuController extends AbstractController
     /**
      * Constructor of the class.<br>
      */
-    public MainMenuController()
-    {
+    public MainMenuController() {
         logger.debug("MainMenuController constructor called.");
         changeListenerMap = new HashMap<>();
     }
@@ -61,10 +59,8 @@ public class MainMenuController extends AbstractController
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      * @throws IOException If the FXML file is not existing.
      */
-    public void onBtnStartClicked(MouseEvent mouseEvent) throws IOException
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void onBtnStartClicked(MouseEvent mouseEvent) throws IOException {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnStart clicked.");
             FirstLevelStart();
         }
@@ -76,10 +72,8 @@ public class MainMenuController extends AbstractController
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      * @throws IOException If the FXML file is not existing.
      */
-    public void onBtnStartPressed(KeyEvent keyEvent) throws IOException
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void onBtnStartPressed(KeyEvent keyEvent) throws IOException {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnStart pressed.");
             FirstLevelStart();
         }
@@ -90,10 +84,8 @@ public class MainMenuController extends AbstractController
      *
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      */
-    public void onBtnExitClicked(MouseEvent mouseEvent)
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void onBtnExitClicked(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnExit clicked.");
             MenuExit();
         }
@@ -104,10 +96,8 @@ public class MainMenuController extends AbstractController
      *
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      */
-    public void onBtnExitPressed(KeyEvent keyEvent)
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void onBtnExitPressed(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnExit pressed.");
             MenuExit();
         }
@@ -119,10 +109,8 @@ public class MainMenuController extends AbstractController
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      * @throws IOException If the FXML file is not existing.
      */
-    public void onBtnOptionsClicked(MouseEvent mouseEvent) throws IOException
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void onBtnOptionsClicked(MouseEvent mouseEvent) throws IOException {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnOptions clicked.");
             OptionsMenu();
         }
@@ -134,10 +122,8 @@ public class MainMenuController extends AbstractController
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      * @throws IOException If the FXML file is not existing.
      */
-    public void onBtnOptionsPressed(KeyEvent keyEvent) throws IOException
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void onBtnOptionsPressed(KeyEvent keyEvent) throws IOException {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnOptions pressed.");
             OptionsMenu();
         }
@@ -152,10 +138,8 @@ public class MainMenuController extends AbstractController
      *
      * @throws IOException If the FXML file is not existing.
      */
-    private void FirstLevelStart()
-    {
-        try
-        {
+    private void FirstLevelStart() {
+        try {
             logger.debug("FirstLevelStart method called.");
             removeResizeListener();
             Stage stage = Main.getPrimaryStage();
@@ -171,12 +155,10 @@ public class MainMenuController extends AbstractController
             gameFirstLC.init(root);
             gameFirstLC.addResizeListener();
             logger.debug("FirstLevelStart method has finished.");
-        } catch (IOException io)
-        {
+        } catch (IOException io) {
             logger.error("GameFirstLevel.fxml has not found, closing application.", io);
             MenuExit();
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Some error occured, closing application.", ex);
             MenuExit();
         }
@@ -185,8 +167,7 @@ public class MainMenuController extends AbstractController
     /**
      * Implements exiting the application.
      */
-    private void MenuExit()
-    {
+    private void MenuExit() {
         logger.debug("MenuExit() method called.");
         removeResizeListener();
         Stage stage = Main.getPrimaryStage();
@@ -198,10 +179,8 @@ public class MainMenuController extends AbstractController
      *
      * @throws IOException If the FXML file is not existing.
      */
-    private void OptionsMenu() throws IOException
-    {
-        try
-        {
+    private void OptionsMenu() throws IOException {
+        try {
             logger.debug("OptionsMenu() method called.");
             removeResizeListener();
             var stage = Main.getPrimaryStage();
@@ -216,14 +195,10 @@ public class MainMenuController extends AbstractController
             optionsController.setChkFullScreen(Main.getPrimaryStage().isFullScreen());
             optionsController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             optionsController.addResizeListener();
-        }
-        catch (IOException io)
-        {
+        } catch (IOException io) {
             logger.error("Options.fxml has not found, closing application.", io);
             MenuExit();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Some error occured, closing application.", ex);
             MenuExit();
         }
@@ -236,15 +211,12 @@ public class MainMenuController extends AbstractController
     /**
      * Removes the current {@link Scene}'s resize {@link ChangeListener}s from the {@link Stage}.
      */
-    private void removeResizeListener()
-    {
+    private void removeResizeListener() {
         var stage = Main.getPrimaryStage();
-        if (changeListenerMap.get("width") != null)
-        {
+        if (changeListenerMap.get("width") != null) {
             stage.widthProperty().removeListener(changeListenerMap.get("width"));
         }
-        if (changeListenerMap.get("height") != null)
-        {
+        if (changeListenerMap.get("height") != null) {
             stage.heightProperty().removeListener(changeListenerMap.get("height"));
         }
     }
@@ -252,8 +224,7 @@ public class MainMenuController extends AbstractController
     /**
      * Adds the current {@link Scene}'s resize {@link ChangeListener}s from the {@link Stage}.
      */
-    public void addResizeListener()
-    {
+    public void addResizeListener() {
         resize();
     }
 
@@ -266,8 +237,7 @@ public class MainMenuController extends AbstractController
      * @param newValueY {@link Stage}'s new Y coordinate after change (if there was a change)
      */
     @Override
-    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
-    {
+    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY) {
         resizeXAndWidth(oldValueX, newValueX);
         resizeYAndHeight(oldValueY, newValueY);
     }
@@ -275,22 +245,17 @@ public class MainMenuController extends AbstractController
     /**
      * Implements resizing to this {@link Scene}.
      */
-    private void resize()
-    {
-        var widthResize = new ChangeListener<Number>()
-        {
+    private void resize() {
+        var widthResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
                 resizeXAndWidth(oldValue, newValue);
             }
         };
 
-        var heightResize = new ChangeListener<Number>()
-        {
+        var heightResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
                 resizeYAndHeight(oldValue, newValue);
             }
         };
@@ -317,8 +282,7 @@ public class MainMenuController extends AbstractController
      * @param oldValue Width of the {@code scene} before resizing or the original width of the {@code scene}
      * @param newValue Width of the {@code scene} after resizing
      */
-    private void resizeXAndWidth(Number oldValue, Number newValue)
-    {
+    private void resizeXAndWidth(Number oldValue, Number newValue) {
         btnStart.setLayoutX(btnStart.getLayoutX() * newValue.doubleValue() / oldValue.doubleValue());
         btnExit.setLayoutX(btnExit.getLayoutX() * newValue.doubleValue() / oldValue.doubleValue());
         btnOptions.setLayoutX(btnOptions.getLayoutX() * newValue.doubleValue() / oldValue.doubleValue());
@@ -337,8 +301,7 @@ public class MainMenuController extends AbstractController
      * @param oldValue Height of the {@code scene} before resizing or the original height of the {@code scene}
      * @param newValue Height of the {@code scene} after resizing
      */
-    private void resizeYAndHeight(Number oldValue, Number newValue)
-    {
+    private void resizeYAndHeight(Number oldValue, Number newValue) {
         btnStart.setLayoutY(btnStart.getLayoutY() * newValue.doubleValue() / oldValue.doubleValue());
         btnExit.setLayoutY(btnExit.getLayoutY() * newValue.doubleValue() / oldValue.doubleValue());
         btnOptions.setLayoutY(btnOptions.getLayoutY() * newValue.doubleValue() / oldValue.doubleValue());

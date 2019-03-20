@@ -1,4 +1,4 @@
-package jumper.Controllers;
+package jumper.controllers;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -25,8 +25,7 @@ import java.util.Map;
  *
  * @param <T> The {@code controller} that called this {@code scene}.
  */
-public class OptionsController<T extends AbstractController> extends AbstractController
-{
+public class OptionsController<T extends AbstractController> extends AbstractController {
     public CheckBox chkFullScreen;
     public Label lblFullScreen;
     public Button btnBack;
@@ -51,8 +50,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @param newValueX      Initialize a variable
      * @param newValueY      Initialize a variable
      */
-    public OptionsController(T prevController, double oldValueX, double oldValueY, double newValueX, double newValueY)
-    {
+    public OptionsController(T prevController, double oldValueX, double oldValueY, double newValueX, double newValueY) {
         logger.debug("OptionsController constructed called. T: {}", prevController.getClass());
         this.prevSceneController = prevController;
         this.oldValX = oldValueX;
@@ -71,10 +69,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      *
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      */
-    public void onChkFullScreenClicked(MouseEvent mouseEvent)
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void onChkFullScreenClicked(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             ChkFullScreenChange();
         }
     }
@@ -85,24 +81,18 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      *
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      */
-    public void onChkFullScreenPressed(KeyEvent keyEvent)
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void onChkFullScreenPressed(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             ChkFullScreenChange();
         }
     }
 
-    private void ChkFullScreenChange()
-    {
+    private void ChkFullScreenChange() {
         logger.debug("ChkFullScreenChange() method called. FullScreen property: {}", Main.getPrimaryStage().isFullScreen());
-        if (!Main.getPrimaryStage().isFullScreen())
-        {
+        if (!Main.getPrimaryStage().isFullScreen()) {
             var stage = Main.getPrimaryStage();
             stage.setFullScreen(true);
-        }
-        else
-        {
+        } else {
             var stage = Main.getPrimaryStage();
             stage.setFullScreen(false);
         }
@@ -114,8 +104,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      *
      * @param fs The value of the application's full screen property.
      */
-    protected void setChkFullScreen(boolean fs)
-    {
+    protected void setChkFullScreen(boolean fs) {
         chkFullScreen.setSelected(fs);
     }
 
@@ -132,8 +121,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @see <a href="https://bugs.openjdk.java.net/browse/JDK-8156779?focusedCommentId=14213204&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14213204"
      * target="_blank">Issue</a>
      */
-    private void setFullScreenResizeX()
-    {
+    private void setFullScreenResizeX() {
         //WARNING: This java.awt methods, like this, give some kind of warning
         //link: https://bugs.openjdk.java.net/browse/JDK-8156779?focusedCommentId=14213204&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14213204
         //they fix it in openjfx12 if they can
@@ -141,13 +129,10 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
         var fsWidth = dp.getWidth();
         var stage = Main.getPrimaryStage();
         //if we call this method from width property changelistener, then the stage's width will be the full screen's width
-        if (stage.getWidth() == fsWidth)    //if changing to full screen
-        {
+        if (stage.getWidth() == fsWidth) {                  //if changing to full screen
             //resizeXAndWidth(oldStageXBeforeFS, fsWidth);
             resizeXAndWidth(oldStageX, fsWidth);
-        }
-        else
-        {
+        } else {
             //resizeXAndWidth(fsWidth, oldSceneXBeforeFS);
             resizeXAndWidth(fsWidth, oldStageX);
         }
@@ -163,21 +148,17 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @see <a href="https://bugs.openjdk.java.net/browse/JDK-8156779?focusedCommentId=14213204&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14213204"
      * target="_blank">Issue</a>
      */
-    private void setFullScreenResizeY()
-    {
+    private void setFullScreenResizeY() {
         //WARNING: This java.awt methods, like this, give some kind of warning
         //link: https://bugs.openjdk.java.net/browse/JDK-8156779?focusedCommentId=14213204&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-14213204
         //they fix it in openjfx12 if they can
         var dp = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode();
         var fsHeight = dp.getHeight();
         var stage = Main.getPrimaryStage();
-        if (stage.getHeight() == fsHeight)
-        {
+        if (stage.getHeight() == fsHeight) {
             //resizeYAndHeight(oldStageYBeforeFS, fsHeight);
             resizeYAndHeight(oldStageY, fsHeight);
-        }
-        else
-        {
+        } else {
             //resizeYAndHeight(fsHeight, oldSceneYBeforeFS);
             resizeYAndHeight(fsHeight, oldStageY);
         }
@@ -187,8 +168,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     /**
      * Implementation of {@link AbstractController#addResizeListener()}.
      */
-    protected void addResizeListener()
-    {
+    protected void addResizeListener() {
         resize();
     }
 
@@ -198,19 +178,15 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * Without this method, the {@code change listeners} would not be removed from the main {@code stage}
      * and the application would do some unnecessary operation.
      */
-    private void removeResizeListener()
-    {
+    private void removeResizeListener() {
         var stage = Main.getPrimaryStage();
-        if (changeListenerMap.get("width") != null)
-        {
+        if (changeListenerMap.get("width") != null) {
             stage.widthProperty().removeListener(changeListenerMap.get("width"));
         }
-        if (changeListenerMap.get("height") != null)
-        {
+        if (changeListenerMap.get("height") != null) {
             stage.heightProperty().removeListener(changeListenerMap.get("height"));
         }
-        if (fullScreenChangeListener != null)
-        {
+        if (fullScreenChangeListener != null) {
             stage.fullScreenProperty().removeListener(fullScreenChangeListener);
         }
     }
@@ -218,36 +194,25 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
     /**
      * Implements resizing to this {@link Scene}.
      */
-    private void resize()
-    {
-        var widthResize = new ChangeListener<Number>()
-        {
+    private void resize() {
+        var widthResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
-                if (!fullScreenChangingX)
-                {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+                if (!fullScreenChangingX) {
                     resizeXAndWidth(oldValue, newValue);
-                }
-                else
-                {
+                } else {
                     setFullScreenResizeX();
                     fullScreenChangingX = false;
                 }
             }
         };
 
-        var heightResize = new ChangeListener<Number>()
-        {
+        var heightResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
-                if (!fullScreenChangingY)
-                {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+                if (!fullScreenChangingY) {
                     resizeYAndHeight(oldValue, newValue);
-                }
-                else
-                {
+                } else {
                     setFullScreenResizeY();
                     fullScreenChangingY = false;
                 }
@@ -258,8 +223,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
             var stage = Main.getPrimaryStage();
             oldStageXBeforeFS = stage.getWidth();
             oldStageYBeforeFS = stage.getHeight();
-            if (stage.isFullScreen())
-            {
+            if (stage.isFullScreen()) {
                 oldSceneXBeforeFS = stage.getScene().getWidth();
                 oldSceneYBeforeFS = stage.getScene().getHeight();
             }
@@ -292,8 +256,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @param oldValue Width of the {@code scene} before resizing or the original width of the {@code scene}
      * @param newValue Width of the {@code scene} after resizing
      */
-    private void resizeXAndWidth(Number oldValue, Number newValue)
-    {
+    private void resizeXAndWidth(Number oldValue, Number newValue) {
         double ratio = newValue.doubleValue() / oldValue.doubleValue();
 
         lblFullScreen.setLayoutX(lblFullScreen.getLayoutX() * ratio);
@@ -314,8 +277,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @param oldValue Height of the {@code scene} before resizing or the original height of the {@code scene}
      * @param newValue Height of the {@code scene} after resizing
      */
-    private void resizeYAndHeight(Number oldValue, Number newValue)
-    {
+    private void resizeYAndHeight(Number oldValue, Number newValue) {
         double ratio = newValue.doubleValue() / oldValue.doubleValue();
 
         lblFullScreen.setLayoutY(lblFullScreen.getLayoutY() * ratio);
@@ -339,8 +301,7 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @param newValueY {@link javafx.stage.Stage}'s new Y coordinate after change (if there was a change)
      */
     @Override
-    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
-    {
+    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY) {
         lblFullScreen.applyCss();
         resizeXAndWidth(oldValueX, newValueX);
         resizeYAndHeight(oldValueY, newValueY);
@@ -356,10 +317,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      * @throws IOException If the fxml file is not found.
      */
-    public void onBtnBackPressed(KeyEvent keyEvent) throws IOException
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void onBtnBackPressed(KeyEvent keyEvent) throws IOException {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnBack pressed.");
             BackToPreviousScene();
         }
@@ -371,10 +330,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      * @throws IOException If the fxml file is not found.
      */
-    public void onBtnBackClicked(MouseEvent mouseEvent) throws IOException
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void onBtnBackClicked(MouseEvent mouseEvent) throws IOException {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnBack clicked.");
             BackToPreviousScene();
         }
@@ -390,10 +347,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
      *
      * @throws IOException If the fxml file is not found.
      */
-    private void BackToPreviousScene()
-    {
-        try
-        {
+    private void BackToPreviousScene() {
+        try {
             logger.debug("BackToPreviousScene() method called.");
             removeResizeListener();
             var className = prevSceneController.getClass().getName();
@@ -410,14 +365,10 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
             setNewAndStageXY(root, stage);
             prevSceneController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             prevSceneController.addResizeListener();
-        }
-        catch (IOException io)
-        {
+        } catch (IOException io) {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             errorGoToMainMenu();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Some error occured during loading the main menu, closing the application.", ex);
             errorGoToMainMenu();
         }
@@ -425,10 +376,8 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
 
     //endregion Back to Previous Scene
 
-    private void errorGoToMainMenu()
-    {
-        try
-        {
+    private void errorGoToMainMenu() {
+        try {
             var stage = Main.getPrimaryStage();
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
             var mainController = new MainMenuController();
@@ -440,15 +389,11 @@ public class OptionsController<T extends AbstractController> extends AbstractCon
             removeResizeListener();
             mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             mainController.addResizeListener();
-        }
-        catch (IOException io)
-        {
+        } catch (IOException io) {
             logger.error("MainMenu.fxml not founded, closing application.", io);
             removeResizeListener();
             Main.getPrimaryStage().close();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Something bad happened, closing application.", ex);
             removeResizeListener();
             Main.getPrimaryStage().close();

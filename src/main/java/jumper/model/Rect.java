@@ -1,4 +1,4 @@
-package jumper.Model;
+package jumper.model;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
@@ -53,7 +53,7 @@ public abstract class Rect extends Rectangle {
         this.velocityX = velocityX;
     }
 
-    public void addVelocityX(double velocityX){
+    public void addVelocityX(double velocityX) {
         this.velocityX += velocityX;
     }
 
@@ -65,7 +65,7 @@ public abstract class Rect extends Rectangle {
         this.velocityY = velocityY;
     }
 
-    public void addVelocityY(double velocityY){
+    public void addVelocityY(double velocityY) {
         this.velocityY += velocityY;
     }
 
@@ -85,7 +85,7 @@ public abstract class Rect extends Rectangle {
         this.oldVelocityY = oldVelocityY;
     }
 
-    private Rectangle2D getBoundaries(){
+    private Rectangle2D getBoundaries() {
         return new Rectangle2D(this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 

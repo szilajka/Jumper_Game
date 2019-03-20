@@ -1,4 +1,4 @@
-package jumper.Controllers;
+package jumper.controllers;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -15,17 +15,16 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-import jumper.Helpers.MathH;
-import jumper.Model.FallingRectangle;
-import jumper.Model.Player;
+import jumper.helpers.MathH;
+import jumper.model.FallingRectangle;
+import jumper.model.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
 
-public class GameFirstLevelController extends AbstractController
-{
+public class GameFirstLevelController extends AbstractController {
     private static final Logger logger = LogManager.getLogger("GameFirstLevelController");
     private Camera cam;
     private Canvas firstLevelCanvas;
@@ -45,8 +44,7 @@ public class GameFirstLevelController extends AbstractController
 
     //region Constructor
 
-    public GameFirstLevelController()
-    {
+    public GameFirstLevelController() {
         logger.debug("GameFirstLevelController constructor called.");
         changeListenerMap = new HashMap<>();
         keyEventHandlerMap = new HashMap<>();
@@ -57,8 +55,7 @@ public class GameFirstLevelController extends AbstractController
 
     //region Initialization
 
-    public void init(AnchorPane ap)
-    {
+    public void init(AnchorPane ap) {
         logger.debug("init() method called.");
         initUI(ap);
         initObjects();
@@ -68,10 +65,8 @@ public class GameFirstLevelController extends AbstractController
     }
 
 
-    private void initObjects()
-    {
-        try
-        {
+    private void initObjects() {
+        try {
             logger.debug("initObjects() method called.");
             startLine = new Line(0, (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50), firstLevelCanvas.getWidth(),
                     (firstLevelCanvas.getHeight() - firstLevelCanvas.getHeight() / 50));
@@ -83,14 +78,12 @@ public class GameFirstLevelController extends AbstractController
                     extractStartLineWidth, startLine.getStartY() - extractStartLineWidth));
             borders.add(new Line(startLine.getEndX() - extractStartLineWidth, 0,
                     startLine.getEndX() - extractStartLineWidth, startLine.getEndY() - extractStartLineWidth));
-            for (var line : borders)
-            {
+            for (var line : borders) {
                 line.setStrokeWidth(3.0);
                 line.setStroke(Color.BLACK);
             }
 
-            if (player == null)
-            {
+            if (player == null) {
                 var stage = Main.getPrimaryStage();
                 double playerWidth = stage.getWidth() / 10, playerHeight = playerWidth;
                 var playerX = firstLevelCanvas.getWidth() / 2 - (playerWidth / 2);
@@ -99,23 +92,18 @@ public class GameFirstLevelController extends AbstractController
             }
             player.setColor(Color.BLUE);
 
-            if (enemy == null)
-            {
+            if (enemy == null) {
                 enemy = Collections.synchronizedList(new ArrayList<FallingRectangle>());
             }
             logger.debug("initObjects() method finished. player {}, enemies size: {}", player, enemy.size());
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Exception occured in initObjects.", ex);
             errorGoToMainMenu();
         }
     }
 
-    private void initUI(AnchorPane ap)
-    {
-        try
-        {
+    private void initUI(AnchorPane ap) {
+        try {
             logger.debug("initUI() method called.");
             Stage stage = Main.getPrimaryStage();
             Scene scene = stage.getScene();
@@ -123,9 +111,7 @@ public class GameFirstLevelController extends AbstractController
             ap.getChildren().add(firstLevelCanvas);
             scene.setCamera(cam);
             logger.debug("initUI method finished.");
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Error occured in initUI.", ex);
             errorGoToMainMenu();
         }
@@ -134,53 +120,42 @@ public class GameFirstLevelController extends AbstractController
     //endregion Initialization
 
     //region Drawing
-    private void draw()
-    {
-        try
-        {
+    private void draw() {
+        try {
             var gc = firstLevelCanvas.getGraphicsContext2D();
             gc.clearRect(0, 0, firstLevelCanvas.getWidth(), firstLevelCanvas.getHeight());
             var sceneHeight = Main.getPrimaryStage().getScene().getHeight();
-            for (int i = 0; i < enemy.size(); i++)
-            {
+            for (int i = 0; i < enemy.size(); i++) {
                 var rect = enemy.get(i);
-                if (shouldDrawIt(cam, rect.getY(), rect.getHeight(), sceneHeight))
-                {
+                if (shouldDrawIt(cam, rect.getY(), rect.getHeight(), sceneHeight)) {
                     drawRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), rect.getColor());
                 }
             }
             drawRect(player.getX(), player.getY(), player.getWidth(), player.getHeight(), player.getColor());
-            if (shouldDrawIt(cam, startLine.getStartY(), startLine.getStrokeWidth(), sceneHeight))
-            {
+            if (shouldDrawIt(cam, startLine.getStartY(), startLine.getStrokeWidth(), sceneHeight)) {
                 drawLine(startLine);
             }
-            for (var line : borders)
-            {
+            for (var line : borders) {
                 drawLine(line);
             }
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Some error occured during drawing.", ex);
             errorGoToMainMenu();
         }
     }
 
-    private boolean shouldDrawIt(Camera cam, double drawY, double drawHeight, double sceneHeight)
-    {
+    private boolean shouldDrawIt(Camera cam, double drawY, double drawHeight, double sceneHeight) {
         return ((drawY + drawHeight) >= cam.getLayoutY()) && (drawY <= (cam.getLayoutY() + sceneHeight));
     }
 
-    private void drawLine(Line line)
-    {
+    private void drawLine(Line line) {
         var gc = firstLevelCanvas.getGraphicsContext2D();
         gc.setStroke(line.getStroke());
         gc.setLineWidth(line.getStrokeWidth());
         gc.strokeLine(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
     }
 
-    private void drawRect(double minX, double minY, double width, double height, Color color)
-    {
+    private void drawRect(double minX, double minY, double width, double height, Color color) {
         var gc = firstLevelCanvas.getGraphicsContext2D();
         gc.setFill(color);
         gc.fillRect(minX, minY, width, height);
@@ -190,46 +165,36 @@ public class GameFirstLevelController extends AbstractController
 
     //region Key Listener
 
-    protected void removeKeyListener()
-    {
+    protected void removeKeyListener() {
         var stage = Main.getPrimaryStage();
-        if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null)
-        {
+        if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
             stage.removeEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
         }
-        if (keyEventHandlerMap.get(KeyEvent.KEY_RELEASED) != null)
-        {
+        if (keyEventHandlerMap.get(KeyEvent.KEY_RELEASED) != null) {
             stage.removeEventHandler(KeyEvent.KEY_RELEASED, keyEventHandlerMap.get(KeyEvent.KEY_RELEASED));
         }
     }
 
-    private void keyListenerFirstLevel()
-    {
-        var firstPEH = new EventHandler<KeyEvent>()
-        {
+    private void keyListenerFirstLevel() {
+        var firstPEH = new EventHandler<KeyEvent>() {
             @Override
-            public void handle(KeyEvent keyEvent)
-            {
+            public void handle(KeyEvent keyEvent) {
                 var kc = keyEvent.getCode();
-                if (kc == KeyCode.RIGHT && !paused)
-                {
+                if (kc == KeyCode.RIGHT && !paused) {
                     player.setVelocityX(player.getMoveSpeed() * 10);
                     rightPressed = true;
                 }
-                if (kc == KeyCode.UP && !paused && !upPressed && !player.isMoving())
-                {
+                if (kc == KeyCode.UP && !paused && !upPressed && !player.isMoving()) {
                     player.setVelocityY(-Math.sqrt(2 * constG * player.getHeight() * 3.5) * 10);
                     //player.setVelocityY(-Main.getPrimaryStage().getScene().getHeight());
                     upPressed = true;
                     player.setMoving(true);
                 }
-                if (kc == KeyCode.LEFT && !paused)
-                {
+                if (kc == KeyCode.LEFT && !paused) {
                     player.setVelocityX(-player.getMoveSpeed() * 10);
                     leftPressed = true;
                 }
-                if (kc == KeyCode.ESCAPE && !paused)
-                {
+                if (kc == KeyCode.ESCAPE && !paused) {
                     player.setOldVelocityX(player.getVelocityX());
                     player.setOldVelocityY(player.getVelocityY());
                     player.setVelocityX(0.0);
@@ -240,8 +205,7 @@ public class GameFirstLevelController extends AbstractController
                     rightPressed = false;
                     tr.cancel();
                     trGenerate.cancel();
-                    try
-                    {
+                    try {
                         var stage = Main.getPrimaryStage();
                         var fl = new FXMLLoader(getClass().getClassLoader().getResource("Pause.fxml"));
                         var pauseC = new PauseController(GameFirstLevelController.this);
@@ -258,39 +222,30 @@ public class GameFirstLevelController extends AbstractController
                         pauseC.keyListenerPause();
                         removeKeyListener();
                         removeResizeListener();
-                    }
-                    catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             }
         };
 
-        var firstREH = new EventHandler<KeyEvent>()
-        {
+        var firstREH = new EventHandler<KeyEvent>() {
             @Override
-            public void handle(KeyEvent keyEvent)
-            {
+            public void handle(KeyEvent keyEvent) {
                 var kc = keyEvent.getCode();
-                if (kc == KeyCode.RIGHT)
-                {
+                if (kc == KeyCode.RIGHT) {
                     rightPressed = false;
-                    if (!paused)
-                    {
+                    if (!paused) {
                         player.setOldVelocityX(0.0);
                     }
                 }
-                if (kc == KeyCode.LEFT)
-                {
+                if (kc == KeyCode.LEFT) {
                     leftPressed = false;
-                    if (!paused)
-                    {
+                    if (!paused) {
                         player.setOldVelocityX(0.0);
                     }
                 }
-                if (kc == KeyCode.UP)
-                {
+                if (kc == KeyCode.UP) {
                     upPressed = false;
                 }
             }
@@ -312,47 +267,37 @@ public class GameFirstLevelController extends AbstractController
     //region Resize Methods
 
     @Override
-    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
-    {
+    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY) {
         resizeXAndWidth(oldValueX, newValueX);
         resizeYAndHeight(oldValueY, newValueY);
     }
 
     @Override
-    protected void addResizeListener()
-    {
+    protected void addResizeListener() {
         resize();
     }
 
-    private void removeResizeListener()
-    {
+    private void removeResizeListener() {
         var stage = Main.getPrimaryStage();
-        if (changeListenerMap.get("width") != null)
-        {
+        if (changeListenerMap.get("width") != null) {
             stage.widthProperty().removeListener(changeListenerMap.get("width"));
         }
-        if (changeListenerMap.get("height") != null)
-        {
+        if (changeListenerMap.get("height") != null) {
             stage.heightProperty().removeListener(changeListenerMap.get("height"));
         }
     }
 
-    private void resize()
-    {
-        var widthResize = new ChangeListener<Number>()
-        {
+    private void resize() {
+        var widthResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
                 resizeXAndWidth(oldValue, newValue);
             }
         };
 
-        var heightResize = new ChangeListener<Number>()
-        {
+        var heightResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
                 resizeYAndHeight(oldValue, newValue);
             }
         };
@@ -370,8 +315,7 @@ public class GameFirstLevelController extends AbstractController
 
     }
 
-    private void resizeXAndWidth(Number oldValue, Number newValue)
-    {
+    private void resizeXAndWidth(Number oldValue, Number newValue) {
         ratioX = newValue.doubleValue() / oldValue.doubleValue();
 
         firstLevelCanvas.setLayoutX(0);
@@ -389,16 +333,14 @@ public class GameFirstLevelController extends AbstractController
         player.setX(player.getX() * ratioX);
         player.setWidth(player.getWidth() * ratioX);
 
-        for (int i = 0; i < enemy.size(); i++)
-        {
+        for (int i = 0; i < enemy.size(); i++) {
             var rect = enemy.get(i);
             rect.setX(rect.getX() * ratioX);
             rect.setWidth(rect.getWidth() * ratioX);
         }
     }
 
-    private void resizeYAndHeight(Number oldValue, Number newValue)
-    {
+    private void resizeYAndHeight(Number oldValue, Number newValue) {
         ratioY = newValue.doubleValue() / oldValue.doubleValue();
 
         firstLevelCanvas.setLayoutY(0);
@@ -416,8 +358,7 @@ public class GameFirstLevelController extends AbstractController
         player.setY(MathH.round(player.getY() * ratioY, 3));
         player.setHeight(player.getHeight() * ratioY);
 
-        for (int i = 0; i < enemy.size(); i++)
-        {
+        for (int i = 0; i < enemy.size(); i++) {
             var rect = enemy.get(i);
             rect.setY(MathH.round(rect.getY() * ratioY, 3));
             rect.setHeight(rect.getHeight() * ratioY);
@@ -429,28 +370,22 @@ public class GameFirstLevelController extends AbstractController
 
     //region Update
 
-    protected void letsContinue(AnchorPane ap)
-    {
-        try
-        {
+    protected void letsContinue(AnchorPane ap) {
+        try {
             player.setVelocityX(player.getOldVelocityX());
             player.setVelocityY(player.getOldVelocityY());
             player.setOldVelocityX(0.0);
             player.setOldVelocityY(0.0);
             paused = false;
             this.init(ap);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Can not continue the game, due to error.", ex);
             errorGoToMainMenu();
         }
     }
 
-    private void errorGoToMainMenu()
-    {
-        try
-        {
+    private void errorGoToMainMenu() {
+        try {
             tr.cancel();
             trGenerate.cancel();
             var stage = Main.getPrimaryStage();
@@ -465,16 +400,12 @@ public class GameFirstLevelController extends AbstractController
             removeResizeListener();
             mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             mainController.addResizeListener();
-        }
-        catch (IOException io)
-        {
+        } catch (IOException io) {
             logger.error("MainMenu.fxml not founded, closing application.", io);
             removeKeyListener();
             removeResizeListener();
             Main.getPrimaryStage().close();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Something bad happened, closing application.", ex);
             removeKeyListener();
             removeResizeListener();
@@ -482,55 +413,45 @@ public class GameFirstLevelController extends AbstractController
         }
     }
 
-    private void updatePlayer(double time)
-    {
+    private void updatePlayer(double time) {
         boolean crashedLeft = false, crashedRight = false, standingOn = false, crashedUp = false;
         Map<String, FallingRectangle> crashedRect = new HashMap<>();
         double sceneHeight = Main.getPrimaryStage().getScene().getHeight();
-        for (int i = 0; i < enemy.size(); i++)
-        {
+        for (int i = 0; i < enemy.size(); i++) {
             var rect = enemy.get(i);
-            if (FallingRectangle.shouldStopFallingRectangle(player, rect))
-            {
+            if (FallingRectangle.shouldStopFallingRectangle(player, rect)) {
                 rect.setVelocityY(0.0);
                 rect.setStopped(true);
             }
-            if (FallingRectangle.shouldDestroyFallingRectangle(rect, startLine))
-            {
+            if (FallingRectangle.shouldDestroyFallingRectangle(rect, startLine)) {
                 enemy.remove(i);
                 i--;
                 continue;
             }
-            if (enemy.stream().anyMatch(f -> f != rect && f.getY() < rect.getY() && FallingRectangle.shouldDestroyFallingRectangle(f, rect)))
-            {
+            if (enemy.stream().anyMatch(f -> f != rect && f.getY() < rect.getY() && FallingRectangle.shouldDestroyFallingRectangle(f, rect))) {
                 enemy.remove(i);
                 i--;
                 continue;
             }
-            if (rect.getY() > (cam.getLayoutY() + (sceneHeight * 1.2)))
-            {
+            if (rect.getY() > (cam.getLayoutY() + (sceneHeight * 1.2))) {
                 enemy.remove(i);
                 i--;
                 continue;
             }
 
-            if (rect.leftIntersects(player))
-            {
+            if (rect.leftIntersects(player)) {
                 crashedRight = true;
                 crashedRect.put("right", rect);
             }
-            if (rect.rightIntersects(player))
-            {
+            if (rect.rightIntersects(player)) {
                 crashedLeft = true;
                 crashedRect.put("left", rect);
             }
-            if (rect.getSomethingIsStandingOn(player))
-            {
+            if (rect.getSomethingIsStandingOn(player)) {
                 standingOn = true;
                 crashedRect.put("down", rect);
             }
-            if (rect.getIsStandingOnSomething(player))
-            {
+            if (rect.getIsStandingOnSomething(player)) {
                 enemy.remove(i);
                 i--;
                 crashedUp = true;
@@ -540,42 +461,31 @@ public class GameFirstLevelController extends AbstractController
 
         if ((!crashedLeft && !crashedRight)
                 || (crashedLeft && player.getVelocityX() > 0 && !crashedRight)
-                || (crashedRight && player.getVelocityX() < 0 && !crashedLeft))
-        {
-            if (player.getOldVelocityX() != 0.0)
-            {
+                || (crashedRight && player.getVelocityX() < 0 && !crashedLeft)) {
+            if (player.getOldVelocityX() != 0.0) {
                 if ((crashedLeft && player.getOldVelocityX() > 0.0)
                         || (crashedRight && player.getOldVelocityX() < 0.0)
-                        || (!crashedLeft && !crashedRight))
-                {
+                        || (!crashedLeft && !crashedRight)) {
                     player.setVelocityX(player.getOldVelocityX());
                 }
 
                 player.setOldVelocityX(0.0);
             }
             player.setX(player.getX() + player.getVelocityX() * time);
-        }
-        else if (crashedLeft && player.getVelocityX() <= 0.0 && !crashedRight)
-        {
+        } else if (crashedLeft && player.getVelocityX() <= 0.0 && !crashedRight) {
             var rect = crashedRect.get("left");
-            if (rect != null && player.getOldVelocityX() == 0.0)
-            {
+            if (rect != null && player.getOldVelocityX() == 0.0) {
                 player.setX(rect.getX() + rect.getWidth());
-                if (leftPressed || rightPressed)
-                {
+                if (leftPressed || rightPressed) {
                     player.setOldVelocityX(player.getVelocityX());
                 }
                 player.setVelocityX(0.0);
             }
-        }
-        else if (crashedRight && player.getVelocityX() >= 0 && !crashedLeft)
-        {
+        } else if (crashedRight && player.getVelocityX() >= 0 && !crashedLeft) {
             var rect = crashedRect.get("right");
-            if (rect != null && player.getOldVelocityX() == 0.0)
-            {
+            if (rect != null && player.getOldVelocityX() == 0.0) {
                 player.setX(rect.getX() - player.getWidth());
-                if (leftPressed || rightPressed)
-                {
+                if (leftPressed || rightPressed) {
                     player.setOldVelocityX(player.getVelocityX());
                 }
                 player.setVelocityX(0.0);
@@ -583,8 +493,7 @@ public class GameFirstLevelController extends AbstractController
         }
 
         if (!crashedLeft && !crashedRight && !crashedUp && !standingOn && player.getVelocityY() == 0.0 && !player.isStandingOnStartLine()
-                && !player.isMoving())
-        {
+                && !player.isMoving()) {
             player.addVelocityY(constG);
             player.setMoving(true);
         }
@@ -593,12 +502,9 @@ public class GameFirstLevelController extends AbstractController
 //        {
 //            // player.setY(MathH.round(player.getY() + player.getVelocityY() * time, 3));
 //        }
-        else if (crashedUp && player.getVelocityY() < 0.0)
-        {
+        else if (crashedUp && player.getVelocityY() < 0.0) {
             player.setVelocityY(0.0);
-        }
-        else if (standingOn && player.getVelocityY() >= 0.0)
-        {
+        } else if (standingOn && player.getVelocityY() >= 0.0) {
             player.setVelocityY(0.0);
             player.setMoving(false);
         }
@@ -610,76 +516,53 @@ public class GameFirstLevelController extends AbstractController
         cam.setLayoutY(player.getY() - (scene.getHeight() * 0.8) + player.getHeight());
     }
 
-    private void updateEnemy(double time)
-    {
-        for (int i = 0; i < enemy.size(); i++)
-        {
+    private void updateEnemy(double time) {
+        for (int i = 0; i < enemy.size(); i++) {
             var rect = enemy.get(i);
-            if (!rect.isStopped())
-            {
+            if (!rect.isStopped()) {
                 rect.setY(MathH.round(rect.getY() + rect.getVelocityY() * time, 3));
             }
         }
     }
 
-    private void update(double time)
-    {
+    private void update(double time) {
         updatePlayer(time);
         updateEnemy(time);
         draw();
 
-        if (!rightPressed && !leftPressed && !paused)
-        {
-            if (player.getVelocityX() > 10e-6)
-            {
-                if (player.getVelocityX() <= 1.0)
-                {
+        if (!rightPressed && !leftPressed && !paused) {
+            if (player.getVelocityX() > 10e-6) {
+                if (player.getVelocityX() <= 1.0) {
                     player.setVelocityX(0.0);
-                }
-                else
-                {
-                    if (!rightPressed)
-                    {
+                } else {
+                    if (!rightPressed) {
                         player.addVelocityX(-50.0);
                     }
                 }
-            }
-            else if (player.getVelocityX() <= 10e-6)
-            {
-                if (player.getVelocityX() > -1.0)
-                {
+            } else if (player.getVelocityX() <= 10e-6) {
+                if (player.getVelocityX() > -1.0) {
                     player.setVelocityX(0.0);
-                }
-                else
-                {
-                    if (!leftPressed)
-                    {
+                } else {
+                    if (!leftPressed) {
                         player.addVelocityX(50.0);
                     }
                 }
             }
         }
-        if (player.isMoving() && !paused)
-        {
-            if (player.getY() + player.getHeight() < startLine.getStartY() + 0.5)
-            {
+        if (player.isMoving() && !paused) {
+            if (player.getY() + player.getHeight() < startLine.getStartY() + 0.5) {
                 player.addVelocityY(constG);
                 player.setStandingOnStartLine(false);
-            }
-            else if (player.getY() + player.getHeight() >= startLine.getStartY() + 0.5)
-            {
+            } else if (player.getY() + player.getHeight() >= startLine.getStartY() + 0.5) {
                 player.setY(MathH.round(startLine.getStartY() - player.getHeight(), 3));
                 player.setVelocityY(0.0);
                 player.setMoving(false);
                 player.setStandingOnStartLine(true);
             }
         }
-        if ((player.getX() + player.getWidth()) >= borders.get(1).getStartX())
-        {
+        if ((player.getX() + player.getWidth()) >= borders.get(1).getStartX()) {
             player.setX(borders.get(1).getStartX() - player.getWidth());
-        }
-        else if (player.getX() <= borders.get(0).getStartX())
-        {
+        } else if (player.getX() <= borders.get(0).getStartX()) {
             player.setX(borders.get(0).getStartX());
         }
 
@@ -689,36 +572,27 @@ public class GameFirstLevelController extends AbstractController
 
     //region Run
 
-    public void run()
-    {
+    public void run() {
         logger.debug("run() method called.");
-        ts = new TimerTask()
-        {
+        ts = new TimerTask() {
             @Override
-            public synchronized void run()
-            {
+            public synchronized void run() {
                 var delta = 2 * 10e-4;  //if it were time based, it wouldn't be a constant
                 update(delta);
             }
         };
 
-        tsGenerate = new TimerTask()
-        {
+        tsGenerate = new TimerTask() {
             @Override
-            public synchronized void run()
-            {
+            public synchronized void run() {
                 FallingRectangle lastRect;
-                if (enemy.size() != 0)
-                {
+                if (enemy.size() != 0) {
                     lastRect = enemy.get(enemy.size() - 1);
-                }
-                else
-                {
+                } else {
                     lastRect = null;
                 }
                 var newRect = FallingRectangle.generateFallingRectangle(player, lastRect, cam);
-                if (newRect != null)
-                {
+                if (newRect != null) {
                     enemy.add(newRect);
                 }
             }

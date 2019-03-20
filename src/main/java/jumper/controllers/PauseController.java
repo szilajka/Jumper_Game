@@ -1,4 +1,4 @@
-package jumper.Controllers;
+package jumper.controllers;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,8 +24,7 @@ import java.util.Map;
  * This class is the {@code controller} of the Pause menu.
  * This {@link Scene} is only available while the user is playing.
  */
-public class PauseController extends AbstractController
-{
+public class PauseController extends AbstractController {
     public Button btnContinue;
     public Button btnExit;
     public Button btnMenu;
@@ -44,8 +43,7 @@ public class PauseController extends AbstractController
      *
      * @param gameFirstLevelController The {@link GameFirstLevelController} that paused the game.
      */
-    public PauseController(GameFirstLevelController gameFirstLevelController)
-    {
+    public PauseController(GameFirstLevelController gameFirstLevelController) {
         logger.debug("PauseController constructor started.");
         this.gameFirstLC = gameFirstLevelController;
         this.changeListenerMap = new HashMap<>();
@@ -58,41 +56,32 @@ public class PauseController extends AbstractController
     //region Resize Methods
 
     @Override
-    protected void addResizeListener()
-    {
+    protected void addResizeListener() {
         resize();
     }
 
-    private void removeResizeListener()
-    {
+    private void removeResizeListener() {
         var stage = Main.getPrimaryStage();
 
-        if (changeListenerMap.get("width") != null)
-        {
+        if (changeListenerMap.get("width") != null) {
             stage.widthProperty().addListener(changeListenerMap.get("width"));
         }
-        if (changeListenerMap.get("height") != null)
-        {
+        if (changeListenerMap.get("height") != null) {
             stage.heightProperty().addListener(changeListenerMap.get("height"));
         }
     }
 
-    private void resize()
-    {
-        var widthResize = new ChangeListener<Number>()
-        {
+    private void resize() {
+        var widthResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
                 resizeXAndWidth(oldValue, newValue);
             }
         };
 
-        var heightResize = new ChangeListener<Number>()
-        {
+        var heightResize = new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue)
-            {
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
                 resizeYAndHeight(oldValue, newValue);
             }
         };
@@ -110,14 +99,12 @@ public class PauseController extends AbstractController
     }
 
     @Override
-    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY)
-    {
+    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY) {
         resizeXAndWidth(oldValueX, newValueX);
         resizeYAndHeight(oldValueY, newValueY);
     }
 
-    private void resizeXAndWidth(Number oldValue, Number newValue)
-    {
+    private void resizeXAndWidth(Number oldValue, Number newValue) {
         double ratio = newValue.doubleValue() / oldValue.doubleValue();
 
         btnContinue.setLayoutX(btnContinue.getLayoutX() * ratio);
@@ -130,8 +117,7 @@ public class PauseController extends AbstractController
 
     }
 
-    private void resizeYAndHeight(Number oldValue, Number newValue)
-    {
+    private void resizeYAndHeight(Number oldValue, Number newValue) {
         double ratio = newValue.doubleValue() / oldValue.doubleValue();
 
         btnContinue.setLayoutY(btnContinue.getLayoutY() * ratio);
@@ -148,11 +134,9 @@ public class PauseController extends AbstractController
 
     //region Key Listener
 
-    private void removeKeyListener()
-    {
+    private void removeKeyListener() {
         var stage = Main.getPrimaryStage();
-        if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null)
-        {
+        if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
             stage.removeEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
         }
     }
@@ -161,23 +145,17 @@ public class PauseController extends AbstractController
      * This method adds an {@link EventHandler} to the {@link Scene}.
      * If you press {@code ESC}, then it continues the game.
      */
-    protected void keyListenerPause()
-    {
-        var pauseEH = new EventHandler<KeyEvent>()
-        {
+    protected void keyListenerPause() {
+        var pauseEH = new EventHandler<KeyEvent>() {
             @Override
-            public void handle(KeyEvent keyEvent)
-            {
+            public void handle(KeyEvent keyEvent) {
                 var kc = keyEvent.getCode();
-                if (kc == KeyCode.ESCAPE && !paused)
-                {
+                if (kc == KeyCode.ESCAPE && !paused) {
                     var stage = Main.getPrimaryStage();
                     continueFirstLevel();
                     stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);
 
-                }
-                else if (kc == KeyCode.ESCAPE)
-                {
+                } else if (kc == KeyCode.ESCAPE) {
                     gameFirstLC.removeKeyListener();
                     paused = false;
                 }
@@ -202,10 +180,8 @@ public class PauseController extends AbstractController
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      * @throws IOException If the fxml file is not found.
      */
-    public void OnBtnContinuePressed(KeyEvent keyEvent) throws IOException
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void OnBtnContinuePressed(KeyEvent keyEvent) throws IOException {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnContinue pressed.");
             continueFirstLevel();
         }
@@ -217,10 +193,8 @@ public class PauseController extends AbstractController
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      * @throws IOException If the fxml file is not found.
      */
-    public void OnBtnContinueClicked(MouseEvent mouseEvent) throws IOException
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void OnBtnContinueClicked(MouseEvent mouseEvent) throws IOException {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnContinue clicked.");
             continueFirstLevel();
         }
@@ -231,10 +205,8 @@ public class PauseController extends AbstractController
      *
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      */
-    public void OnBtnExitPressed(KeyEvent keyEvent)
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void OnBtnExitPressed(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnExit pressed.");
             AppExit();
         }
@@ -245,10 +217,8 @@ public class PauseController extends AbstractController
      *
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      */
-    public void OnBtnExitClicked(MouseEvent mouseEvent)
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void OnBtnExitClicked(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnExit clicked.");
             AppExit();
         }
@@ -260,10 +230,8 @@ public class PauseController extends AbstractController
      * @param keyEvent The {@link KeyEvent} that triggers this method.
      * @throws IOException If the fxml file is not found.
      */
-    public void OnBtnMenuPressed(KeyEvent keyEvent) throws IOException
-    {
-        if (keyEvent.getCode() == KeyCode.ENTER)
-        {
+    public void OnBtnMenuPressed(KeyEvent keyEvent) throws IOException {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnMenu pressed.");
             loadMainMenu();
         }
@@ -275,10 +243,8 @@ public class PauseController extends AbstractController
      * @param mouseEvent The {@link MouseEvent} that triggers this method.
      * @throws IOException If the fxml file is not found.
      */
-    public void OnBtnMenuClicked(MouseEvent mouseEvent) throws IOException
-    {
-        if (mouseEvent.getButton() == MouseButton.PRIMARY)
-        {
+    public void OnBtnMenuClicked(MouseEvent mouseEvent) throws IOException {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnMenu clicked.");
             loadMainMenu();
         }
@@ -291,8 +257,7 @@ public class PauseController extends AbstractController
     /**
      * Implements the exit button's behaviour.
      */
-    private void AppExit()
-    {
+    private void AppExit() {
         logger.debug("AppExit() method called.");
         removeResizeListener();
         Stage stage = (Stage) btnExit.getScene().getWindow();
@@ -304,10 +269,8 @@ public class PauseController extends AbstractController
      *
      * @throws IOException If the fxml file is not found.
      */
-    private void loadMainMenu()
-    {
-        try
-        {
+    private void loadMainMenu() {
+        try {
             logger.debug("loadMainMenu() method called.");
             var stage = Main.getPrimaryStage();
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
@@ -321,14 +284,10 @@ public class PauseController extends AbstractController
             removeResizeListener();
             mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
             mainController.addResizeListener();
-        }
-        catch (IOException io)
-        {
+        } catch (IOException io) {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Some error occured during loading the main menu, closing the application.", ex);
             AppExit();
         }
@@ -339,10 +298,8 @@ public class PauseController extends AbstractController
      *
      * @throws IOException If the fxml file is not found.
      */
-    private void continueFirstLevel()
-    {
-        try
-        {
+    private void continueFirstLevel() {
+        try {
             logger.debug("continueFirstLevel() method called.");
             var stage = Main.getPrimaryStage();
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
@@ -354,14 +311,10 @@ public class PauseController extends AbstractController
             removeKeyListener();
             removeResizeListener();
             gameFirstLC.letsContinue(ap);
-        }
-        catch (IOException io)
-        {
+        } catch (IOException io) {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             logger.error("Some error occured during loading the main menu, closing the application.", ex);
             AppExit();
         }
