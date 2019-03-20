@@ -1,10 +1,8 @@
-package jumper.Model;
+package jumper.model;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-
-import java.util.Optional;
 
 /**
  * Rectangle abstract class
@@ -17,6 +15,8 @@ public abstract class Rect extends Rectangle {
     //speed
     private double velocityX = 0.0;
     private double velocityY = 0.0;
+    private double oldVelocityX = 0.0;
+    private double oldVelocityY = 0.0;
     private boolean isMoving = false;
 
     public boolean isMoving() {
@@ -27,9 +27,14 @@ public abstract class Rect extends Rectangle {
         isMoving = moving;
     }
 
-    public Rect(double v, double v1, double v2, double v3, Optional<Color> color) {
-        super(v, v1, v2, v3);
-        color.ifPresent(c -> this.color = c);
+    public Rect(double x, double y, double width, double height) {
+        super(x, y, width, height);
+        this.color = Color.BLACK;
+    }
+
+    public Rect(double x, double y, double width, double height, Color color) {
+        super(x, y, width, height);
+        this.color = color;
     }
 
     public void setColor(Color color) {
@@ -48,7 +53,7 @@ public abstract class Rect extends Rectangle {
         this.velocityX = velocityX;
     }
 
-    public void addVelocityX(double velocityX){
+    public void addVelocityX(double velocityX) {
         this.velocityX += velocityX;
     }
 
@@ -60,11 +65,27 @@ public abstract class Rect extends Rectangle {
         this.velocityY = velocityY;
     }
 
-    public void addVelocityY(double velocityY){
+    public void addVelocityY(double velocityY) {
         this.velocityY += velocityY;
     }
 
-    private Rectangle2D getBoundaries(){
+    public double getOldVelocityX() {
+        return oldVelocityX;
+    }
+
+    public void setOldVelocityX(double oldVelocityX) {
+        this.oldVelocityX = oldVelocityX;
+    }
+
+    public double getOldVelocityY() {
+        return oldVelocityY;
+    }
+
+    public void setOldVelocityY(double oldVelocityY) {
+        this.oldVelocityY = oldVelocityY;
+    }
+
+    private Rectangle2D getBoundaries() {
         return new Rectangle2D(this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
