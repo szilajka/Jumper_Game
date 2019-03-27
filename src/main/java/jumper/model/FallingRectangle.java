@@ -4,7 +4,7 @@ import javafx.scene.Camera;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import jumper.controllers.Main;
-import jumper.helpers.MathH;
+import jumper.helpers.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,24 +14,48 @@ public class FallingRectangle extends Rect {
     private static final Logger logger = LogManager.getLogger("FallingRectangle");
     private static final double radiusBetween = 50.0;
     private boolean stopped = false;
+    public static double basicEnemyWidth = 100.0;
+    public static double basicEnemyHeight = 25.0;
+    public static final double basicEnemyVelocitiyY = 100.0;
 
+    private boolean intersectsWithFallingRectangle = false;
+
+    private double startY = 0.0;
 
     public double getStartY() {
         return startY;
     }
 
-    private double startY = 0.0;
+    public boolean isIntersectsWithFallingRectangle() {
+        return intersectsWithFallingRectangle;
+    }
+
+    public void setIntersectsWithFallingRectangle(boolean intersectsWithFallingRectangle) {
+        this.intersectsWithFallingRectangle = intersectsWithFallingRectangle;
+    }
 
     public FallingRectangle(double x, double y, double width, double height) {
         super(x, y, width, height);
         this.startY = y;
-        super.setVelocityY(250.0);
+        super.setVelocityY(basicEnemyVelocitiyY);
     }
 
     public FallingRectangle(double x, double y, double width, double height, Color color) {
         super(x, y, width, height, color);
         this.startY = y;
-        super.setVelocityY(250.0);
+        super.setVelocityY(basicEnemyVelocitiyY);
+    }
+
+    public FallingRectangle(double x, double y, double width, double height, double velocityY) {
+        super(x, y, width, height);
+        this.startY = y;
+        super.setVelocityY(velocityY);
+    }
+
+    public FallingRectangle(double x, double y, double width, double height, Color color, double velocityY) {
+        super(x, y, width, height, color);
+        this.startY = y;
+        super.setVelocityY(velocityY);
     }
 
     public boolean isStopped() {
@@ -43,13 +67,6 @@ public class FallingRectangle extends Rect {
     }
 
     //region Intersection
-
-    /**
-     * If the falling rectangle's left or right side intersects with the rectangle's left or right side.
-     *
-     * @param rect
-     * @return
-     */
     public boolean intersectsWithLeftOrRightSide(Rect rect) {
         return this.leftIntersects(rect) || this.rightIntersects(rect);
     }
@@ -65,7 +82,7 @@ public class FallingRectangle extends Rect {
      * @return
      */
     public boolean leftIntersects(Rect rect) {
-        return Math.abs(MathH.round(this.getX(), 3) - MathH.round(rect.getX() + rect.getWidth(), 3)) <= 2.0
+        return Math.abs(MathHelper.round(this.getX(), 3) - MathHelper.round(rect.getX() + rect.getWidth(), 3)) <= 2.0
                 && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
         //return this.inWidthLeft(rect) && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
     }
@@ -77,7 +94,7 @@ public class FallingRectangle extends Rect {
      * @return
      */
     public boolean rightIntersects(Rect rect) {
-        return Math.abs(MathH.round(this.getX() + this.getWidth(), 3) - MathH.round(rect.getX(), 3)) <= 2.0
+        return Math.abs(MathHelper.round(this.getX() + this.getWidth(), 3) - MathHelper.round(rect.getX(), 3)) <= 2.0
                 && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
         //return this.inWidthRight(rect) && this.inHeight(rect) && !this.somethingIsStandingOn(rect);
     }
@@ -154,9 +171,9 @@ public class FallingRectangle extends Rect {
          *
          * */
 
-        return MathH.round(rect.getX(), 3) <= MathH.round(x, 3)
-                && (MathH.round(rect.getX() + rect.getWidth(), 3)) >= MathH.round(x, 3)
-                && MathH.round(rect.getX() + rect.getWidth(), 3) <= MathH.round(x + width, 3);
+        return MathHelper.round(rect.getX(), 3) <= MathHelper.round(x, 3)
+                && (MathHelper.round(rect.getX() + rect.getWidth(), 3)) >= MathHelper.round(x, 3)
+                && MathHelper.round(rect.getX() + rect.getWidth(), 3) <= MathHelper.round(x + width, 3);
     }
 
     /**
@@ -191,9 +208,9 @@ public class FallingRectangle extends Rect {
          *
          * */
 
-        return MathH.round(x, 3) <= MathH.round(rect.getX(), 3)
-                && MathH.round(x + width, 3) >= MathH.round(rect.getX(), 3)
-                && MathH.round(x + width, 3) <= MathH.round(rect.getX() + rect.getWidth(), 3);
+        return MathHelper.round(x, 3) <= MathHelper.round(rect.getX(), 3)
+                && MathHelper.round(x + width, 3) >= MathHelper.round(rect.getX(), 3)
+                && MathHelper.round(x + width, 3) <= MathHelper.round(rect.getX() + rect.getWidth(), 3);
     }
 
     /**
@@ -227,8 +244,8 @@ public class FallingRectangle extends Rect {
          *
          * */
 
-        return MathH.round(x, 3) <= MathH.round(rect.getX(), 3)
-                && MathH.round(x + width, 3) >= MathH.round(rect.getX() + rect.getWidth(), 3);
+        return MathHelper.round(x, 3) <= MathHelper.round(rect.getX(), 3)
+                && MathHelper.round(x + width, 3) >= MathHelper.round(rect.getX() + rect.getWidth(), 3);
     }
 
     private boolean inWidth(Rect rect) {
@@ -261,9 +278,9 @@ public class FallingRectangle extends Rect {
          *
          * */
 
-        return MathH.round(rect.getY(), 3) <= MathH.round(y, 3)
-                && MathH.round(rect.getY() + rect.getHeight(), 3) >= MathH.round(y, 3)
-                && MathH.round(rect.getY() + rect.getHeight(), 3) <= MathH.round(y + height, 3);
+        return MathHelper.round(rect.getY(), 3) <= MathHelper.round(y, 3)
+                && MathHelper.round(rect.getY() + rect.getHeight(), 3) >= MathHelper.round(y, 3)
+                && MathHelper.round(rect.getY() + rect.getHeight(), 3) <= MathHelper.round(y + height, 3);
     }
 
     /**
@@ -278,15 +295,15 @@ public class FallingRectangle extends Rect {
 
 
     private boolean somethingIsStandingOn(double y, double height, Rect rect) {
-        var ret = MathH.round(y + height, 3) <= MathH.round(rect.getY() + 2.0, 3)
-                && MathH.round(y + height, 3) >= MathH.round(rect.getY() - 2.0, 3);
+        var ret = MathHelper.round(y + height, 3) <= MathHelper.round(rect.getY() + 2.0, 3)
+                && MathHelper.round(y + height, 3) >= MathHelper.round(rect.getY() - 2.0, 3);
         if (ret) {
             return true;
         } else {
             return false;
         }
-        //return MathH.round(y + height, 3) <= MathH.round(rect.getY() + 0.5, 3)
-        //        && MathH.round(y + height, 3) >= MathH.round(rect.getY() - 0.5, 3);
+        //return MathHelper.round(y + height, 3) <= MathHelper.round(rect.getY() + 0.5, 3)
+        //        && MathHelper.round(y + height, 3) >= MathHelper.round(rect.getY() - 0.5, 3);
     }
 
     /**
@@ -324,9 +341,9 @@ public class FallingRectangle extends Rect {
          *
          */
 
-        return MathH.round(y, 3) <= MathH.round(rect.getY(), 3)
-                && MathH.round(y + height, 3) >= MathH.round(rect.getY(), 3)
-                && MathH.round(y + height, 3) <= MathH.round(rect.getY() + rect.getHeight(), 3);
+        return MathHelper.round(y, 3) <= MathHelper.round(rect.getY(), 3)
+                && MathHelper.round(y + height, 3) >= MathHelper.round(rect.getY(), 3)
+                && MathHelper.round(y + height, 3) <= MathHelper.round(rect.getY() + rect.getHeight(), 3);
     }
 
     /**
@@ -352,8 +369,8 @@ public class FallingRectangle extends Rect {
          *
          * */
 
-        return MathH.round(rect.getY(), 3) <= MathH.round(y, 3)
-                && MathH.round(rect.getY() + rect.getHeight(), 3) >= MathH.round(y + height, 3);
+        return MathHelper.round(rect.getY(), 3) <= MathHelper.round(y, 3)
+                && MathHelper.round(rect.getY() + rect.getHeight(), 3) >= MathHelper.round(y + height, 3);
     }
 
     private boolean inHeight(Rect rect) {
@@ -399,7 +416,7 @@ public class FallingRectangle extends Rect {
                 }
             }
 
-            return new FallingRectangle(MathH.round(x, 3), y, width, height, color);
+            return new FallingRectangle(MathHelper.round(x, 3), y, width, height, color);
 
 
         } catch (NullPointerException npEx) {
@@ -410,9 +427,9 @@ public class FallingRectangle extends Rect {
 
     public static boolean shouldStopFallingRectangle(Player player, FallingRectangle fRect) {
         if (!fRect.isStopped()) {
-            if (MathH.round(fRect.getY(), 3) >= MathH.round(player.getY() + player.getHeight(), 3)
-                    && MathH.round(player.getX() - radiusBetween, 3) <= MathH.round(fRect.getX() + fRect.getWidth(), 3)
-                    && MathH.round(player.getX() + radiusBetween, 3) >= MathH.round(fRect.getX(), 3)) {
+            if (MathHelper.round(fRect.getY(), 3) >= MathHelper.round(player.getY() + player.getHeight(), 3)
+                    && MathHelper.round(player.getX() - radiusBetween, 3) <= MathHelper.round(fRect.getX() + fRect.getWidth(), 3)
+                    && MathHelper.round(player.getX() + radiusBetween, 3) >= MathHelper.round(fRect.getX(), 3)) {
                 return true;
             }
 

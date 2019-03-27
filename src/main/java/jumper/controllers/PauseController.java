@@ -19,12 +19,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-/**
- * This class is the {@code controller} of the Pause menu.
- * This {@link Scene} is only available while the user is playing.
- */
-public class PauseController extends AbstractController {
+public class PauseController {
     public Button btnContinue;
     public Button btnExit;
     public Button btnMenu;
@@ -53,85 +48,6 @@ public class PauseController extends AbstractController {
 
     //endregion Constructor
 
-    //region Resize Methods
-
-    @Override
-    protected void addResizeListener() {
-        resize();
-    }
-
-    private void removeResizeListener() {
-        var stage = Main.getPrimaryStage();
-
-        if (changeListenerMap.get("width") != null) {
-            stage.widthProperty().addListener(changeListenerMap.get("width"));
-        }
-        if (changeListenerMap.get("height") != null) {
-            stage.heightProperty().addListener(changeListenerMap.get("height"));
-        }
-    }
-
-    private void resize() {
-        var widthResize = new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-                resizeXAndWidth(oldValue, newValue);
-            }
-        };
-
-        var heightResize = new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-                resizeYAndHeight(oldValue, newValue);
-            }
-        };
-
-        removeResizeListener();
-
-        changeListenerMap.put("width", widthResize);
-        changeListenerMap.put("height", heightResize);
-
-        var stage = Main.getPrimaryStage();
-
-        stage.widthProperty().addListener(changeListenerMap.get("width"));
-        stage.heightProperty().addListener(changeListenerMap.get("height"));
-
-    }
-
-    @Override
-    protected void resizeOnLoad(Number oldValueX, Number oldValueY, Number newValueX, Number newValueY) {
-        resizeXAndWidth(oldValueX, newValueX);
-        resizeYAndHeight(oldValueY, newValueY);
-    }
-
-    private void resizeXAndWidth(Number oldValue, Number newValue) {
-        double ratio = newValue.doubleValue() / oldValue.doubleValue();
-
-        btnContinue.setLayoutX(btnContinue.getLayoutX() * ratio);
-        btnMenu.setLayoutX(btnMenu.getLayoutX() * ratio);
-        btnExit.setLayoutX(btnExit.getLayoutX() * ratio);
-
-        btnContinue.setPrefWidth(btnContinue.getPrefWidth() * ratio);
-        btnMenu.setPrefWidth(btnMenu.getPrefWidth() * ratio);
-        btnExit.setPrefWidth(btnExit.getPrefWidth() * ratio);
-
-    }
-
-    private void resizeYAndHeight(Number oldValue, Number newValue) {
-        double ratio = newValue.doubleValue() / oldValue.doubleValue();
-
-        btnContinue.setLayoutY(btnContinue.getLayoutY() * ratio);
-        btnMenu.setLayoutY(btnMenu.getLayoutY() * ratio);
-        btnExit.setLayoutY(btnExit.getLayoutY() * ratio);
-
-        btnContinue.setPrefHeight(btnContinue.getPrefHeight() * ratio);
-        btnMenu.setPrefHeight(btnMenu.getPrefHeight() * ratio);
-        btnExit.setPrefHeight(btnExit.getPrefHeight() * ratio);
-
-    }
-
-    //endregion Resize Methods
-
     //region Key Listener
 
     private void removeKeyListener() {
@@ -156,7 +72,7 @@ public class PauseController extends AbstractController {
                     stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);
 
                 } else if (kc == KeyCode.ESCAPE) {
-                    gameFirstLC.removeKeyListener();
+                    gameFirstLC.getEngine().removeKeyListener();
                     paused = false;
                 }
             }
@@ -259,7 +175,6 @@ public class PauseController extends AbstractController {
      */
     private void AppExit() {
         logger.debug("AppExit() method called.");
-        removeResizeListener();
         Stage stage = (Stage) btnExit.getScene().getWindow();
         stage.close();
     }
@@ -279,11 +194,7 @@ public class PauseController extends AbstractController {
             var ap = (AnchorPane) fl.load();
             var mainScene = btnMenu.getScene();
             mainScene.setRoot(ap);
-            setNewAndStageXY(ap, stage);
             removeKeyListener();
-            removeResizeListener();
-            mainController.resizeOnLoad(oldStageX, oldStageY, changeNewX, changeNewY);
-            mainController.addResizeListener();
         } catch (IOException io) {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();
@@ -307,10 +218,8 @@ public class PauseController extends AbstractController {
             var ap = (AnchorPane) fl.load();
             var gameScene = btnContinue.getScene();
             gameScene.setRoot(ap);
-            setNewAndStageXY(ap, stage);
             removeKeyListener();
-            removeResizeListener();
-            gameFirstLC.letsContinue(ap);
+            gameFirstLC.getEngine().letsContinue(ap);
         } catch (IOException io) {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();

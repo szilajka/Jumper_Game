@@ -8,11 +8,6 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
-/**
- * This is the Main {@code class} of the application.
- * This {@code class} is responsible to start the application.
- */
 public class Main extends Application {
     private static final Logger logger = LogManager.getLogger("Main");
     private static Stage primaryStage;
@@ -29,9 +24,6 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.setTitle("Jumper Game");
         stage.show();
-        mainMenuController.addResizeListener();
-        mainMenuController.addResizeListenerToStage();
-        mainMenuController.setOldAndNewValues(stage.getWidth(), stage.getHeight(), stage.getWidth(), stage.getHeight());
         stage.setOnCloseRequest((event) -> {
             logger.debug("Application closes.");
             stage.close();

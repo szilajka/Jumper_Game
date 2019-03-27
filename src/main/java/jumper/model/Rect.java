@@ -4,12 +4,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-/**
- * Rectangle abstract class
- * x and y are the upper left position of the rectangle.
- * width and height are the rectangle's width and height.
- */
-
 public abstract class Rect extends Rectangle {
     private Color color;
     //speed
