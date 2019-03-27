@@ -1,7 +1,5 @@
 package jumper.controllers;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 public class PauseController {
     public Button btnContinue;
     public Button btnExit;
@@ -26,7 +25,6 @@ public class PauseController {
 
     private static final Logger logger = LogManager.getLogger("PauseController");
     private GameFirstLevelController gameFirstLC;
-    private Map<String, ChangeListener<Number>> changeListenerMap;
     private boolean paused = true;
     private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
 
@@ -41,7 +39,6 @@ public class PauseController {
     public PauseController(GameFirstLevelController gameFirstLevelController) {
         logger.debug("PauseController constructor started.");
         this.gameFirstLC = gameFirstLevelController;
-        this.changeListenerMap = new HashMap<>();
         this.keyEventHandlerMap = new HashMap<>();
         logger.debug("PauseController constructor finished.");
     }
@@ -50,14 +47,22 @@ public class PauseController {
 
     //region Key Listener
 
+    /**
+     * Removes the key listener.
+     *
+     * Removes the key listener in this {@code scene} from the {@code stage}.
+     */
     private void removeKeyListener() {
         var stage = Main.getPrimaryStage();
         if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
-            stage.removeEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
+            stage.removeEventHandler(KeyEvent.KEY_PRESSED,
+                    keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
         }
     }
 
     /**
+     * Binds a key listener to the actual {@code scene} of the {@code stage}.
+     *
      * This method adds an {@link EventHandler} to the {@link Scene}.
      * If you press {@code ESC}, then it continues the game.
      */
@@ -172,6 +177,8 @@ public class PauseController {
 
     /**
      * Implements the exit button's behaviour.
+     *
+     * Closes the application.
      */
     private void AppExit() {
         logger.debug("AppExit() method called.");
@@ -181,6 +188,8 @@ public class PauseController {
 
     /**
      * Implements the menu button's behaviour.
+     *
+     * Loads the main menu, if something goes wrong, closes the application.
      *
      * @throws IOException If the fxml file is not found.
      */
@@ -207,6 +216,9 @@ public class PauseController {
     /**
      * Implements the continue button's behaviour.
      *
+     * Loads the game level, if something goes wrong, tries to load the main menu.
+     * If something very bad happens, closes the application.
+     *
      * @throws IOException If the fxml file is not found.
      */
     private void continueFirstLevel() {
@@ -221,8 +233,8 @@ public class PauseController {
             removeKeyListener();
             gameFirstLC.getEngine().letsContinue(ap);
         } catch (IOException io) {
-            logger.error("MainMenu.fxml has not founded, closing the application.", io);
-            AppExit();
+            logger.error("GameFirstLevel.fxml has not founded, closing the application.", io);
+            loadMainMenu();
         } catch (Exception ex) {
             logger.error("Some error occured during loading the main menu, closing the application.", ex);
             AppExit();

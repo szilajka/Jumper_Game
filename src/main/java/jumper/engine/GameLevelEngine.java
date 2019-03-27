@@ -48,7 +48,6 @@ public class GameLevelEngine {
     private double actualVelocityX = 0.0;
     private boolean leftReleased = true;
     private boolean rightReleased = true;
-
     private boolean upReleased = true;
 
     public Player getPlayer() {

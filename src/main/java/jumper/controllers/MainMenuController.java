@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 public class MainMenuController {
     public Button btnStart;
     public Button btnExit;
@@ -28,21 +29,13 @@ public class MainMenuController {
     //region Constructors
 
     /**
-     * Constructor of the class.<br>
+     * Constructor of the class.
+     * Creates a new {@code MainMenuController} instance.
      */
     public MainMenuController() {
         logger.debug("MainMenuController constructor called.");
         changeListenerMap = new HashMap<>();
     }
-
-    /*public MainMenuController(double oldValueX, double oldValueY, double newValueX, double newValueY)
-    {
-        this.oldValX = oldValueX;
-        this.oldValY = oldValueY;
-        this.changeNewX = newValueX;
-        this.changeNewY = newValueY;
-        changeListenerMap = new HashMap<>();
-    }*/
 
     //endregion Constructors
 
