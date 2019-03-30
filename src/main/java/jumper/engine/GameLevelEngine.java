@@ -489,11 +489,22 @@ public class GameLevelEngine {
                 .getResource("textures/wall_left.png").toExternalForm());
         Image wallRight = new Image(getClass().getClassLoader()
                 .getResource("textures/wall_right.png").toExternalForm());
-        int howMany = (int) (canvas.getHeight() / 300);
+        int picHeight = (int) bgImg.getHeight();
+        int howMany = (int) (canvas.getHeight() / picHeight);
         for (int i = 1; i <= howMany; i++) {
-            gc.drawImage(bgImg, 0, canvas.getHeight() - (i * 300));
-            gc.drawImage(wallLeft, 0, canvas.getHeight() - (i * 300));
-            gc.drawImage(wallRight, GameEngineHelper.WIDTH - 100, canvas.getHeight() - (i * 300));
+            double startY = canvas.getHeight() - (i * picHeight);
+            if (startY >= levelEndY) {
+                gc.drawImage(bgImg, 0, startY);
+                gc.drawImage(wallLeft, 0, startY);
+                gc.drawImage(wallRight, GameEngineHelper.WIDTH - 100, startY);
+            }
+            else if(startY < levelEndY){
+                int height = (int)(picHeight - (levelEndY - startY));
+                gc.drawImage(bgImg, 0, startY, bgImg.getWidth(), bgImg.getHeight(),
+                        0, levelEndY, bgImg.getWidth(), height);
+                gc.setFill(Color.LIGHTBLUE);
+                gc.fillRect(0, 0, 800, levelEndY);
+            }
         }
 
     }
