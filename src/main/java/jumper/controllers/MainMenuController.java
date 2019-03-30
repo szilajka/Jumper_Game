@@ -98,14 +98,14 @@ public class MainMenuController {
     /**
      * Implements the loading of the first level.
      *
-     * @throws IOException If the FXML file is not existing.
      */
     private void FirstLevelStart() {
         try {
             logger.debug("FirstLevelStart method called.");
             Stage stage = Main.getPrimaryStage();
 
-            var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
+            var fl = new FXMLLoader(getClass().getClassLoader()
+                    .getResource("GameFirstLevel.fxml"));
             var gameFirstLC = new GameFirstLevelController();
             fl.setController(gameFirstLC);
             var root = (AnchorPane) fl.load();
