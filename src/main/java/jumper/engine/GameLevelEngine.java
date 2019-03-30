@@ -18,9 +18,11 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import jumper.controllers.GameFirstLevelController;
 import jumper.controllers.Main;
+import jumper.helpers.EnemyType;
 import jumper.helpers.GameEngineHelper;
 import jumper.model.FallingRectangle;
 import jumper.model.Player;
@@ -62,6 +64,8 @@ public class GameLevelEngine {
     private double elapsedTime = 0.0;
     private double startTime = 0;
     private boolean steppedOnThisEnemy = false;
+    private boolean startNextLevel;
+    private boolean gameOverGoToMain = false;
 
     public Player getPlayer() {
         return this.player;
@@ -99,6 +103,10 @@ public class GameLevelEngine {
         this.upReleased = upReleased;
     }
 
+    public void setLevelCounter(int levelCounter) {
+        this.levelCounter = levelCounter;
+    }
+
     public GameLevelEngine(Player player, List<FallingRectangle> enemies,
                            Camera camera, List<Line> borders, Canvas canvas,
                            GameFirstLevelController gameFirstLevelController, int levelCounter) {
@@ -121,6 +129,7 @@ public class GameLevelEngine {
     }
 
     private void initObjects(AnchorPane ap) {
+        startNextLevel = false;
         if (canvas == null) {
             canvas = new Canvas(GameEngineHelper.WIDTH, GameEngineHelper.HEIGHT * 5);
         }
@@ -167,39 +176,77 @@ public class GameLevelEngine {
         }
     }
 
+    public void resetLevel() {
+        resetObjects();
+    }
+
+    private void resetObjects() {
+        try {
+            double positionX = (GameEngineHelper.WIDTH / 2) - (Player.playerWidth / 2);
+            double positionY = canvas.getHeight() - Player.playerHeight;
+            player.setStartY(positionY);
+            player.setX(positionX);
+            player.setActualY(positionY);
+            player.setVelocityX(0.0);
+            player.setVelocityY(0.0);
+            player.setCrashedSpike(0);
+            leftReleased = true;
+            rightReleased = true;
+            upReleased = true;
+            player.setJumping(false);
+            player.setFalling(false);
+            enemies.clear();
+            startNextLevel = false;
+            canvas.getGraphicsContext2D().clearRect(0, 0,
+                    canvas.getWidth(), canvas.getHeight());
+            generatedEnemies = 0;
+            steppedEnemies = 0;
+            elapsedTime = 0;
+        } catch (Exception ex) {
+            logger.error("Something bad happened while resetting objects.", ex);
+            gameFirstLevelController.errorGoToMainMenu();
+        }
+
+    }
+
     private FallingRectangle generateEnemy(int level) {
         double enemyPositionX;
         double enemyPositionY;
         double enemyWidth;
         double enemyHeight;
         double enemyFallingSpeed;
+        EnemyType enemyType;
         generatedEnemies++;
-        if (level < 5) {
+        if (level < 3) {
             enemyWidth = FallingRectangle.basicEnemyWidth;
             enemyHeight = FallingRectangle.basicEnemyHeight;
             enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
-        } else if (level < 10) {
+            enemyType = EnemyType.BasicEnemy;
+        } else if (level < 5) {
             if (whichEnemyToGenerate % 2 == 0) {
                 whichEnemyToGenerate = 1;
                 enemyWidth = FallingRectangle.basicEnemyWidth;
                 enemyHeight = FallingRectangle.basicEnemyHeight;
                 enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
+                enemyType = EnemyType.BasicEnemy;
             } else {
                 whichEnemyToGenerate = 0;
                 enemyWidth = FallingRectangle.spikeEnemyWidth;
                 enemyHeight = FallingRectangle.spikeEnemyHeight;
                 enemyFallingSpeed = FallingRectangle.spikeEnemyVelocityY;
+                enemyType = EnemyType.SpikeEnemy;
             }
         } else {
             enemyWidth = FallingRectangle.spikeEnemyWidth;
             enemyHeight = FallingRectangle.spikeEnemyHeight;
             enemyFallingSpeed = FallingRectangle.spikeEnemyVelocityY;
+            enemyType = EnemyType.SpikeEnemy;
         }
         if (enemies.size() == 0) {
             enemyPositionX = Math.floor(GameEngineHelper.WIDTH / 5);
             enemyPositionY = camera.getLayoutY() - enemyDistanceY;
             return new FallingRectangle(enemyPositionX, enemyPositionY,
-                    enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed);
+                    enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
         } else {
             FallingRectangle latestEnemy = enemies.get(enemies.size() - 1);
             double ifDistance = (latestEnemy.getWidth() * 1.2) + enemyDistanceX;
@@ -218,7 +265,7 @@ public class GameLevelEngine {
             }
 
             return new FallingRectangle(enemyPositionX, enemyPositionY,
-                    enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed);
+                    enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
         }
     }
 
@@ -261,6 +308,10 @@ public class GameLevelEngine {
         }
     }
 
+    private void gameOver() {
+        gameFirstLevelController.gameOver();
+    }
+
     private void movePlayer() {
         boolean crashed = false, standingOnEnemy = false, standingOnLine = false,
                 leftCrashed = false, leftCrashedLine = false,
@@ -272,6 +323,12 @@ public class GameLevelEngine {
         for (int i = 0; i < enemies.size(); i++) {
             if (Intersection.upIntersection(player, enemies.get(i), actualVelocityY)) {
                 crashed = true;
+                if (enemies.get(i).getEnemyType() == EnemyType.SpikeEnemy) {
+                    player.setCrashedSpike(player.getCrashedSpike() + 1);
+                }
+                if (player.getCrashedSpike() == 3) {
+                    gameOver();
+                }
                 enemies.remove(i);
                 i--;
                 continue;
@@ -327,6 +384,7 @@ public class GameLevelEngine {
         elapsedTime /= 1000;
         double points = GameEngineHelper.calculatePoints(generatedEnemies, steppedEnemies,
                 elapsedTime);
+        //TODO: Write points to XML then to database
         elapsedTime = 0.0;
         gameFirstLevelController.endLevel();
     }
@@ -497,9 +555,8 @@ public class GameLevelEngine {
                 gc.drawImage(bgImg, 0, startY);
                 gc.drawImage(wallLeft, 0, startY);
                 gc.drawImage(wallRight, GameEngineHelper.WIDTH - 100, startY);
-            }
-            else if(startY < levelEndY){
-                int height = (int)(picHeight - (levelEndY - startY));
+            } else if (startY < levelEndY) {
+                int height = (int) (picHeight - (levelEndY - startY));
                 gc.drawImage(bgImg, 0, startY, bgImg.getWidth(), bgImg.getHeight(),
                         0, levelEndY, bgImg.getWidth(), height);
                 gc.setFill(Color.LIGHTBLUE);
@@ -562,18 +619,24 @@ public class GameLevelEngine {
             }
 
             if (keyCode == KeyCode.ESCAPE && !paused) {
-                double pauseTime = System.nanoTime();
-                elapsedTime += (pauseTime - startTime);
-                player.setOldVelocityX(player.getVelocityX());
-                player.setOldVelocityY(player.getVelocityY());
-                player.setVelocityX(0.0);
-                player.setVelocityY(0.0);
-                paused = true;
-                leftReleased = true;
-                rightReleased = true;
-                gameFirstLevelController.escPressed();
+                if (gameOverGoToMain) {
+                    gameFirstLevelController.errorGoToMainMenu();
+                } else {
+                    double pauseTime = System.nanoTime();
+                    elapsedTime += (pauseTime - startTime);
+                    player.setOldVelocityX(player.getVelocityX());
+                    player.setOldVelocityY(player.getVelocityY());
+                    player.setVelocityX(0.0);
+                    player.setVelocityY(0.0);
+                    paused = true;
+                    leftReleased = true;
+                    rightReleased = true;
+                    gameFirstLevelController.escPressed();
+                }
             }
-
+            if (keyCode == KeyCode.ENTER && startNextLevel) {
+                gameFirstLevelController.nextLevel();
+            }
         };
 
         EventHandler<KeyEvent> keyReleaseEventHandler = keyEvent -> {
@@ -614,7 +677,7 @@ public class GameLevelEngine {
 
     public void letsContinue(AnchorPane ap) {
         try {
-            double startTime = System.nanoTime();
+            startTime = System.nanoTime();
             player.setVelocityX(player.getOldVelocityX());
             player.setVelocityY(player.getOldVelocityY());
             player.setOldVelocityX(0.0);
@@ -629,25 +692,45 @@ public class GameLevelEngine {
     }
 
     public boolean isEndGame() {
-        if (player.getActualY() <= levelEndY) {
-            return true;
-        }
-        return false;
+        return player.getActualY() <= levelEndY;
     }
 
-    public void drawText() {
+    public void drawGameOverText() {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFont(Font.font(100));
-        gc.setFill(Color.RED);
-        final String completed = "Level " + levelCounter + "\ncompleted!";
+        gc.setStroke(Color.RED);
+        final String completed = "Game over!";
         Timeline timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
         final SimpleIntegerProperty i = new SimpleIntegerProperty(0);
         KeyFrame keyFrame = new KeyFrame(Duration.millis(10), event -> {
             if (i.get() > completed.length()) {
                 timeline.stop();
+                gameOverGoToMain = true;
             } else {
-                gc.fillText(completed.substring(0, i.get()), 200, camera.getLayoutY() + 100);
+                gc.strokeText(completed.substring(0, i.get()), 200, camera.getLayoutY() + 100);
+                i.set(i.get() + 1);
+            }
+        });
+        timeline.getKeyFrames().add(keyFrame);
+        timeline.play();
+    }
+
+    public void drawNextLevelText() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setFont(Font.font(100));
+        gc.setStroke(Color.GREEN);
+        final String completed = "Level " + levelCounter + "\ncompleted!" +
+                "\nPress enter\nto continue!";
+        Timeline timeline = new Timeline();
+        timeline.setCycleCount(Animation.INDEFINITE);
+        final SimpleIntegerProperty i = new SimpleIntegerProperty(0);
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(10), event -> {
+            if (i.get() > completed.length()) {
+                timeline.stop();
+                startNextLevel = true;
+            } else {
+                gc.strokeText(completed.substring(0, i.get()), 200, camera.getLayoutY() + 100);
                 i.set(i.get() + 1);
             }
         });

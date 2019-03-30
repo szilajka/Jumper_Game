@@ -1,5 +1,6 @@
 package jumper.controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
@@ -67,6 +68,7 @@ public class GameFirstLevelController {
             tr.cancel();
             trGenerate.cancel();
             stage.close();
+            Platform.exit();
         });
 
     }
@@ -104,7 +106,10 @@ public class GameFirstLevelController {
             var mainController = new MainMenuController();
             fl.setController(mainController);
             var ap = (AnchorPane) fl.load();
-            var mainScene = Main.getPrimaryStage().getScene();
+            var mainScene = stage.getScene();
+            ParallelCamera newCam = new ParallelCamera();
+            newCam.setLayoutY(0);
+            mainScene.setCamera(newCam);
             mainScene.setRoot(ap);
             gameLevelEngine.removeKeyListener();
         } catch (IOException io) {
@@ -119,14 +124,24 @@ public class GameFirstLevelController {
     }
 
     public void endLevel() {
-        ts.cancel();
-        tsGenerate.cancel();
-        gameLevelEngine.drawText();
+        tr.cancel();
+        trGenerate.cancel();
+        gameLevelEngine.drawNextLevelText();
     }
 
     public void nextLevel(){
         GameEngineHelper.levelCounter++;
+        gameLevelEngine.resetLevel();
+        gameLevelEngine.setLevelCounter(GameEngineHelper.levelCounter);
+        runGameLevelEngine();
         //TODO
+    }
+
+    public void gameOver(){
+        tr.cancel();
+        trGenerate.cancel();
+        gameLevelEngine.drawGameOverText();
+        //TODO: call db, set game level to 0.
     }
 
     //endregion GameLevelEngine

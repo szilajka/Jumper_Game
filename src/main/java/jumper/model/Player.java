@@ -13,7 +13,9 @@ public class Player extends Rect {
     private final double maxVelocityX = 100.0;
     private double startY;
     private double actualY;
-    private boolean jumping = false, falling = false;
+    private boolean jumping = false;
+    private boolean falling = false;
+    private int crashedSpike = 0;
 
     /**
      * {@code Player}'s constructor
@@ -156,5 +158,22 @@ public class Player extends Rect {
      */
     public void setJumping(boolean jumping) {
         this.jumping = jumping;
+    }
+
+    /**
+     * Gets the number of crashing with spike {@code enemy}.
+     *
+     * @return number of crashing with spike {@code enemy}
+     */
+    public int getCrashedSpike() {
+        return crashedSpike;
+    }
+
+    /**
+     * Sets the number of crashing with spike {@code enemy}.
+     * @param crashedSpike the number to be set.
+     */
+    public void setCrashedSpike(int crashedSpike) {
+        this.crashedSpike = crashedSpike;
     }
 }
