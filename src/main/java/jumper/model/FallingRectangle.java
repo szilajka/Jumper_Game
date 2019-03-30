@@ -6,9 +6,12 @@ import org.apache.logging.log4j.Logger;
 
 public class FallingRectangle extends Rect {
     private static final Logger logger = LogManager.getLogger("FallingRectangle");
-    public static double basicEnemyWidth = 100.0;
-    public static double basicEnemyHeight = 25.0;
+    public static final double basicEnemyWidth = 100.0;
+    public static final double basicEnemyHeight = 25.0;
+    public static final double spikeEnemyWidth = 150.0;
+    public static final double spikeEnemyHeight = 50.0;
     public static final double basicEnemyVelocitiyY = 100.0;
+    public static final double spikeEnemyVelocityY = 150.0;
     private double startY = 0.0;
 
     /**

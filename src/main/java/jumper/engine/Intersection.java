@@ -2,7 +2,7 @@ package jumper.engine;
 
 import jumper.model.Rect;
 
-import static jumper.helpers.MathHelper.tolerance;
+import static jumper.helpers.GameEngineHelper.tolerance;
 
 public class Intersection {
     //Tűréshatár/Hibahatár

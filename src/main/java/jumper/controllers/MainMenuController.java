@@ -110,7 +110,7 @@ public class MainMenuController {
             fl.setController(gameFirstLC);
             var root = (AnchorPane) fl.load();
 
-            Scene gameScene = btnStart.getScene();
+            Scene gameScene = stage.getScene();
             gameScene.setRoot(root);
             gameFirstLC.initGameEngineLevel(root);
             gameFirstLC.runGameLevelEngine();

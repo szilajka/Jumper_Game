@@ -6,7 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import jumper.engine.GameLevelEngine;
-import jumper.model.FallingRectangle;
+import jumper.helpers.GameEngineHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,15 +26,15 @@ public class GameFirstLevelController {
 
     public GameFirstLevelController() {
         logger.debug("GameFirstLevelController constructor called.");
-        gameLevelEngine = new GameLevelEngine(FallingRectangle.basicEnemyVelocitiyY,
-                GameFirstLevelController.this);
+        gameLevelEngine = new GameLevelEngine(GameFirstLevelController.this,
+                GameEngineHelper.levelCounter);
     }
 
     //endregion Constructor
 
     //region GameLevelEngine
 
-    public GameLevelEngine getEngine(){
+    public GameLevelEngine getEngine() {
         return this.gameLevelEngine;
     }
 
@@ -71,7 +71,7 @@ public class GameFirstLevelController {
 
     }
 
-    public void escPressed(){
+    public void escPressed() {
         paused = true;
         gameLevelEngine.setLeftReleased(true);
         gameLevelEngine.setRightReleased(true);
@@ -116,6 +116,17 @@ public class GameFirstLevelController {
             gameLevelEngine.removeKeyListener();
             Main.getPrimaryStage().close();
         }
+    }
+
+    public void endLevel() {
+        ts.cancel();
+        tsGenerate.cancel();
+        gameLevelEngine.drawText();
+    }
+
+    public void nextLevel(){
+        GameEngineHelper.levelCounter++;
+        //TODO
     }
 
     //endregion GameLevelEngine
