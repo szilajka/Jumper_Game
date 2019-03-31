@@ -1,4 +1,4 @@
-package jumper.helpers;
+package jumper.model.DB;
 
 /*-
  * #%L
@@ -26,6 +26,58 @@ package jumper.helpers;
  * #L%
  */
 
-public enum EnemyType {
-    BasicEnemy, SpikeEnemy
+import javax.persistence.*;
+
+@Entity
+@Table(name = "score")
+public class Score {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    private int id;
+
+    @Column(name = "level", nullable = false)
+    private int level;
+
+    @Column(name = "score", nullable = false)
+    private int score;
+
+    @ManyToOne
+    @JoinColumn(name = "name")
+    private User userName;
+
+    public Score() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public User getUserName() {
+        return userName;
+    }
+
+    public void setUserName(User userName) {
+        this.userName = userName;
+    }
 }

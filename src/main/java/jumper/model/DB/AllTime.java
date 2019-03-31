@@ -1,4 +1,4 @@
-package jumper.helpers;
+package jumper.model.DB;
 
 /*-
  * #%L
@@ -26,6 +26,35 @@ package jumper.helpers;
  * #L%
  */
 
-public enum EnemyType {
-    BasicEnemy, SpikeEnemy
+import javax.persistence.*;
+import java.time.Duration;
+
+@Entity
+@Table(name = "all_time")
+public class AllTime {
+    @OneToOne
+    @JoinColumn(name = "name")
+    private User userName;
+
+    @Column(name = "elapsed_time")
+    private Duration elapsedTime;
+
+    public AllTime() {
+    }
+
+    public User getUserName() {
+        return userName;
+    }
+
+    public void setUserName(User userName) {
+        this.userName = userName;
+    }
+
+    public Duration getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(Duration elapsedTime) {
+        this.elapsedTime = elapsedTime;
+    }
 }
