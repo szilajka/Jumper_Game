@@ -28,12 +28,16 @@ package jumper.authentication;
 
 import jumper.controllers.Main;
 import jumper.model.DB.User;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.persistence.EntityManager;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -55,11 +59,9 @@ public class Authenticate {
         try {
             PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, keyLength);
             SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            byte[] res = skf.generateSecret(spec).getEncoded();
-
+            SecretKey key = skf.generateSecret(spec);
+            byte[] res = key.getEncoded();
             return res;
-            //store res in db.
-            //store salt in db.
         } catch (NoSuchAlgorithmException e) {
             logger.error("NoSuchAlgorithException happened, throwing,", e);
             throw new RuntimeException(e);
@@ -69,16 +71,16 @@ public class Authenticate {
         }
     }
 
-    public static User Login(final String userName, final String password) {
+    public static User Login(final String userName, final String password) throws DecoderException {
         EntityManager em = Main.getEntityManager();
-        User searchUser = new User();
-        searchUser.setUserName(userName);
-        User foundUser = em.find(User.class, searchUser);
+        User foundUser = em.find(User.class, userName);
         if (foundUser == null) {
             return null;
         }
 
-        if(foundUser.getHashedPassword() == hashPassword(password, foundUser.getSalt())){
+        byte[] hashedPwd = hashPassword(password, Hex.decodeHex(foundUser.getSalt().toCharArray()));
+        String stringHashedPwd = String.valueOf(Hex.encodeHex(hashedPwd));
+        if(foundUser.getHashedPassword().equals(stringHashedPwd)){
             loggedInUser = foundUser;
             return foundUser;
         }

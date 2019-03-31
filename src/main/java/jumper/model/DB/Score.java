@@ -29,7 +29,7 @@ package jumper.model.DB;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "score")
+@Table(name = "score", schema = "jumper_app")
 public class Score {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

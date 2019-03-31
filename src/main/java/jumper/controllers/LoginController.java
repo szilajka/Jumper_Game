@@ -12,10 +12,10 @@ package jumper.controllers;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -38,6 +38,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import jumper.authentication.Authenticate;
 import jumper.model.DB.User;
+import org.apache.commons.codec.DecoderException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -74,19 +75,24 @@ public class LoginController {
     }
 
     private void Login() {
-        logger.debug("Login() method called.");
-        final String userName = inputUserName.getText().trim();
-        final String password = passwordField.getText().trim();
-        if (userName.trim().length() == 0 || password.trim().length() == 0) {
+        try {
+            logger.debug("Login() method called.");
+            final String userName = inputUserName.getText().trim();
+            final String password = passwordField.getText().trim();
+            if (userName.trim().length() == 0 || password.trim().length() == 0) {
+                labelErrorUserPwd.setText("Username or password is incorrect!");
+                return;
+            }
+            User findUser = Authenticate.Login(userName, password);
+            if (findUser != null) {
+                GoToMainMenu();
+            } else {
+                labelErrorUserPwd.setText("Username or password is incorrect!");
+                return;
+            }
+        } catch (DecoderException e) {
+            logger.error("Illegal character is in the salt.", e);
             labelErrorUserPwd.setText("Username or password is incorrect!");
-            return;
-        }
-        User findUser = Authenticate.Login(userName, password);
-        if (findUser != null) {
-            GoToMainMenu();
-        } else {
-            labelErrorUserPwd.setText("Username or password is incorrect!");
-            return;
         }
 
         //TODO: Implement login
@@ -95,8 +101,11 @@ public class LoginController {
     private void GoToMainMenu() {
         try {
             logger.debug("GoToMainMenu() method called.");
-            AnchorPane ap = (AnchorPane) FXMLLoader.load(getClass().getClassLoader()
+            var mainMenuController = new MainMenuController();
+            FXMLLoader fl = new FXMLLoader(getClass().getClassLoader()
                     .getResource("MainMenu.fxml"));
+            fl.setController(mainMenuController);
+            AnchorPane ap = (AnchorPane) fl.load();
             var stage = Main.getPrimaryStage();
             var mainMenuScene = stage.getScene();
             mainMenuScene.setRoot(ap);

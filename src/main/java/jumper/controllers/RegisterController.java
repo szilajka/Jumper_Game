@@ -43,6 +43,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class RegisterController {
     private static final Logger logger = LogManager.getLogger("RegisterController");
@@ -83,10 +84,16 @@ public class RegisterController {
                 labelErrorUserName.setText("UserName must not be empty!");
                 return;
             }
+            else{
+                labelErrorUserName.setText("");
+            }
             final String password = passwordField.getText().trim();
             if (password.trim().length() == 0) {
                 labelErrorPassword.setText("Password field must not be empty!");
                 return;
+            }
+            else{
+                labelErrorPassword.setText("");
             }
             byte[] salt = Authenticate.generateSalt();
             byte[] hashedPassword = Authenticate.hashPassword(password, salt);
@@ -102,8 +109,10 @@ public class RegisterController {
             em.close();
             labelErrorUserName.setText("");
             labelErrorPassword.setText("");
+            labelErrorUserName.setText("Register succeeded");
         } catch (Exception ex) {
             logger.error("Some error occured while tried to register.", ex);
+            labelErrorUserName.setText("Some error occured while tried to register");
         }
     }
 

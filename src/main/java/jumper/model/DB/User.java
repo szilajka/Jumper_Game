@@ -12,10 +12,10 @@ package jumper.model.DB;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,29 +26,33 @@ package jumper.model.DB;
  * #L%
  */
 
+import org.apache.commons.codec.binary.Hex;
+
 import javax.persistence.*;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 @Entity
-@Table(name = "jumper_user")
-public class User {
+@Table(name = "jumper_user", schema = "jumper_app")
+public class User implements Serializable {
     @Id
     @Column(name = "name", nullable = false)
     private String userName;
 
     @Column(name = "hashed_password")
-    private byte[] hashedPassword;
+    private String hashedPassword;
 
     @Column(name = "salt")
-    private byte[] salt;
+    private String salt;
 
-    @OneToMany
-    @JoinColumn(name = "id")
+    /*@OneToMany
+    @JoinColumn(name = "name")
     private Collection<Score> score;
 
     @OneToOne
     @JoinColumn(name = "name")
-    private AllTime allTime;
+    private AllTime allTime;*/
 
     public User() {
     }
@@ -61,23 +65,31 @@ public class User {
         this.userName = userName;
     }
 
-    public byte[] getHashedPassword() {
+    public String getHashedPassword() {
         return hashedPassword;
     }
 
     public void setHashedPassword(byte[] hashedPassword) {
+        this.hashedPassword = String.valueOf(Hex.encodeHex(hashedPassword));
+    }
+
+    public void setHashedPassword(String hashedPassword) {
         this.hashedPassword = hashedPassword;
     }
 
-    public byte[] getSalt() {
+    public String getSalt() {
         return salt;
     }
 
     public void setSalt(byte[] salt) {
+        this.salt = String.valueOf(Hex.encodeHex(salt));
+    }
+
+    public void setSalt(String salt) {
         this.salt = salt;
     }
 
-    public Collection<Score> getScore() {
+    /*public Collection<Score> getScore() {
         return score;
     }
 
@@ -91,5 +103,5 @@ public class User {
 
     public void setAllTime(AllTime allTime) {
         this.allTime = allTime;
-    }
+    }*/
 }

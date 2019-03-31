@@ -30,8 +30,13 @@ import javax.persistence.*;
 import java.time.Duration;
 
 @Entity
-@Table(name = "all_time")
+@Table(name = "all_time", schema = "jumper_app")
 public class AllTime {
+    @Id
+    //@GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    private int id;
+
     @OneToOne
     @JoinColumn(name = "name")
     private User userName;
@@ -40,6 +45,14 @@ public class AllTime {
     private Duration elapsedTime;
 
     public AllTime() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public User getUserName() {
