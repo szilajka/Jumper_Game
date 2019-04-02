@@ -228,6 +228,7 @@ public class GameLevelEngine {
             generatedEnemies = 0;
             steppedEnemies = 0;
             elapsedTime = 0;
+            startTime = System.nanoTime();
         } catch (Exception ex) {
             logger.error("Something bad happened while resetting objects.", ex);
             gameFirstLevelController.errorGoToMainMenu();
@@ -352,7 +353,8 @@ public class GameLevelEngine {
                 if (enemies.get(i).getEnemyType() == EnemyType.SpikeEnemy) {
                     player.setCrashedSpike(player.getCrashedSpike() + 1);
                 }
-                if (player.getCrashedSpike() == 3) {
+                if (player.getCrashedSpike() == 3
+                        || player.getStartVelocityY() <= player.getDecreaseStartVelocityY()) {
                     gameOver();
                 }
                 enemies.remove(i);
@@ -407,12 +409,10 @@ public class GameLevelEngine {
     private void endGame() {
         double endTime = System.nanoTime();
         elapsedTime += (endTime - startTime);
-        elapsedTime /= 1000;
         double points = GameEngineHelper.calculatePoints(generatedEnemies, steppedEnemies,
                 elapsedTime);
-        //TODO: Write points to XML then to database
         elapsedTime = 0.0;
-        gameFirstLevelController.endLevel();
+        gameFirstLevelController.endLevel((int) points, elapsedTime);
     }
 
     private void calculatePlayerX(boolean leftCrashed, boolean rightCrashed,

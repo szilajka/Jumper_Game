@@ -26,6 +26,8 @@ package jumper.helpers;
  * #L%
  */
 
+import java.util.concurrent.TimeUnit;
+
 public class GameEngineHelper {
     public static final double tolerance = 0.5;
     public static final double sixtyFpsSeconds = 0.017;
@@ -35,6 +37,7 @@ public class GameEngineHelper {
     public static int levelCounter = 1;
 
     public static double calculatePoints(int enemiesNumber, int steppedEnemies, double seconds) {
+        seconds = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(seconds).longValue());
         return Math.floor((enemiesNumber - steppedEnemies) * upMultiplier / seconds);
     }
 }

@@ -26,6 +26,7 @@ package jumper.authentication;
  * #L%
  */
 
+import jumper.Queries.Queries;
 import jumper.controllers.Main;
 import jumper.model.DB.User;
 import org.apache.commons.codec.DecoderException;
@@ -37,10 +38,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.persistence.EntityManager;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 
 public class Authenticate {
     private static final Logger logger = LogManager.getLogger("Authenticate");
@@ -73,7 +74,7 @@ public class Authenticate {
 
     public static User Login(final String userName, final String password) throws DecoderException {
         EntityManager em = Main.getEntityManager();
-        User foundUser = em.find(User.class, userName);
+        User foundUser = Queries.getUserByUserName(em, userName);
         if (foundUser == null) {
             return null;
         }
@@ -81,6 +82,9 @@ public class Authenticate {
         byte[] hashedPwd = hashPassword(password, Hex.decodeHex(foundUser.getSalt().toCharArray()));
         String stringHashedPwd = String.valueOf(Hex.encodeHex(hashedPwd));
         if(foundUser.getHashedPassword().equals(stringHashedPwd)){
+            /*if(foundUser.getScore() == null){
+                foundUser.setScore(new ArrayList());
+            }*/
             loggedInUser = foundUser;
             return foundUser;
         }

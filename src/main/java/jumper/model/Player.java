@@ -35,7 +35,7 @@ public class Player extends Rect {
     public static double playerWidth = 100.0;
     public static double playerHeight = 100.0;
     private double startVelocityY = -250.0;
-    private final double decreaseStartVelocityY = 10.0;
+    private final double decreaseStartVelocityY = 20.0;
     private final double maxVelocityX = 100.0;
     private double startY;
     private double actualY;

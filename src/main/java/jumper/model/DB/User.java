@@ -30,8 +30,7 @@ import org.apache.commons.codec.binary.Hex;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "jumper_user", schema = "jumper_app")
@@ -46,13 +45,11 @@ public class User implements Serializable {
     @Column(name = "salt")
     private String salt;
 
-    /*@OneToMany
-    @JoinColumn(name = "name")
-    private Collection<Score> score;
+    @OneToMany(targetEntity = Score.class, mappedBy = "userName")
+    private List<Score> score;
 
-    @OneToOne
-    @JoinColumn(name = "name")
-    private AllTime allTime;*/
+    @OneToOne(mappedBy = "userName")
+    private AllTime allTime;
 
     public User() {
     }
@@ -89,11 +86,11 @@ public class User implements Serializable {
         this.salt = salt;
     }
 
-    /*public Collection<Score> getScore() {
+    public List<Score> getScore() {
         return score;
     }
 
-    public void setScore(Collection<Score> score) {
+    public void setScore(List<Score> score) {
         this.score = score;
     }
 
@@ -103,5 +100,5 @@ public class User implements Serializable {
 
     public void setAllTime(AllTime allTime) {
         this.allTime = allTime;
-    }*/
+    }
 }

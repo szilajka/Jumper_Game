@@ -37,13 +37,15 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import jumper.authentication.Authenticate;
+import jumper.model.DB.AllTime;
+import jumper.model.DB.Score;
 import jumper.model.DB.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 public class RegisterController {
     private static final Logger logger = LogManager.getLogger("RegisterController");
@@ -98,14 +100,25 @@ public class RegisterController {
             byte[] salt = Authenticate.generateSalt();
             byte[] hashedPassword = Authenticate.hashPassword(password, salt);
             EntityManager em = Main.getEntityManager();
-            em.getTransaction().begin();
             User storeUser = new User();
             storeUser.setUserName(userName);
             storeUser.setHashedPassword(hashedPassword);
             storeUser.setSalt(salt);
+            Score storeScore = new Score();
+            storeScore.setScore(0);
+            storeScore.setLevel(1);
+            storeScore.setUserName(storeUser.getUserName());
+            AllTime storeAllTime = new AllTime();
+            storeAllTime.setElapsedTime(0);
+            storeAllTime.setUserName(storeUser);
+            em.getTransaction().begin();
             em.persist(storeUser);
-            em.getTransaction().commit();
+            em.persist(storeScore);
+            em.persist(storeAllTime);
+            em.getTransaction().commit(); //ez egy nagy szar!!!! - by zig
             em.detach(storeUser);
+            em.detach(storeScore);
+            em.detach(storeAllTime);
             em.close();
             labelErrorUserName.setText("");
             labelErrorPassword.setText("");

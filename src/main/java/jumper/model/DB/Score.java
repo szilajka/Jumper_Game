@@ -32,7 +32,7 @@ import javax.persistence.*;
 @Table(name = "score", schema = "jumper_app")
 public class Score {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private int id;
 
@@ -42,9 +42,8 @@ public class Score {
     @Column(name = "score", nullable = false)
     private int score;
 
-    @ManyToOne
-    @JoinColumn(name = "name")
-    private User userName;
+    @Column(name = "user_name")
+    private String userName;
 
     public Score() {
     }
@@ -73,11 +72,11 @@ public class Score {
         this.score = score;
     }
 
-    public User getUserName() {
+    public String getUserName() {
         return userName;
     }
 
-    public void setUserName(User userName) {
+    public void setUserName(String userName) {
         this.userName = userName;
     }
 }

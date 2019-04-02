@@ -94,8 +94,6 @@ public class LoginController {
             logger.error("Illegal character is in the salt.", e);
             labelErrorUserPwd.setText("Username or password is incorrect!");
         }
-
-        //TODO: Implement login
     }
 
     private void GoToMainMenu() {

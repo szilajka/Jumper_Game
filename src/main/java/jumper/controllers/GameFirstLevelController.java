@@ -12,10 +12,10 @@ package jumper.controllers;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,14 +32,23 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import jumper.Queries.Queries;
+import jumper.authentication.Authenticate;
 import jumper.engine.GameLevelEngine;
 import jumper.helpers.GameEngineHelper;
+import jumper.model.DB.AllTime;
+import jumper.model.DB.Score;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.temporal.TemporalUnit;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class GameFirstLevelController {
     private static final Logger logger = LogManager.getLogger("GameFirstLevelController");
@@ -66,6 +75,18 @@ public class GameFirstLevelController {
     }
 
     public void initGameEngineLevel(AnchorPane ap) {
+
+
+        EntityManager em = Main.getEntityManager();
+        em.getTransaction().begin();
+        Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
+        em.close();
+
+
+
+        if (score != null) {
+            gameLevelEngine.setLevelCounter(score.getLevel());
+        }
         gameLevelEngine.init(ap);
         gameLevelEngine.keyListener();
     }
@@ -149,13 +170,38 @@ public class GameFirstLevelController {
         }
     }
 
-    public void endLevel() {
+    public void endLevel(int points, double elapsedTime) {
         tr.cancel();
         trGenerate.cancel();
+        EntityManager em = Main.getEntityManager();
+        Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
+        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+        if (score != null) {
+            score.setLevel(GameEngineHelper.levelCounter + 1);
+            score.setScore(score.getScore() + points);
+
+
+            em.getTransaction().begin();
+            em.persist(score);
+            em.getTransaction().commit();
+
+
+            em.detach(score);
+        } else {
+            logger.error("Score value to {} has not been recorded!",
+                    Authenticate.getLoggedInUser().getUserName());
+        }
+        if(allTime != null){
+            int elapsedSecs = Math.toIntExact(Duration.
+                    ofNanos(Double.valueOf(elapsedTime).longValue()).toSeconds());
+            allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+
+        }
+        em.close();
         gameLevelEngine.drawNextLevelText();
     }
 
-    public void nextLevel(){
+    public void nextLevel() {
         GameEngineHelper.levelCounter++;
         gameLevelEngine.resetLevel();
         gameLevelEngine.setLevelCounter(GameEngineHelper.levelCounter);
@@ -163,9 +209,18 @@ public class GameFirstLevelController {
         //TODO
     }
 
-    public void gameOver(){
+    public void gameOver() {
         tr.cancel();
         trGenerate.cancel();
+        EntityManager em = Main.getEntityManager();
+        em.getTransaction().begin();
+        Score score = new Score();
+        score.setLevel(1);
+        score.setScore(0);
+        score.setUserName(Authenticate.getLoggedInUser().getUserName());
+        em.persist(score);
+        em.getTransaction().commit();
+        em.close();
         gameLevelEngine.drawGameOverText();
         //TODO: call db, set game level to 0.
     }
