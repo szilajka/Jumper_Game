@@ -1,31 +1,5 @@
 package jumper.engine;
 
-/*-
- * #%L
- * jumper_game
- * %%
- * Copyright (C) 2019 Szilárd Németi
- * %%
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * #L%
- */
-
 
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -40,11 +14,10 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import jumper.controllers.GameFirstLevelController;
 import jumper.controllers.Main;
@@ -57,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
 import static jumper.helpers.GameEngineHelper.tolerance;
@@ -154,7 +128,7 @@ public class GameLevelEngine {
         this.levelCounter = levelCounter;
     }
 
-    private void initObjects(AnchorPane ap) {
+    private void initObjects(AnchorPane ap, int velocityY) {
         startNextLevel = false;
         if (canvas == null) {
             canvas = new Canvas(GameEngineHelper.WIDTH, GameEngineHelper.HEIGHT * 5);
@@ -198,7 +172,7 @@ public class GameLevelEngine {
 
 
             borders.addAll(Arrays.asList(baseLine, leftLine, rightLine));
-
+            player.setStartVelocityY(velocityY);
         }
     }
 
@@ -336,7 +310,11 @@ public class GameLevelEngine {
     }
 
     private void gameOver() {
-        gameFirstLevelController.gameOver();
+        double endTime = System.nanoTime();
+        elapsedTime += (endTime - startTime);
+        elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
+        gameFirstLevelController.gameOver(elapsedTime);
+        elapsedTime = 0.0;
     }
 
     private void movePlayer() {
@@ -354,7 +332,7 @@ public class GameLevelEngine {
                     player.setCrashedSpike(player.getCrashedSpike() + 1);
                 }
                 if (player.getCrashedSpike() == 3
-                        || player.getStartVelocityY() <= player.getDecreaseStartVelocityY()) {
+                        || player.getStartVelocityY() >= -player.getDecreaseStartVelocityY()) {
                     gameOver();
                 }
                 enemies.remove(i);
@@ -409,10 +387,12 @@ public class GameLevelEngine {
     private void endGame() {
         double endTime = System.nanoTime();
         elapsedTime += (endTime - startTime);
+        elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
         double points = GameEngineHelper.calculatePoints(generatedEnemies, steppedEnemies,
                 elapsedTime);
+        gameFirstLevelController.endLevel((int) points, elapsedTime,
+                Math.toIntExact(Double.valueOf(player.getStartVelocityY()).longValue()));
         elapsedTime = 0.0;
-        gameFirstLevelController.endLevel((int) points, elapsedTime);
     }
 
     private void calculatePlayerX(boolean leftCrashed, boolean rightCrashed,
@@ -483,6 +463,8 @@ public class GameLevelEngine {
             player.setFalling(false);
             steppedOnThisEnemy = false;
         } else if (crashed && player.isJumping()) {
+            player.setStartVelocityY(player.getStartVelocityY()
+                    + player.getDecreaseStartVelocityY());
             collapsedTime = 0.0;
             player.setStartY(player.getActualY());
             double fallingVelocity = g / 2 * Math.pow(collapsedTime, 2);
@@ -597,8 +579,8 @@ public class GameLevelEngine {
                 && (drawY <= (cam.getLayoutY() + sceneHeight));
     }
 
-    public void init(AnchorPane ap) {
-        initObjects(ap);
+    public void init(AnchorPane ap, int velocityY) {
+        initObjects(ap, velocityY);
     }
 
     public void runTask() {

@@ -1,31 +1,5 @@
 package jumper.controllers;
 
-/*-
- * #%L
- * jumper_game
- * %%
- * Copyright (C) 2019 Szilárd Németi
- * %%
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * #L%
- */
-
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.ParallelCamera;
@@ -38,17 +12,14 @@ import jumper.engine.GameLevelEngine;
 import jumper.helpers.GameEngineHelper;
 import jumper.model.DB.AllTime;
 import jumper.model.DB.Score;
+import jumper.model.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalTime;
-import java.time.temporal.TemporalUnit;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 public class GameFirstLevelController {
     private static final Logger logger = LogManager.getLogger("GameFirstLevelController");
@@ -75,19 +46,15 @@ public class GameFirstLevelController {
     }
 
     public void initGameEngineLevel(AnchorPane ap) {
-
-
         EntityManager em = Main.getEntityManager();
         em.getTransaction().begin();
         Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
         em.close();
-
-
-
         if (score != null) {
             gameLevelEngine.setLevelCounter(score.getLevel());
         }
-        gameLevelEngine.init(ap);
+        int velocityY = (score == null ? Player.finalStartVelocityY : score.getVelocityY());
+        gameLevelEngine.init(ap, velocityY);
         gameLevelEngine.keyListener();
     }
 
@@ -170,7 +137,7 @@ public class GameFirstLevelController {
         }
     }
 
-    public void endLevel(int points, double elapsedTime) {
+    public void endLevel(int points, double elapsedTime, int velocityY) {
         tr.cancel();
         trGenerate.cancel();
         EntityManager em = Main.getEntityManager();
@@ -179,23 +146,22 @@ public class GameFirstLevelController {
         if (score != null) {
             score.setLevel(GameEngineHelper.levelCounter + 1);
             score.setScore(score.getScore() + points);
-
-
+            score.setVelocityY(velocityY);
             em.getTransaction().begin();
             em.persist(score);
             em.getTransaction().commit();
-
-
             em.detach(score);
         } else {
             logger.error("Score value to {} has not been recorded!",
                     Authenticate.getLoggedInUser().getUserName());
         }
         if(allTime != null){
-            int elapsedSecs = Math.toIntExact(Duration.
-                    ofNanos(Double.valueOf(elapsedTime).longValue()).toSeconds());
+            int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
             allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
-
+            em.getTransaction().begin();
+            em.persist(allTime);
+            em.getTransaction().commit();
+            em.detach(allTime);
         }
         em.close();
         gameLevelEngine.drawNextLevelText();
@@ -209,17 +175,24 @@ public class GameFirstLevelController {
         //TODO
     }
 
-    public void gameOver() {
+    public void gameOver(double elapsedTime) {
         tr.cancel();
         trGenerate.cancel();
         EntityManager em = Main.getEntityManager();
-        em.getTransaction().begin();
+        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+        int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+        allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
         Score score = new Score();
         score.setLevel(1);
         score.setScore(0);
+        score.setVelocityY(Player.finalStartVelocityY);
         score.setUserName(Authenticate.getLoggedInUser().getUserName());
+        em.getTransaction().begin();
         em.persist(score);
+        em.persist(allTime);
         em.getTransaction().commit();
+        em.detach(allTime);
+        em.detach(score);
         em.close();
         gameLevelEngine.drawGameOverText();
         //TODO: call db, set game level to 0.

@@ -1,31 +1,5 @@
 package jumper.controllers;
 
-/*-
- * #%L
- * jumper_game
- * %%
- * Copyright (C) 2019 Szilárd Németi
- * %%
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * #L%
- */
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -40,12 +14,13 @@ import jumper.authentication.Authenticate;
 import jumper.model.DB.AllTime;
 import jumper.model.DB.Score;
 import jumper.model.DB.User;
+import jumper.model.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import java.io.IOException;
-import java.time.Duration;
 
 public class RegisterController {
     private static final Logger logger = LogManager.getLogger("RegisterController");
@@ -83,46 +58,58 @@ public class RegisterController {
             logger.debug("Authenticate() method called.");
             String userName = inputUserName.getText().trim();
             if (userName.trim().length() == 0) {
-                labelErrorUserName.setText("UserName must not be empty!");
+                labelErrorUserName.setText("Username field must not be empty!");
                 return;
-            }
-            else{
+            } else {
                 labelErrorUserName.setText("");
             }
             final String password = passwordField.getText().trim();
             if (password.trim().length() == 0) {
                 labelErrorPassword.setText("Password field must not be empty!");
                 return;
-            }
-            else{
+            } else {
                 labelErrorPassword.setText("");
             }
             byte[] salt = Authenticate.generateSalt();
             byte[] hashedPassword = Authenticate.hashPassword(password, salt);
             EntityManager em = Main.getEntityManager();
+
             User storeUser = new User();
             storeUser.setUserName(userName);
             storeUser.setHashedPassword(hashedPassword);
             storeUser.setSalt(salt);
+
             Score storeScore = new Score();
             storeScore.setScore(0);
             storeScore.setLevel(1);
+            storeScore.setVelocityY(Player.finalStartVelocityY);
             storeScore.setUserName(storeUser.getUserName());
+
             AllTime storeAllTime = new AllTime();
             storeAllTime.setElapsedTime(0);
             storeAllTime.setUserName(storeUser);
+
             em.getTransaction().begin();
+
             em.persist(storeUser);
             em.persist(storeScore);
             em.persist(storeAllTime);
+
             em.getTransaction().commit(); //ez egy nagy szar!!!! - by zig
+
             em.detach(storeUser);
             em.detach(storeScore);
             em.detach(storeAllTime);
+
             em.close();
+
             labelErrorUserName.setText("");
             labelErrorPassword.setText("");
             labelErrorUserName.setText("Register succeeded");
+        } catch (PersistenceException ex) {
+            logger.error("Some error during register.", ex);
+            logger.debug("Tried to insert existing key, username: {}", inputUserName.getText());
+            labelErrorUserName.setText("Try to use another username, this username is reserved.");
         } catch (Exception ex) {
             logger.error("Some error occured while tried to register.", ex);
             labelErrorUserName.setText("Some error occured while tried to register");
