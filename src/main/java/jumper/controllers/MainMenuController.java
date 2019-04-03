@@ -1,8 +1,6 @@
 package jumper.controllers;
 
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXMLLoader;
-
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
@@ -15,15 +13,27 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * {@code Controller} of the {@code MainMenu view}.
+ */
 public class MainMenuController {
+    /**
+     * The Start button.
+     */
     public Button btnStart;
+    /**
+     * The Scoreboard button
+     */
+    public Button btnScoreBoard;
+    /**
+     * The Exit button.
+     */
     public Button btnExit;
-    public Button btnOptions;
 
-    private Map<String, ChangeListener<Number>> changeListenerMap;
+    /**
+     * The {@link Logger} of the class.
+     */
     private static final Logger logger = LogManager.getLogger("MainMenuController");
 
     //region Constructors
@@ -34,7 +44,6 @@ public class MainMenuController {
      */
     public MainMenuController() {
         logger.debug("MainMenuController constructor called.");
-        changeListenerMap = new HashMap<>();
     }
 
     //endregion Constructors
@@ -67,6 +76,11 @@ public class MainMenuController {
         }
     }
 
+    /**
+     * Handles the button click on button Scoreboard.
+     *
+     * @param mouseEvent The {@link MouseEvent} that triggers this method.
+     */
     public void onBtnScoreBoardClicked(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
             logger.debug("BtnScoreBoard clicked.");
@@ -74,6 +88,12 @@ public class MainMenuController {
         }
     }
 
+
+    /**
+     * Handles the key press on button Scoreboard.
+     *
+     * @param keyEvent The {@link KeyEvent} that triggers this method.
+     */
     public void onBtnScoreBoardPressed(KeyEvent keyEvent) {
         if (keyEvent.getCode() == KeyCode.ENTER) {
             logger.debug("BtnScoreBoard pressed.");
@@ -137,7 +157,10 @@ public class MainMenuController {
         }
     }
 
-    public void ScoreBoard() {
+    /**
+     * Implements the loading of ScoreBoard menu.
+     */
+    private void ScoreBoard() {
         try {
             var stage = Main.getPrimaryStage();
             FXMLLoader fl = new FXMLLoader(getClass().getClassLoader()
@@ -149,8 +172,9 @@ public class MainMenuController {
             sbScene.setRoot(ap);
             sbController.setTableView();
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException io) {
+            logger.error("Scoreboard.fxml not found, closing the application.", io);
+            MenuExit();
         }
     }
 
