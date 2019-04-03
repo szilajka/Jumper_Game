@@ -105,6 +105,7 @@ public class GameFirstLevelController {
             pauseScene.setCamera(newCam);
             pauseScene.setRoot(ap);
             pauseC.keyListenerPause();
+            pauseC.setInGanemTime();
             gameLevelEngine.removeKeyListener();
         } catch (IOException e) {
             e.printStackTrace();

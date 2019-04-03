@@ -86,6 +86,7 @@ public class LoginController {
             var stage = Main.getPrimaryStage();
             var mainMenuScene = stage.getScene();
             mainMenuScene.setRoot(ap);
+            mainMenuController.setInGameTime();
         } catch (IOException io) {
             logger.error("MainMenu.fxml not found! Closing the application!");
             AppExit();

@@ -19,16 +19,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import jumper.authentication.Authenticate;
 import jumper.controllers.GameFirstLevelController;
 import jumper.controllers.Main;
 import jumper.helpers.EnemyType;
 import jumper.helpers.GameEngineHelper;
+import jumper.model.DB.AllTime;
 import jumper.model.FallingRectangle;
 import jumper.model.Player;
 import jumper.model.Rect;
+import jumper.queries.Queries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -632,6 +636,8 @@ public class GameLevelEngine {
                 } else {
                     double pauseTime = System.nanoTime();
                     elapsedTime += (pauseTime - startTime);
+                    elapsedTime = TimeUnit.NANOSECONDS
+                            .toSeconds(Double.valueOf(elapsedTime).longValue());
                     player.setOldVelocityX(player.getVelocityX());
                     player.setOldVelocityY(player.getVelocityY());
                     player.setVelocityX(0.0);
@@ -639,6 +645,19 @@ public class GameLevelEngine {
                     paused = true;
                     leftReleased = true;
                     rightReleased = true;
+                    //------------------------------------------Entity manager start---------
+                    EntityManager em = Main.getEntityManager();
+                    AllTime allTime = Queries.getAllTimeByUserName(em,
+                            Authenticate.getLoggedInUser());
+                    int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+                    allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+                    em.getTransaction().begin();
+                    em.persist(allTime);
+                    em.getTransaction().commit();
+                    em.detach(allTime);
+                    em.close();
+                    //------------------------------------------Entity manager end---------
+                    elapsedTime = 0;
                     gameFirstLevelController.escPressed();
                 }
             }
