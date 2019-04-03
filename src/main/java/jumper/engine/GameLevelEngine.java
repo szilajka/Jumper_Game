@@ -29,6 +29,7 @@ import jumper.model.FallingRectangle;
 import jumper.model.Player;
 import jumper.model.Rect;
 import jumper.queries.Queries;
+import org.hibernate.annotations.common.util.impl.Log;
 import org.tinylog.Logger;
 
 import javax.persistence.EntityManager;
@@ -448,7 +449,6 @@ public class GameLevelEngine {
      * @return the value whether the enemy should be stopped or not
      */
     private boolean stopEnemy(FallingRectangle fallingRectangle) {
-        Logger.debug("stopEnemy() method called.");
         double radiusX = 100.0 + tolerance;
         double playerHeight = player.getY() + player.getHeight();
         double fallingRectangleWidth = fallingRectangle.getX() + fallingRectangle.getWidth();
@@ -463,7 +463,6 @@ public class GameLevelEngine {
             Logger.info("The enemy object should be stopped: {}", fallingRectangle);
             return true;
         }
-        Logger.debug("stopEnemy() method finished.");
         return false;
     }
 
@@ -471,7 +470,6 @@ public class GameLevelEngine {
      * Calculates the coordinates of the enemies.
      */
     private void moveEnemy() {
-        Logger.debug("moveEnemy() method called.");
         for (int i = 0; i < enemies.size(); i++) {
             enemies.get(i).setY(enemies.get(i).getY() +
                     (enemies.get(i).getVelocityY() * sixtyFpsSeconds));
@@ -491,7 +489,6 @@ public class GameLevelEngine {
             }
 
         }
-        Logger.debug("moveEnemy() method finished.");
     }
 
     /**
@@ -579,17 +576,36 @@ public class GameLevelEngine {
         }
     }
 
+    /**
+     * Implements the end of the level actions, before the next level loads.
+     */
     private void endGame() {
+        Logger.debug("endGame() method called.");
         double endTime = System.nanoTime();
         elapsedTime += (endTime - startTime);
         elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
         double points = GameEngineHelper.calculatePoints(generatedEnemies, steppedEnemies,
                 elapsedTime);
+
+        Logger.info("Level {} finished with {} points, player Y velocity: {}",
+                levelCounter, points, player.getStartVelocityY());
+
         gameFirstLevelController.endLevel((int) points, elapsedTime,
                 Math.toIntExact(Double.valueOf(player.getStartVelocityY()).longValue()));
         elapsedTime = 0.0;
+        Logger.debug("endGame() method finished.");
     }
 
+    /**
+     * Calculates the {@code player}'s X coordinates.
+     *
+     * @param leftCrashed      whether the {@code player}'s left side crashed
+     * @param rightCrashed     whether the {@code player}'s right side crashed
+     * @param leftCrashedLine  whether the {@code player}'s left side crashed with the left wall
+     * @param rightCrashedLine whether the {@code player}'s right side crashed with the right wall
+     * @param enemyLeftPlayer  the enemy that crashed with the {@code player}'s left side
+     * @param enemyRightPlayer the enemy that crashed with the {@code player}'s right side
+     */
     private void calculatePlayerX(boolean leftCrashed, boolean rightCrashed,
                                   boolean leftCrashedLine, boolean rightCrashedLine,
                                   FallingRectangle enemyLeftPlayer,
@@ -601,23 +617,29 @@ public class GameLevelEngine {
         } else if (leftCrashed && !rightCrashed && rightReleased) {
             player.setVelocityX(0.0);
             if (enemyLeftPlayer != null) {
+                Logger.info("Player's left side crashed with enemy.");
                 player.setX(enemyLeftPlayer.getX() + enemyLeftPlayer.getWidth()
                         + tolerance);
             } else {
+                Logger.info("Player's left side crashed with line.");
                 player.setX(borders.get(1).getStartX() + borders.get(1).getStrokeWidth() / 2
                         + tolerance);
             }
         } else if (!leftCrashed && rightCrashed && leftReleased) {
             player.setVelocityX(0.0);
             if (enemyRightPlayer != null) {
+                Logger.info("Player's right side crashed with enemy.");
                 player.setX(enemyRightPlayer.getX() - player.getWidth() - tolerance);
             } else {
+                Logger.info("Player's right side crashed with line.");
                 player.setX(borders.get(2).getStartX() - borders.get(2).getStrokeWidth() / 2
                         - player.getWidth() - tolerance);
             }
         } else if (!leftCrashed && rightCrashed && !leftReleased) {
+            Logger.info("Player's right side crashed.");
             player.setX(player.getX() + (player.getVelocityX() * sixtyFpsSeconds));
         } else if (leftCrashed && !rightCrashed && !rightReleased) {
+            Logger.info("Player's left side crashed.");
             player.setX(player.getX() + (player.getVelocityX() * sixtyFpsSeconds));
         } else if (leftCrashed && rightCrashed) {
             player.setVelocityX(0.0);
@@ -632,12 +654,21 @@ public class GameLevelEngine {
                     player.setX(enemyLeftPlayer.getX() + enemyLeftPlayer.getWidth() + tolerance);
                 }
             } else {
+                Logger.info("Player stuck between left wall and enemy.");
                 player.setX(borders.get(1).getStartX() + borders.get(1).getStrokeWidth()
                         + tolerance);
             }
         }
     }
 
+    /**
+     * Calculates the {@code player}'s Y coordinate.
+     *
+     * @param crashed         whether the {@code player} crashed with something
+     * @param standingOnEnemy whether the {@code player} standing on {@code enemy}
+     * @param standingOnLine  whether the {@code player} standing on {@code line}
+     * @param enemy           the {@code enemy} that the {@code player} crashed with
+     */
     private void calculatePlayerY(boolean crashed, boolean standingOnEnemy, boolean standingOnLine,
                                   FallingRectangle enemy) {
         if (crashed && standingOnEnemy) {
@@ -650,6 +681,8 @@ public class GameLevelEngine {
             player.setStartY(enemy.getY() - tolerance);
             actualVelocityY = tolerance;
             player.setFalling(false);
+            Logger.info("Player standing on enemy and crashed with enemy. " +
+                    "New Y velocity: {}", player.getStartVelocityY());
         } else if (crashed && standingOnLine) {
             player.setStartVelocityY(player.getStartVelocityY()
                     + player.getDecreaseStartVelocityY());
@@ -657,6 +690,8 @@ public class GameLevelEngine {
             actualVelocityY = tolerance;
             player.setFalling(false);
             steppedOnThisEnemy = false;
+            Logger.info("Player standing on line and crashed with enemy. " +
+                    "New Y velocity: {}", player.getStartVelocityY());
         } else if (crashed && player.isJumping()) {
             player.setStartVelocityY(player.getStartVelocityY()
                     + player.getDecreaseStartVelocityY());
@@ -667,6 +702,8 @@ public class GameLevelEngine {
             player.setActualY(player.getStartY() + (fallingVelocity));
             player.setFalling(true);
             steppedOnThisEnemy = false;
+            Logger.info("Player was jumping when crashed with enemy. " +
+                    "New Y velocity: {}", player.getStartVelocityY());
         } else if (standingOnEnemy && !player.isJumping()) {
             if (!steppedOnThisEnemy) {
                 steppedOnThisEnemy = true;
@@ -721,28 +758,43 @@ public class GameLevelEngine {
         }
     }
 
+    /**
+     * Draws the current frame to the {@link Canvas}
+     */
     private void draw() {
         if (canvas != null) {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
             for (int i = 0; i < enemies.size(); i++) {
-                drawRect(enemies.get(i), gc, GameEngineHelper.HEIGHT);
+                drawRect(enemies.get(i), gc);
             }
 
-            drawRect(player, gc, GameEngineHelper.HEIGHT);
+            drawRect(player, gc);
             camera.setLayoutY(player.getY() + player.getHeight() - (GameEngineHelper.HEIGHT * 0.8));
         }
     }
 
-    private void drawRect(Rect rect, GraphicsContext gc, double sceneHeight) {
-        if (shouldDrawIt(camera, rect.getY(), rect.getHeight(), sceneHeight)) {
+    /**
+     * A helper method to draw {@link Rect} objects.
+     *
+     * @param rect the {@code rect} to draw
+     * @param gc   the {@link GraphicsContext} that draws to {@code canvas}
+     */
+    private void drawRect(Rect rect, GraphicsContext gc) {
+        if (shouldDrawIt(camera, rect.getY(), rect.getHeight())) {
             gc.setFill(rect.getColor());
             gc.fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
         }
     }
 
+    /**
+     * A helper method to draw an {@link Image} to the {@code canvas}
+     *
+     * @param canvas the {@code canvas} that will be drawn on
+     */
     private void drawImage(Canvas canvas) {
+        Logger.debug("drawImage() method called.");
         var gc = canvas.getGraphicsContext2D();
         Image bgImg = new Image(getClass().getClassLoader()
                 .getResource("textures/brick.png").toExternalForm());
@@ -766,18 +818,41 @@ public class GameLevelEngine {
                 gc.fillRect(0, 0, 800, levelEndY);
             }
         }
-
+        Logger.debug("drawImage() method finished.");
     }
 
-    private boolean shouldDrawIt(Camera cam, double drawY, double drawHeight, double sceneHeight) {
+    /**
+     * A helper method to decide whether an object should be drawn or not.
+     *
+     * @param cam        the {@link Camera} that follows the {@code player}
+     * @param drawY      the object's upper left Y coordinate
+     * @param drawHeight the object's height
+     * @return whether the object should be drawn or not
+     */
+    private boolean shouldDrawIt(Camera cam, double drawY, double drawHeight) {
         return ((drawY + drawHeight) >= cam.getLayoutY())
-                && (drawY <= (cam.getLayoutY() + sceneHeight));
+                && (drawY <= (cam.getLayoutY() + GameEngineHelper.HEIGHT));
     }
 
+    /**
+     * Initializes the objects of the class.
+     * <p>
+     * A public method that is available to call from other classes.
+     *
+     * @param ap        the {@link AnchorPane} that will contains the {@link Canvas}
+     * @param velocityY the {@code player}'s actual Y velocity
+     */
     public void init(AnchorPane ap, int velocityY) {
         initObjects(ap, velocityY);
     }
 
+    /**
+     * Initializes the start time and calculates once the enemies and the players coordinates
+     * and draws them.
+     * <p>
+     * This method should be used with a {@link Timer} that calls every X seconds this method
+     * to calculate the coordinates of the objects and draw them to the {@code canvas}.
+     */
     public void runTask() {
         if (startTime == 0.0) {
             startTime = System.nanoTime();
@@ -793,13 +868,23 @@ public class GameLevelEngine {
         }
     }
 
+    /**
+     * Generates an enemy.
+     * <p>
+     * This method should be used with a {@link Timer} that calls every X seconds this method
+     * to generate an enemy.
+     */
     public void generateEnemyTask() {
         synchronized (enemies) {
             enemies.add(generateEnemy(levelCounter));
         }
     }
 
+    /**
+     * Adds key listener to the engine.
+     */
     public void keyListener() {
+        Logger.debug("keyListener() method called.");
         EventHandler<KeyEvent> keyPressEventHandler = keyEvent -> {
             KeyCode keyCode = keyEvent.getCode();
             if ((keyCode == KeyCode.UP || keyCode == KeyCode.W)
@@ -810,6 +895,7 @@ public class GameLevelEngine {
                 player.setStartY(player.getY());
             } else if ((keyCode == KeyCode.UP || keyCode == KeyCode.W)
                     && player.isJumping() && !paused) {
+                Logger.info("Player is jumping.");
                 upReleased = true;
             }
             if ((keyCode == KeyCode.LEFT || keyCode == KeyCode.A) && !paused) {
@@ -823,8 +909,10 @@ public class GameLevelEngine {
 
             if (keyCode == KeyCode.ESCAPE && !paused) {
                 if (gameOverGoToMain) {
+                    Logger.info("Game over, going to main menu.");
                     gameFirstLevelController.errorGoToMainMenu();
                 } else {
+                    Logger.info("The game is paused.");
                     double pauseTime = System.nanoTime();
                     elapsedTime += (pauseTime - startTime);
                     elapsedTime = TimeUnit.NANOSECONDS
@@ -837,6 +925,7 @@ public class GameLevelEngine {
                     leftReleased = true;
                     rightReleased = true;
                     //------------------------------------------Entity manager start---------
+                    Logger.debug("Saving the elapsed time to database.");
                     EntityManager em = Main.getEntityManager();
                     AllTime allTime = Queries.getAllTimeByUserName(em,
                             Authenticate.getLoggedInUser());
@@ -847,12 +936,15 @@ public class GameLevelEngine {
                     em.getTransaction().commit();
                     em.detach(allTime);
                     em.close();
+                    Logger.debug("Transaction finished.");
                     //------------------------------------------Entity manager end---------
                     elapsedTime = 0;
                     gameFirstLevelController.escPressed();
                 }
             }
             if (keyCode == KeyCode.ENTER && startNextLevel) {
+                Logger.info("Enter pressed. Continuing with next level: {}.",
+                        levelCounter + 1);
                 gameFirstLevelController.nextLevel();
             }
         };
@@ -878,9 +970,12 @@ public class GameLevelEngine {
         var stage = Main.getPrimaryStage();
         stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
         stage.addEventHandler(KeyEvent.KEY_RELEASED, keyEventHandlerMap.get(KeyEvent.KEY_RELEASED));
-
+        Logger.debug("keyListener() method finished.");
     }
 
+    /**
+     * Removes the key listener from the engine.
+     */
     public void removeKeyListener() {
         var stage = Main.getPrimaryStage();
         if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
@@ -893,8 +988,14 @@ public class GameLevelEngine {
         }
     }
 
+    /**
+     * Continues the game from paused state.
+     *
+     * @param ap the {@link AnchorPane} that will contains the {@link Canvas}
+     */
     public void letsContinue(AnchorPane ap) {
         try {
+            Logger.info("The game continues.");
             startTime = System.nanoTime();
             player.setVelocityX(player.getOldVelocityX());
             player.setVelocityY(player.getOldVelocityY());
@@ -909,11 +1010,20 @@ public class GameLevelEngine {
         }
     }
 
+    /**
+     * Decides whether the {@code player} has reached the end of the level or not.
+     *
+     * @return the {@code player} has reached the end of the level or not
+     */
     public boolean isEndGame() {
         return player.getActualY() <= levelEndY;
     }
 
+    /**
+     * Draws the game over text to the screen.
+     */
     public void drawGameOverText() {
+        Logger.info("Game over.");
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFont(Font.font(100));
         gc.setStroke(Color.RED);
@@ -934,7 +1044,11 @@ public class GameLevelEngine {
         timeline.play();
     }
 
+    /**
+     * Draws the next level text to the screen.
+     */
     public void drawNextLevelText() {
+        Logger.info("Continue to next level: {}", levelCounter + 1);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFont(Font.font(100));
         gc.setStroke(Color.GREEN);

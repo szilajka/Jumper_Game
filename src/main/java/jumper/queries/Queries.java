@@ -8,7 +8,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
+/**
+ * This class contains queries to the game.
+ */
 public class Queries {
+    /**
+     * Finds the {@link User} by the given username.
+     *
+     * @param em       an {@link EntityManager} that connects to the database
+     * @param userName the username that will be searched
+     * @return the user if it is found, else null
+     */
     public static User getUserByUserName(EntityManager em, String userName) {
         if (!userName.trim().equals("")) {
             TypedQuery<User> userQuery = em.createQuery("SELECT u FROM User u " +
@@ -21,6 +31,13 @@ public class Queries {
         }
     }
 
+    /**
+     * Finds the {@link Score} by the given {@link User}.
+     *
+     * @param em   an {@link EntityManager} that connects to the database
+     * @param user the {@code user} that will be searched
+     * @return the {@code score} if it is found, else null
+     */
     public static Score getScoreByUserName(EntityManager em, User user) {
         if (user != null) {
             TypedQuery<Score> scoreQuery = em.createQuery("SELECT s FROM Score s " +
@@ -35,6 +52,13 @@ public class Queries {
         }
     }
 
+    /**
+     * Finds the {@link AllTime} by the given {@link User}.
+     *
+     * @param em   an {@link EntityManager} that connects to the database
+     * @param user the {@code user} that will be searched
+     * @return the {@code all time} if it is found, else null
+     */
     public static AllTime getAllTimeByUserName(EntityManager em, User user) {
         TypedQuery<AllTime> atQuery = em.createQuery("SELECT at FROM AllTime AS at " +
                 "WHERE at.userName = :name " +
@@ -43,6 +67,11 @@ public class Queries {
         return allTimes.isEmpty() ? null : allTimes.get(0);
     }
 
+    /**
+     * Finds the top 10 {@link Score}s.
+     * @param em an {@link EntityManager} that connects to the database
+     * @return the {@code scores} if they are found, else null
+     */
     public static List<Score> getTopTenScoreBoard(EntityManager em) {
         TypedQuery<Score> sbQuery = em.createQuery("SELECT s FROM Score s " +
                 "LEFT JOIN User u ON u.userName = s.userName " +

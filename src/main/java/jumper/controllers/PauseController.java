@@ -102,6 +102,7 @@ public class PauseController {
             public void handle(KeyEvent keyEvent) {
                 var kc = keyEvent.getCode();
                 if (kc == KeyCode.ESCAPE && !paused) {
+                    Logger.info("Continuing the game.");
                     var stage = Main.getPrimaryStage();
                     continueFirstLevel();
                     stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);

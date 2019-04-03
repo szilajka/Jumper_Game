@@ -1,21 +1,61 @@
 package jumper.model;
 
 import javafx.scene.paint.Color;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.tinylog.Logger;
 
+/**
+ * The player class, this represents the user in the game.
+ */
 public class Player extends Rect {
-    private static final Logger logger = LogManager.getLogger("Player");
+    /**
+     * The player's width.
+     */
     public static double playerWidth = 100.0;
+    /**
+     * The player's height.
+     */
     public static double playerHeight = 100.0;
+    /**
+     * A constant, the player's starting Y velocity.
+     */
     public final static int finalStartVelocityY = -250;
+    /**
+     * The player's starting Y velocity.
+     * <p>
+     * When the player is crashing, this value will be reduced.
+     */
     private double startVelocityY = finalStartVelocityY;
+    /**
+     * The amount of which the player's Y velocity should be decreased.
+     */
     private final double decreaseStartVelocityY = 50.0;
+    /**
+     * The player's maximum X velocity.
+     */
     private final double maxVelocityX = 100.0;
+    /**
+     * The player's upper left Y position at the start.
+     * <p>
+     * This coordinate is recomputed when the player jumps or crashed or lands.
+     */
     private double startY;
+    /**
+     * The player's actual upper left Y position.
+     */
     private double actualY;
+    /**
+     * Indicates whether the player is jumping or not.
+     */
     private boolean jumping = false;
+    /**
+     * Indicates whether the player is falling or not.
+     */
     private boolean falling = false;
+    /**
+     * How many {@link jumper.helpers.EnemyType#SpikeEnemy} crashed with the player.
+     * <p>
+     * If this number reaches 3, then the game ends.
+     */
     private int crashedSpike = 0;
 
     /**
@@ -28,7 +68,7 @@ public class Player extends Rect {
      */
     public Player(double x, double y, double width, double height) {
         super(x, y, width, height);
-        logger.debug("Player constructor called with 4 parameters.");
+        Logger.debug("Player constructor called with 4 parameters.");
     }
 
     /**
@@ -42,7 +82,7 @@ public class Player extends Rect {
      */
     public Player(double x, double y, double width, double height, Color color) {
         super(x, y, width, height, color);
-        logger.debug("Player constructor called with 5 parameters.");
+        Logger.debug("Player constructor called with 5 parameters.");
     }
 
     /**
@@ -172,6 +212,7 @@ public class Player extends Rect {
 
     /**
      * Sets the number of crashing with spike {@code enemy}.
+     *
      * @param crashedSpike the number to be set.
      */
     public void setCrashedSpike(int crashedSpike) {

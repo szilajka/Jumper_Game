@@ -3,11 +3,29 @@ package jumper.model;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+/**
+ * The superior class of the {@link Player} and the {@link FallingRectangle} classes.
+ */
 public abstract class Rect extends Rectangle {
+    /**
+     * The object's color.
+     */
     private Color color;
+    /**
+     * The object's X velocity.
+     */
     private double velocityX = 0.0;
+    /**
+     * The object's Y velocity.
+     */
     private double velocityY = 0.0;
+    /**
+     * The object's X velocity before pausing.
+     */
     private double oldVelocityX = 0.0;
+    /**
+     * The object's Y velocity before pausing.
+     */
     private double oldVelocityY = 0.0;
 
     /**

@@ -25,6 +25,14 @@ public class Score {
     public Score() {
     }
 
+    public Score(int id, int level, int score, int velocityY, String userName) {
+        this.id = id;
+        this.level = level;
+        this.score = score;
+        this.velocityY = velocityY;
+        this.userName = userName;
+    }
+
     public int getId() {
         return id;
     }

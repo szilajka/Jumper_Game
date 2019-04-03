@@ -1,7 +1,6 @@
 package jumper.model.DB;
 
 import javax.persistence.*;
-import java.time.Duration;
 
 @Entity
 @Table(name = "all_time", schema = "jumper_app")
@@ -20,6 +19,12 @@ public class AllTime {
     private int elapsedTime;
 
     public AllTime() {
+    }
+
+    public AllTime(int id, User userName, int elapsedTime) {
+        this.id = id;
+        this.userName = userName;
+        this.elapsedTime = elapsedTime;
     }
 
     public int getId() {

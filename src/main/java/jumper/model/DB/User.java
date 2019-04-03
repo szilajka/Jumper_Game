@@ -28,6 +28,14 @@ public class User implements Serializable {
     public User() {
     }
 
+    public User(String userName, String hashedPassword, String salt, List<Score> score, AllTime allTime) {
+        this.userName = userName;
+        this.hashedPassword = hashedPassword;
+        this.salt = salt;
+        this.score = score;
+        this.allTime = allTime;
+    }
+
     public String getUserName() {
         return userName;
     }
