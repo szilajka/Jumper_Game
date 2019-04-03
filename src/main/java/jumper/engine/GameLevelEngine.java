@@ -29,8 +29,7 @@ import jumper.model.FallingRectangle;
 import jumper.model.Player;
 import jumper.model.Rect;
 import jumper.queries.Queries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.tinylog.Logger;
 
 import javax.persistence.EntityManager;
 import java.util.*;
@@ -39,100 +38,244 @@ import java.util.concurrent.TimeUnit;
 import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
 import static jumper.helpers.GameEngineHelper.tolerance;
 
+/**
+ * The {@code game's engine}.
+ * This class is responsible to calculate the positions of the player, enemies and the walls.
+ */
 public class GameLevelEngine {
-    private static final Logger logger = LogManager.getLogger("GameLevelEngine");
-
+    /**
+     * A constant to declare the end of each level.
+     */
     private final double levelEndY = 500.0;
+    /**
+     * A constant that is used while generating the enemy.
+     */
     private final double enemyDistanceY = 200.0;
+    /**
+     * A constant that is used while generating the enemy.
+     */
     private final double enemyDistanceX = 150.0;
+    /**
+     * The {@link Player} object.
+     * This is the {@code user}.
+     */
     private Player player;
+    /**
+     * A {@code list} that stores the enemies.
+     */
     private List<FallingRectangle> enemies;
+    /**
+     * The {@link Camera} used to track the player.
+     */
     private Camera camera;
+    /**
+     * A {@code list} that stores the borders (walls and the start line).
+     */
     private List<Line> borders;
+    /**
+     * The {@link Canvas} which the engine draws.
+     */
     private Canvas canvas;
-    private boolean jumping, paused;
+    /**
+     * A {@code boolean} that indicates whether the player is jumping or not.
+     */
+    private boolean jumping;
+    /**
+     * A {@code boolean} that indicates whether the game is paused or not.
+     */
+    private boolean paused;
+    /**
+     * This is used to calculate the {@code player}'s actual Y coordinate.
+     */
     private double collapsedTime = 0.0;
+    /**
+     * A constant that is used to calculate the {@code player}'s actual Y coordinate.
+     */
     private static final double g = 50.0;
+    /**
+     * A {@code list} that stores those enemies, which are intended to remove.
+     */
     private List<FallingRectangle> removeEnemies;
+    /**
+     * The {@link GameFirstLevelController} that initialized this engine.
+     */
     private GameFirstLevelController gameFirstLevelController;
+    /**
+     * This {@link Map} stores the event handlers for key presses.
+     */
     private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
+    /**
+     * This is used to calculate whether the {@code player} has crashed with something.
+     */
     private double actualVelocityY = 0.0;
+    /**
+     * This is used to calculate whether the {@code player} has crashed with something.
+     */
     private double actualVelocityX = 0.0;
+    /**
+     * The user released the left key or not.
+     */
     private boolean leftReleased = true;
+    /**
+     * The user released the right key or not.
+     */
     private boolean rightReleased = true;
+    /**
+     * The user released the up key or not.
+     */
     private boolean upReleased = true;
+    /**
+     * This is used to decide whether a {@link EnemyType#BasicEnemy}
+     * or a {@link EnemyType#SpikeEnemy} to generate.
+     */
     private int whichEnemyToGenerate = 0;
+    /**
+     * The number of the generated enemies.
+     */
     private int generatedEnemies = 0;
+    /**
+     * The number of the {@code enemies} that the {@code player} stepped on.
+     */
     private int steppedEnemies = 0;
+    /**
+     * The level counter.
+     */
     private int levelCounter;
+    /**
+     * This stores the elapsed nanoseconds.
+     */
     private double elapsedTime = 0.0;
+    /**
+     * This stores the time when the game is started or continued.
+     */
     private double startTime = 0;
+    /**
+     * Used to decide whether a player is jumped to a new enemy or to an old one.
+     */
     private boolean steppedOnThisEnemy = false;
+    /**
+     * If true, the next level starts when the ENTER key pressed.
+     */
     private boolean startNextLevel;
+    /**
+     * If true, the Main Menu loads, when the user presses the ESCAPE key.
+     */
     private boolean gameOverGoToMain = false;
 
+    /**
+     * Gets the actual {@code player} object.
+     *
+     * @return the {@code player}
+     */
     public Player getPlayer() {
         return this.player;
     }
 
+    /**
+     * If the {@code player} is jumping or not.
+     *
+     * @return if jumping, true, else false
+     */
     public boolean isJumping() {
         return jumping;
     }
 
+    /**
+     * Sets the jumping value.
+     *
+     * @param jumping the value to be set.
+     */
     public void setJumping(boolean jumping) {
         this.jumping = jumping;
     }
 
+    /**
+     * Whether the left key is released or not.
+     *
+     * @return if the left key is released, true, else false
+     */
     public boolean isLeftReleased() {
         return leftReleased;
     }
 
+    /**
+     * Sets the left released value.
+     *
+     * @param leftReleased the value to be set.
+     */
     public void setLeftReleased(boolean leftReleased) {
         this.leftReleased = leftReleased;
     }
 
+    /**
+     * Whether the right key is released or not.
+     *
+     * @return if the right key is released, true, else false
+     */
     public boolean isRightReleased() {
         return rightReleased;
     }
 
+    /**
+     * Sets the right released value.
+     *
+     * @param rightReleased the value to be set.
+     */
     public void setRightReleased(boolean rightReleased) {
         this.rightReleased = rightReleased;
     }
 
+    /**
+     * Whether the up key is released or not.
+     *
+     * @return if the up key is released, true, else false
+     */
     public boolean isUpReleased() {
         return upReleased;
     }
 
+    /**
+     * Sets the up released value.
+     *
+     * @param upReleased the value to be set.
+     */
     public void setUpReleased(boolean upReleased) {
         this.upReleased = upReleased;
     }
 
+    /**
+     * Sets the level counter value.
+     *
+     * @param levelCounter the value to be set
+     */
     public void setLevelCounter(int levelCounter) {
         this.levelCounter = levelCounter;
     }
 
-    public GameLevelEngine(Player player, List<FallingRectangle> enemies,
-                           Camera camera, List<Line> borders, Canvas canvas,
-                           GameFirstLevelController gameFirstLevelController, int levelCounter) {
-        this.player = player;
-        this.enemies = enemies;
-        this.camera = camera;
-        this.borders = borders;
-        this.canvas = canvas;
-        this.removeEnemies = new ArrayList<>();
-        this.keyEventHandlerMap = new HashMap<>();
-        this.gameFirstLevelController = gameFirstLevelController;
-        this.levelCounter = levelCounter;
-    }
-
+    /**
+     * Constructor of the class.
+     *
+     * @param gameFirstLevelController the {@link GameFirstLevelController} that initialized this
+     *                                 engine.
+     * @param levelCounter             the actual level's value
+     */
     public GameLevelEngine(GameFirstLevelController gameFirstLevelController, int levelCounter) {
+        Logger.debug("GameLevelEngine object is creating.");
         this.removeEnemies = new ArrayList<>();
         this.keyEventHandlerMap = new HashMap<>();
         this.gameFirstLevelController = gameFirstLevelController;
         this.levelCounter = levelCounter;
     }
 
+    /**
+     * Initializes the objects of the class.
+     *
+     * @param ap        the {@link AnchorPane} that will contains the {@link Canvas}
+     * @param velocityY the {@code player}'s actual Y velocity
+     */
     private void initObjects(AnchorPane ap, int velocityY) {
+        Logger.info("initObjects() method called with the player actual Y velocity: {}",
+                velocityY);
         startNextLevel = false;
         if (canvas == null) {
             canvas = new Canvas(GameEngineHelper.WIDTH, GameEngineHelper.HEIGHT * 5);
@@ -178,14 +321,26 @@ public class GameLevelEngine {
             borders.addAll(Arrays.asList(baseLine, leftLine, rightLine));
             player.setStartVelocityY(velocityY);
         }
+        Logger.debug("initObjects() method finished.");
     }
 
+    /**
+     * A public method that is reached from other controllers to reset the game level.
+     */
     public void resetLevel() {
+        Logger.debug("resetLevel() method called.");
         resetObjects();
     }
 
+    /**
+     * Resets the objects of the class.
+     * <p>
+     * This method is called when the {@code player} completes a level, but
+     * before loading the next level.
+     */
     private void resetObjects() {
         try {
+            Logger.debug("resetObjects() method called.");
             double positionX = (GameEngineHelper.WIDTH / 2) - (Player.playerWidth / 2);
             double positionY = canvas.getHeight() - Player.playerHeight;
             player.setStartY(positionY);
@@ -207,14 +362,22 @@ public class GameLevelEngine {
             steppedEnemies = 0;
             elapsedTime = 0;
             startTime = System.nanoTime();
+            Logger.debug("resetObjects() method finished.");
         } catch (Exception ex) {
-            logger.error("Something bad happened while resetting objects.", ex);
+            Logger.error("Something bad happened while resetting objects, " +
+                    "go to Main Menu.", ex);
             gameFirstLevelController.errorGoToMainMenu();
         }
-
     }
 
+    /**
+     * Generates enemies regarding to the actual level.
+     *
+     * @param level the game level
+     * @return the created enemy
+     */
     private FallingRectangle generateEnemy(int level) {
+        Logger.debug("generateEnemy() method called.");
         double enemyPositionX;
         double enemyPositionY;
         double enemyWidth;
@@ -268,13 +431,24 @@ public class GameLevelEngine {
             } else {
                 enemyPositionY = levelEndY;
             }
-
-            return new FallingRectangle(enemyPositionX, enemyPositionY,
+            FallingRectangle newEnemy = new FallingRectangle(enemyPositionX, enemyPositionY,
                     enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
+
+            Logger.debug("generateEnemy() method finished.");
+            Logger.info("Method returned with enemy: {}, level: {}", newEnemy, level);
+
+            return newEnemy;
         }
     }
 
+    /**
+     * Decides whether an enemy object should be stopped or not.
+     *
+     * @param fallingRectangle the enemy object that should be examined
+     * @return the value whether the enemy should be stopped or not
+     */
     private boolean stopEnemy(FallingRectangle fallingRectangle) {
+        Logger.debug("stopEnemy() method called.");
         double radiusX = 100.0 + tolerance;
         double playerHeight = player.getY() + player.getHeight();
         double fallingRectangleWidth = fallingRectangle.getX() + fallingRectangle.getWidth();
@@ -285,13 +459,19 @@ public class GameLevelEngine {
         boolean inPlayersRightX = Math.abs(playerWidth - fallingRectangle.getX()) < radiusX;
 
         if (playerLowerY && (inPlayersLeftX || inPlayersRightX)) {
+            Logger.debug("stopEnemy() method finished.");
+            Logger.info("The enemy object should be stopped: {}", fallingRectangle);
             return true;
         }
-
+        Logger.debug("stopEnemy() method finished.");
         return false;
     }
 
+    /**
+     * Calculates the coordinates of the enemies.
+     */
     private void moveEnemy() {
+        Logger.debug("moveEnemy() method called.");
         for (int i = 0; i < enemies.size(); i++) {
             enemies.get(i).setY(enemies.get(i).getY() +
                     (enemies.get(i).getVelocityY() * sixtyFpsSeconds));
@@ -311,16 +491,27 @@ public class GameLevelEngine {
             }
 
         }
+        Logger.debug("moveEnemy() method finished.");
     }
 
+    /**
+     * Implements the end of the game if the user is dead.
+     * <p>
+     * If the {@code user} dies in the game, this method will be called.
+     */
     private void gameOver() {
+        Logger.debug("gameOver() method called.");
         double endTime = System.nanoTime();
         elapsedTime += (endTime - startTime);
         elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
         gameFirstLevelController.gameOver(elapsedTime);
         elapsedTime = 0.0;
+        Logger.debug("gameOver() method finished.");
     }
 
+    /**
+     * Calculates the {@code player}'s coordinates.
+     */
     private void movePlayer() {
         boolean crashed = false, standingOnEnemy = false, standingOnLine = false,
                 leftCrashed = false, leftCrashedLine = false,
@@ -713,7 +904,7 @@ public class GameLevelEngine {
             gameFirstLevelController.initGameEngineLevel(ap);
             gameFirstLevelController.runGameLevelEngine();
         } catch (Exception ex) {
-            logger.error("Can not continue the game, due to error.", ex);
+            Logger.error("Can not continue the game, due to error.", ex);
             gameFirstLevelController.errorGoToMainMenu();
         }
     }

@@ -16,8 +16,7 @@ import jumper.authentication.Authenticate;
 import jumper.helpers.TimeHelper;
 import jumper.model.DB.AllTime;
 import jumper.queries.Queries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.tinylog.Logger;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -25,11 +24,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * {@code Controller} of the {@code Pause} view.
  */
 public class PauseController {
+    /**
+     * The Continue button.
+     */
     public Button btnContinue;
+    /**
+     * The Exit button.
+     */
     public Button btnExit;
+    /**
+     * The Menu button.
+     */
     public Button btnMenu;
     /**
      * Label for text: {@code 'Time in game:'}
@@ -40,58 +48,55 @@ public class PauseController {
      */
     public Label lblTimeQuery;
     /**
-     * {@link Logger} of the {@code class}.
-     */
-    private static final Logger logger = LogManager.getLogger("PauseController");
-    /**
      * Instance of the caller {@link GameFirstLevelController}.
      */
     private GameFirstLevelController gameFirstLC;
     /**
-     *
+     * A {@code boolean} used to really load this view.
      */
     private boolean paused = true;
+    /**
+     * This {@link Map} stores the {@link EventHandler}s that responds to key presses.
+     */
     private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
-
-    //region Constructor
 
     /**
      * The constructor of this class.
-     * We give the game level controller as parameter, so later we can continue the game from where we paused.
+     * We give the game level controller as parameter, so later we can continue the game
+     * from where we paused.
      *
      * @param gameFirstLevelController The {@link GameFirstLevelController} that paused the game.
      */
     public PauseController(GameFirstLevelController gameFirstLevelController) {
-        logger.debug("PauseController constructor started.");
+        Logger.debug("PauseController constructor started.");
         this.gameFirstLC = gameFirstLevelController;
         this.keyEventHandlerMap = new HashMap<>();
-        logger.debug("PauseController constructor finished.");
+        Logger.debug("PauseController constructor finished.");
     }
-
-    //endregion Constructor
-
-    //region Key Listener
 
     /**
      * Removes the key listener.
-     *
+     * <p>
      * Removes the key listener in this {@code scene} from the {@code stage}.
      */
     private void removeKeyListener() {
+        Logger.debug("removeKeyListener() method called.");
         var stage = Main.getPrimaryStage();
         if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
             stage.removeEventHandler(KeyEvent.KEY_PRESSED,
                     keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
         }
+        Logger.debug("removeKeyListener() method finished.");
     }
 
     /**
      * Binds a key listener to the actual {@code scene} of the {@code stage}.
-     *
+     * <p>
      * This method adds an {@link EventHandler} to the {@link Scene}.
      * If you press {@code ESC}, then it continues the game.
      */
     protected void keyListenerPause() {
+        Logger.debug("keyListenerPause() method called.");
         var pauseEH = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
@@ -114,24 +119,24 @@ public class PauseController {
         };
 
         removeKeyListener();
-
         keyEventHandlerMap.put(KeyEvent.KEY_PRESSED, pauseEH);
-
         var stage = Main.getPrimaryStage();
         stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
+        Logger.debug("keyListenerPause() method finished.");
     }
 
-    //endregion Key Listener
-
-    public void setInGanemTime(){
+    /**
+     * Sets the {@link Label}'s text for the in game time.
+     */
+    public void setInGameTime() {
+        Logger.debug("setInGameTime() method called.");
         EntityManager em = Main.getEntityManager();
         AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
         int elapsedSecs = allTime == null ? 0 : allTime.getElapsedTime();
         String formattedTime = TimeHelper.convertSecondsToDuration(elapsedSecs);
         lblTimeQuery.setText(formattedTime);
+        Logger.debug("setInGameTime() method finished.");
     }
-
-    //region Button Actions
 
     /**
      * This method implements the continue button's behaviour when it is pressed.
@@ -141,7 +146,7 @@ public class PauseController {
      */
     public void OnBtnContinuePressed(KeyEvent keyEvent) throws IOException {
         if (keyEvent.getCode() == KeyCode.ENTER) {
-            logger.debug("BtnContinue pressed.");
+            Logger.debug("BtnContinue pressed.");
             continueFirstLevel();
         }
     }
@@ -154,7 +159,7 @@ public class PauseController {
      */
     public void OnBtnContinueClicked(MouseEvent mouseEvent) throws IOException {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            logger.debug("BtnContinue clicked.");
+            Logger.debug("BtnContinue clicked.");
             continueFirstLevel();
         }
     }
@@ -166,7 +171,7 @@ public class PauseController {
      */
     public void OnBtnExitPressed(KeyEvent keyEvent) {
         if (keyEvent.getCode() == KeyCode.ENTER) {
-            logger.debug("BtnExit pressed.");
+            Logger.debug("BtnExit pressed.");
             AppExit();
         }
     }
@@ -178,7 +183,7 @@ public class PauseController {
      */
     public void OnBtnExitClicked(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            logger.debug("BtnExit clicked.");
+            Logger.debug("BtnExit clicked.");
             AppExit();
         }
     }
@@ -191,7 +196,7 @@ public class PauseController {
      */
     public void OnBtnMenuPressed(KeyEvent keyEvent) throws IOException {
         if (keyEvent.getCode() == KeyCode.ENTER) {
-            logger.debug("BtnMenu pressed.");
+            Logger.debug("BtnMenu pressed.");
             loadMainMenu();
         }
     }
@@ -204,82 +209,75 @@ public class PauseController {
      */
     public void OnBtnMenuClicked(MouseEvent mouseEvent) throws IOException {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            logger.debug("BtnMenu clicked.");
+            Logger.debug("BtnMenu clicked.");
             loadMainMenu();
         }
     }
 
-    //endregion Button Actions
-
-    //region Implementation of Button Actions
-
     /**
      * Implements the exit button's behaviour.
-     *
+     * <p>
      * Closes the application.
      */
     private void AppExit() {
-        logger.debug("AppExit() method called.");
-        Stage stage = (Stage) btnExit.getScene().getWindow();
+        Logger.debug("AppExit() method called.");
+        Stage stage = Main.getPrimaryStage();
         stage.close();
     }
 
     /**
      * Implements the menu button's behaviour.
-     *
+     * <p>
      * Loads the main menu, if something goes wrong, closes the application.
-     *
-     * @throws IOException If the fxml file is not found.
      */
     private void loadMainMenu() {
         try {
-            logger.debug("loadMainMenu() method called.");
+            Logger.debug("loadMainMenu() method called.");
             var stage = Main.getPrimaryStage();
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
             var mainController = new MainMenuController();
             fl.setController(mainController);
             var ap = (AnchorPane) fl.load();
-            var mainScene = btnMenu.getScene();
+            var mainScene = stage.getScene();
             mainScene.setRoot(ap);
             removeKeyListener();
             mainController.setInGameTime();
+            Logger.debug("loadMainMenu() method finished.");
         } catch (IOException io) {
-            logger.error("MainMenu.fxml has not founded, closing the application.", io);
+            Logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();
         } catch (Exception ex) {
-            logger.error("Some error occured during loading the main menu, closing the application.", ex);
+            Logger.error("Some error occurred during loading the main menu, " +
+                    "closing the application.", ex);
             AppExit();
         }
     }
 
     /**
      * Implements the continue button's behaviour.
-     *
+     * <p>
      * Loads the game level, if something goes wrong, tries to load the main menu.
      * If something very bad happens, closes the application.
-     *
-     * @throws IOException If the fxml file is not found.
      */
     private void continueFirstLevel() {
         try {
-            logger.debug("continueFirstLevel() method called.");
+            Logger.debug("continueFirstLevel() method called.");
             var stage = Main.getPrimaryStage();
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
             fl.setController(gameFirstLC);
             var ap = (AnchorPane) fl.load();
-            var gameScene = btnContinue.getScene();
+            var gameScene = stage.getScene();
             gameScene.setRoot(ap);
             removeKeyListener();
             gameFirstLC.getEngine().letsContinue(ap);
+            Logger.debug("continueFirstLevel() method finished.");
         } catch (IOException io) {
-            logger.error("GameFirstLevel.fxml has not founded, closing the application.", io);
+            Logger.error("GameFirstLevel.fxml has not founded, closing the application.", io);
             loadMainMenu();
         } catch (Exception ex) {
-            logger.error("Some error occured during loading the main menu, closing the application.", ex);
+            Logger.error("Some error occurred during loading the main menu, closing the application.", ex);
             AppExit();
         }
     }
-
-    //endregion Implementation of Button Actions
 
 }

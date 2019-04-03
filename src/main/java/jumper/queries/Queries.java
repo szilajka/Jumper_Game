@@ -6,7 +6,6 @@ import jumper.model.DB.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Queries {

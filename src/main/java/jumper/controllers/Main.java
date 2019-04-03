@@ -2,26 +2,35 @@ package jumper.controllers;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.tinylog.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+/**
+ * The main class of the application.
+ * <p>
+ * This class loads the application.
+ */
 public class Main extends Application {
-    private static final Logger logger = LogManager.getLogger("Main");
+    /**
+     * The {@link Stage} that is used all over the application.
+     */
     private static Stage primaryStage;
+    /**
+     * An {@link EntityManagerFactory} that is used to create the connection
+     * between the application and the database.
+     */
     private static EntityManagerFactory emf;
 
 
     @Override
     public void start(Stage stage) throws Exception {
-        logger.debug("Application started. Start function called.");
+        Logger.debug("Application started. Start function called.");
         emf = Persistence.createEntityManagerFactory("jumper");
         primaryStage = stage;
         AnchorPane ap = (AnchorPane) FXMLLoader.load(getClass().getClassLoader()
@@ -31,7 +40,7 @@ public class Main extends Application {
         stage.setTitle("Jumper Game");
         stage.show();
         stage.setOnCloseRequest((event) -> {
-            logger.debug("Application closes.");
+            Logger.debug("Application closes.");
             stage.close();
         });
     }
@@ -42,6 +51,11 @@ public class Main extends Application {
         emf.close();
     }
 
+    /**
+     * The main method of the application.
+     *
+     * @param args any arguments that the user wants to pass to the application.
+     */
     public static void main(String[] args) {
         launch(args);
     }
@@ -55,6 +69,11 @@ public class Main extends Application {
         return primaryStage;
     }
 
+    /**
+     * Creates a new {@link EntityManager} object.
+     *
+     * @return a new {@code Entity Manager}
+     */
     public static EntityManager getEntityManager() {
         return emf.createEntityManager();
     }

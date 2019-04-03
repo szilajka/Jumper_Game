@@ -15,8 +15,7 @@ import javafx.stage.Stage;
 import jumper.model.DB.Score;
 import jumper.model.ScoreBoard;
 import jumper.queries.Queries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.tinylog.Logger;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -29,11 +28,7 @@ import java.util.Map;
  * {@code Controller} of the {@code Scoreboard} view.
  */
 public class ScoreboardController {
-    /**
-     * {@link Logger} of the class.
-     */
-    private static final Logger logger = LogManager.getLogger("ScoreboardController");
-    /**
+        /**
      * {@link Label} for text: {@code Scoreboard}
      */
     public Label labelScoreBoard;
@@ -69,6 +64,7 @@ public class ScoreboardController {
      */
     public ScoreboardController() {
         this.keyEventHandlerMap = new HashMap<>();
+        Logger.info("A new ScoreboardController object created.");
     }
 
     /**
@@ -78,7 +74,7 @@ public class ScoreboardController {
      */
     public void setTableView() {
         try {
-            logger.debug("setTableView() method started.");
+            Logger.debug("setTableView() method started.");
             EntityManager em = Main.getEntityManager();
             List<Score> scoreList = Queries.getTopTenScoreBoard(em);
             List<ScoreBoard> sbList = new ArrayList<>();
@@ -94,8 +90,9 @@ public class ScoreboardController {
             tvNum.setSortType(TableColumn.SortType.ASCENDING);
             tableViewScoreBoard.setEditable(false);
             tableViewScoreBoard.setItems(FXCollections.observableList(sbList));
+            Logger.debug("setTableView() method finished.");
         } catch (Exception ex) {
-            logger.error("Some error occured during during setting ListView.", ex);
+            Logger.error("Some error occured during during setting ListView.", ex);
         }
     }
 
@@ -105,22 +102,26 @@ public class ScoreboardController {
      * Removes the key listener in this {@code scene} from the {@code stage}.
      */
     private void removeKeyListener() {
+        Logger.debug("removeKeyListener() method called.");
         var stage = Main.getPrimaryStage();
         if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
             stage.removeEventHandler(KeyEvent.KEY_PRESSED,
                     keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
         }
+        Logger.debug("removeKeyListener() method finished.");
     }
 
     /**
      * Implements the behaviour of this {@code scene} when a key is pressed.
      */
     public void keyListenerScoreBoard() {
+        Logger.debug("keyListenerScoreBoard() method called.");
         var pauseEH = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
                 var kc = keyEvent.getCode();
                 if (kc == KeyCode.ESCAPE) {
+                    Logger.info("ESCAPE has been pressed.");
                     var stage = Main.getPrimaryStage();
                     stage.removeEventHandler(KeyEvent.KEY_PRESSED,
                             keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
@@ -133,6 +134,7 @@ public class ScoreboardController {
         keyEventHandlerMap.put(KeyEvent.KEY_PRESSED, pauseEH);
         var stage = Main.getPrimaryStage();
         stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
+        Logger.debug("keyListenerScoreBoard() method finished.");
     }
 
     /**
@@ -140,6 +142,7 @@ public class ScoreboardController {
      */
     private void GoToMainMenu() {
         try {
+            Logger.debug("GoToMainMenu() method called.");
             var stage = Main.getPrimaryStage();
             FXMLLoader fl = new FXMLLoader(getClass().getClassLoader()
                     .getResource("MainMenu.fxml"));
@@ -149,8 +152,9 @@ public class ScoreboardController {
             var mainScene = stage.getScene();
             mainScene.setRoot(ap);
             mainMenuController.setInGameTime();
+            Logger.debug("GoToMainMenu() method finished.");
         } catch (IOException io) {
-            logger.error("MainMenu.fxml not found, closing the application.", io);
+            Logger.error("MainMenu.fxml not found, closing the application.", io);
             MenuExit();
         }
     }
@@ -159,7 +163,7 @@ public class ScoreboardController {
      * Implements exiting the application.
      */
     private void MenuExit() {
-        logger.debug("MenuExit() method called.");
+        Logger.debug("MenuExit() method called.");
         Stage stage = Main.getPrimaryStage();
         stage.close();
     }

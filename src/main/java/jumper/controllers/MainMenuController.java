@@ -14,8 +14,7 @@ import jumper.authentication.Authenticate;
 import jumper.helpers.TimeHelper;
 import jumper.model.DB.AllTime;
 import jumper.queries.Queries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.tinylog.Logger;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -46,34 +45,25 @@ public class MainMenuController {
     public Label lblTimeQuery;
 
     /**
-     * The {@link Logger} of the class.
-     */
-    private static final Logger logger = LogManager.getLogger("MainMenuController");
-
-    //region Constructors
-
-    /**
      * Constructor of the class.
      * Creates a new {@code MainMenuController} instance.
      */
     public MainMenuController() {
-        logger.debug("MainMenuController constructor called.");
+        Logger.debug("A new MainMenuController object created.");
     }
 
-    //endregion Constructors
-
     /**
-     * Sets the
+     * Sets the {@link Label}'s text for the in game time.
      */
     public void setInGameTime(){
+        Logger.debug("setInGameTime() method called.");
         EntityManager em = Main.getEntityManager();
         AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
         int elapsedSecs = allTime == null ? 0 : allTime.getElapsedTime();
         String formattedTime = TimeHelper.convertSecondsToDuration(elapsedSecs);
         lblTimeQuery.setText(formattedTime);
+        Logger.debug("setInGameTime() method finished.");
     }
-
-    //region Button Actions
 
     /**
      * Handles the button click on button Start.
@@ -83,7 +73,7 @@ public class MainMenuController {
      */
     public void onBtnStartClicked(MouseEvent mouseEvent) throws IOException {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            logger.debug("BtnStart clicked.");
+            Logger.debug("BtnStart clicked.");
             FirstLevelStart();
         }
     }
@@ -96,7 +86,7 @@ public class MainMenuController {
      */
     public void onBtnStartPressed(KeyEvent keyEvent) throws IOException {
         if (keyEvent.getCode() == KeyCode.ENTER) {
-            logger.debug("BtnStart pressed.");
+            Logger.debug("BtnStart pressed.");
             FirstLevelStart();
         }
     }
@@ -108,7 +98,7 @@ public class MainMenuController {
      */
     public void onBtnScoreBoardClicked(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            logger.debug("BtnScoreBoard clicked.");
+            Logger.debug("BtnScoreBoard clicked.");
             ScoreBoard();
         }
     }
@@ -121,7 +111,7 @@ public class MainMenuController {
      */
     public void onBtnScoreBoardPressed(KeyEvent keyEvent) {
         if (keyEvent.getCode() == KeyCode.ENTER) {
-            logger.debug("BtnScoreBoard pressed.");
+            Logger.debug("BtnScoreBoard pressed.");
             ScoreBoard();
         }
     }
@@ -133,7 +123,7 @@ public class MainMenuController {
      */
     public void onBtnExitClicked(MouseEvent mouseEvent) {
         if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-            logger.debug("BtnExit clicked.");
+            Logger.debug("BtnExit clicked.");
             MenuExit();
         }
     }
@@ -145,21 +135,17 @@ public class MainMenuController {
      */
     public void onBtnExitPressed(KeyEvent keyEvent) {
         if (keyEvent.getCode() == KeyCode.ENTER) {
-            logger.debug("BtnExit pressed.");
+            Logger.debug("BtnExit pressed.");
             MenuExit();
         }
     }
-
-    //endregion Button Actions
-
-    //region Implementations of Button Actions
 
     /**
      * Implements the loading of the first level.
      */
     private void FirstLevelStart() {
         try {
-            logger.debug("FirstLevelStart method called.");
+            Logger.debug("FirstLevelStart() method called.");
             Stage stage = Main.getPrimaryStage();
 
             var fl = new FXMLLoader(getClass().getClassLoader()
@@ -167,17 +153,16 @@ public class MainMenuController {
             var gameFirstLC = new GameFirstLevelController();
             fl.setController(gameFirstLC);
             var root = (AnchorPane) fl.load();
-
             Scene gameScene = stage.getScene();
             gameScene.setRoot(root);
             gameFirstLC.initGameEngineLevel(root);
             gameFirstLC.runGameLevelEngine();
-            logger.debug("FirstLevelStart method has finished.");
+            Logger.debug("FirstLevelStart() method has finished.");
         } catch (IOException io) {
-            logger.error("GameFirstLevel.fxml has not found, closing application.", io);
+            Logger.error("GameFirstLevel.fxml has not found, closing application.", io);
             MenuExit();
         } catch (Exception ex) {
-            logger.error("Some error occured, closing application.", ex);
+            Logger.error("Some error occurred, closing application.", ex);
             MenuExit();
         }
     }
@@ -187,6 +172,7 @@ public class MainMenuController {
      */
     private void ScoreBoard() {
         try {
+            Logger.debug("ScoreBoard() method called.");
             var stage = Main.getPrimaryStage();
             FXMLLoader fl = new FXMLLoader(getClass().getClassLoader()
                     .getResource("Scoreboard.fxml"));
@@ -197,8 +183,9 @@ public class MainMenuController {
             sbScene.setRoot(ap);
             sbController.setTableView();
             sbController.keyListenerScoreBoard();
+            Logger.debug("ScoreBoard() method finished.");
         } catch (IOException io) {
-            logger.error("Scoreboard.fxml not found, closing the application.", io);
+            Logger.error("Scoreboard.fxml not found, closing the application.", io);
             MenuExit();
         }
     }
@@ -207,11 +194,9 @@ public class MainMenuController {
      * Implements exiting the application.
      */
     private void MenuExit() {
-        logger.debug("MenuExit() method called.");
+        Logger.debug("MenuExit() method called.");
         Stage stage = Main.getPrimaryStage();
         stage.close();
     }
-
-    //endregion Implementations of Button Actions
 
 }
