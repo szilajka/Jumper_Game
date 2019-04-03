@@ -5,3 +5,4 @@
 .idea/**
 .attach*
 logs/
+*/**/META-INF/persistence.xml

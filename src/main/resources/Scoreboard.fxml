@@ -15,9 +15,9 @@
       </Label>
       <TableView fx:id="tableViewScoreBoard" layoutX="59.0" layoutY="231.0" prefHeight="500.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <columns>
-          <TableColumn fx:id="tvNum" prefWidth="100.0" text="Number" />
-          <TableColumn fx:id="tvUserName" prefWidth="350.0" text="Username" />
-            <TableColumn fx:id="tvScore" prefWidth="350.0" text="Score" />
+          <TableColumn fx:id="tvNum" editable="false" prefWidth="100.0" resizable="false" sortable="false" text="Number" />
+          <TableColumn fx:id="tvUserName" editable="false" prefWidth="350.0" resizable="false" sortable="false" text="Username" />
+            <TableColumn fx:id="tvScore" editable="false" prefWidth="350.0" resizable="false" sortable="false" text="Score" />
         </columns>
       </TableView>
    </children>

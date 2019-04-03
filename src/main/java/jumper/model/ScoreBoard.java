@@ -2,14 +2,38 @@ package jumper.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
+/**
+ * Model class of the {@link jumper.controllers.ScoreboardController}.
+ */
 public class ScoreBoard {
+
+    /**
+     * Current row number in the table.
+     */
     private SimpleStringProperty rowNumber;
+
+    /**
+     * Username in the table.
+     */
     private SimpleStringProperty userName;
+
+    /**
+     * Score in the table.
+     */
     private SimpleStringProperty score;
 
+    /**
+     * Generates an empty {@code ScoreBoard} object.
+     */
     public ScoreBoard() {
     }
 
+    /**
+     * Generates a new {@code ScoreBoard} object.
+     * @param rowNumber the current row number in the table
+     * @param userName the username to be shown in the table
+     * @param score the user's score 
+     */
     public ScoreBoard(SimpleStringProperty rowNumber, SimpleStringProperty userName,
                       SimpleStringProperty score) {
         this.rowNumber = rowNumber;

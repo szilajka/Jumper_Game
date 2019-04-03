@@ -147,7 +147,7 @@ public class MainMenuController {
             AnchorPane ap = (AnchorPane) fl.load();
             var sbScene = stage.getScene();
             sbScene.setRoot(ap);
-            sbController.setListView();
+            sbController.setTableView();
 
         } catch (IOException e) {
             e.printStackTrace();
