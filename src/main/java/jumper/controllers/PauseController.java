@@ -5,26 +5,51 @@ import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import jumper.authentication.Authenticate;
+import jumper.helpers.TimeHelper;
+import jumper.model.DB.AllTime;
+import jumper.queries.Queries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *
+ */
 public class PauseController {
     public Button btnContinue;
     public Button btnExit;
     public Button btnMenu;
-
+    /**
+     * Label for text: {@code 'Time in game:'}
+     */
+    public Label lblTime;
+    /**
+     * Label for the time that the user spent in this game.
+     */
+    public Label lblTimeQuery;
+    /**
+     * {@link Logger} of the {@code class}.
+     */
     private static final Logger logger = LogManager.getLogger("PauseController");
+    /**
+     * Instance of the caller {@link GameFirstLevelController}.
+     */
     private GameFirstLevelController gameFirstLC;
+    /**
+     *
+     */
     private boolean paused = true;
     private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
 
@@ -80,6 +105,11 @@ public class PauseController {
                     gameFirstLC.getEngine().removeKeyListener();
                     paused = false;
                 }
+                // Reminder for me if you ever wonder about it:
+                // The above lines are a tricky one.
+                // If you press the ESCAPE button, then the gameFirstLevelController calls this
+                // PauseController, and then it sets this method and at this time this thinks, that
+                // the ESCAPE button is pressed, and then continues the game.
             }
         };
 
@@ -92,6 +122,14 @@ public class PauseController {
     }
 
     //endregion Key Listener
+
+    public void setInGanemTime(){
+        EntityManager em = Main.getEntityManager();
+        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+        int elapsedSecs = allTime == null ? 0 : allTime.getElapsedTime();
+        String formattedTime = TimeHelper.convertSecondsToDuration(elapsedSecs);
+        lblTimeQuery.setText(formattedTime);
+    }
 
     //region Button Actions
 
@@ -204,6 +242,7 @@ public class PauseController {
             var mainScene = btnMenu.getScene();
             mainScene.setRoot(ap);
             removeKeyListener();
+            mainController.setInGameTime();
         } catch (IOException io) {
             logger.error("MainMenu.fxml has not founded, closing the application.", io);
             AppExit();

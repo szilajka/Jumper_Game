@@ -74,7 +74,7 @@ public class WelcomeController {
             var registerScene = stage.getScene();
             registerScene.setRoot(ap);
         } catch (IOException io) {
-            logger.error("Register.fxml not found!", io);
+            logger.error("Authenticate.fxml not found!", io);
             AppExit();
         }
     }

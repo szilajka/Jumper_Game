@@ -27,5 +27,15 @@
          </font>
       </TextField>
       <PasswordField fx:id="passwordField" layoutX="308.0" layoutY="270.0" prefHeight="60.0" prefWidth="430.0" />
+      <Label fx:id="labelErrorUserName" layoutX="79.0" layoutY="165.0" prefHeight="67.0" prefWidth="658.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="labelErrorPassword" layoutX="71.0" layoutY="353.0" prefHeight="67.0" prefWidth="658.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

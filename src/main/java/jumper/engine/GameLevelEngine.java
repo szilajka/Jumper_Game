@@ -14,23 +14,27 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
+import jumper.authentication.Authenticate;
 import jumper.controllers.GameFirstLevelController;
 import jumper.controllers.Main;
 import jumper.helpers.EnemyType;
 import jumper.helpers.GameEngineHelper;
+import jumper.model.DB.AllTime;
 import jumper.model.FallingRectangle;
 import jumper.model.Player;
 import jumper.model.Rect;
+import jumper.queries.Queries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.persistence.EntityManager;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
 import static jumper.helpers.GameEngineHelper.tolerance;
@@ -128,7 +132,7 @@ public class GameLevelEngine {
         this.levelCounter = levelCounter;
     }
 
-    private void initObjects(AnchorPane ap) {
+    private void initObjects(AnchorPane ap, int velocityY) {
         startNextLevel = false;
         if (canvas == null) {
             canvas = new Canvas(GameEngineHelper.WIDTH, GameEngineHelper.HEIGHT * 5);
@@ -172,7 +176,7 @@ public class GameLevelEngine {
 
 
             borders.addAll(Arrays.asList(baseLine, leftLine, rightLine));
-
+            player.setStartVelocityY(velocityY);
         }
     }
 
@@ -202,6 +206,7 @@ public class GameLevelEngine {
             generatedEnemies = 0;
             steppedEnemies = 0;
             elapsedTime = 0;
+            startTime = System.nanoTime();
         } catch (Exception ex) {
             logger.error("Something bad happened while resetting objects.", ex);
             gameFirstLevelController.errorGoToMainMenu();
@@ -309,7 +314,11 @@ public class GameLevelEngine {
     }
 
     private void gameOver() {
-        gameFirstLevelController.gameOver();
+        double endTime = System.nanoTime();
+        elapsedTime += (endTime - startTime);
+        elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
+        gameFirstLevelController.gameOver(elapsedTime);
+        elapsedTime = 0.0;
     }
 
     private void movePlayer() {
@@ -326,7 +335,8 @@ public class GameLevelEngine {
                 if (enemies.get(i).getEnemyType() == EnemyType.SpikeEnemy) {
                     player.setCrashedSpike(player.getCrashedSpike() + 1);
                 }
-                if (player.getCrashedSpike() == 3) {
+                if (player.getCrashedSpike() == 3
+                        || player.getStartVelocityY() >= -player.getDecreaseStartVelocityY()) {
                     gameOver();
                 }
                 enemies.remove(i);
@@ -381,12 +391,12 @@ public class GameLevelEngine {
     private void endGame() {
         double endTime = System.nanoTime();
         elapsedTime += (endTime - startTime);
-        elapsedTime /= 1000;
+        elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
         double points = GameEngineHelper.calculatePoints(generatedEnemies, steppedEnemies,
                 elapsedTime);
-        //TODO: Write points to XML then to database
+        gameFirstLevelController.endLevel((int) points, elapsedTime,
+                Math.toIntExact(Double.valueOf(player.getStartVelocityY()).longValue()));
         elapsedTime = 0.0;
-        gameFirstLevelController.endLevel();
     }
 
     private void calculatePlayerX(boolean leftCrashed, boolean rightCrashed,
@@ -457,6 +467,8 @@ public class GameLevelEngine {
             player.setFalling(false);
             steppedOnThisEnemy = false;
         } else if (crashed && player.isJumping()) {
+            player.setStartVelocityY(player.getStartVelocityY()
+                    + player.getDecreaseStartVelocityY());
             collapsedTime = 0.0;
             player.setStartY(player.getActualY());
             double fallingVelocity = g / 2 * Math.pow(collapsedTime, 2);
@@ -571,8 +583,8 @@ public class GameLevelEngine {
                 && (drawY <= (cam.getLayoutY() + sceneHeight));
     }
 
-    public void init(AnchorPane ap) {
-        initObjects(ap);
+    public void init(AnchorPane ap, int velocityY) {
+        initObjects(ap, velocityY);
     }
 
     public void runTask() {
@@ -624,6 +636,8 @@ public class GameLevelEngine {
                 } else {
                     double pauseTime = System.nanoTime();
                     elapsedTime += (pauseTime - startTime);
+                    elapsedTime = TimeUnit.NANOSECONDS
+                            .toSeconds(Double.valueOf(elapsedTime).longValue());
                     player.setOldVelocityX(player.getVelocityX());
                     player.setOldVelocityY(player.getVelocityY());
                     player.setVelocityX(0.0);
@@ -631,6 +645,19 @@ public class GameLevelEngine {
                     paused = true;
                     leftReleased = true;
                     rightReleased = true;
+                    //------------------------------------------Entity manager start---------
+                    EntityManager em = Main.getEntityManager();
+                    AllTime allTime = Queries.getAllTimeByUserName(em,
+                            Authenticate.getLoggedInUser());
+                    int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+                    allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+                    em.getTransaction().begin();
+                    em.persist(allTime);
+                    em.getTransaction().commit();
+                    em.detach(allTime);
+                    em.close();
+                    //------------------------------------------Entity manager end---------
+                    elapsedTime = 0;
                     gameFirstLevelController.escPressed();
                 }
             }

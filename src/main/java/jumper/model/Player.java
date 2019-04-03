@@ -8,8 +8,9 @@ public class Player extends Rect {
     private static final Logger logger = LogManager.getLogger("Player");
     public static double playerWidth = 100.0;
     public static double playerHeight = 100.0;
-    private double startVelocityY = -250.0;
-    private final double decreaseStartVelocityY = 10.0;
+    public final static int finalStartVelocityY = -250;
+    private double startVelocityY = finalStartVelocityY;
+    private final double decreaseStartVelocityY = 50.0;
     private final double maxVelocityX = 100.0;
     private double startY;
     private double actualY;

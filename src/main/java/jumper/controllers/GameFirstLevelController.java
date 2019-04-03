@@ -6,11 +6,17 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import jumper.queries.Queries;
+import jumper.authentication.Authenticate;
 import jumper.engine.GameLevelEngine;
 import jumper.helpers.GameEngineHelper;
+import jumper.model.DB.AllTime;
+import jumper.model.DB.Score;
+import jumper.model.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -40,7 +46,15 @@ public class GameFirstLevelController {
     }
 
     public void initGameEngineLevel(AnchorPane ap) {
-        gameLevelEngine.init(ap);
+        EntityManager em = Main.getEntityManager();
+        em.getTransaction().begin();
+        Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
+        em.close();
+        if (score != null) {
+            gameLevelEngine.setLevelCounter(score.getLevel());
+        }
+        int velocityY = (score == null ? Player.finalStartVelocityY : score.getVelocityY());
+        gameLevelEngine.init(ap, velocityY);
         gameLevelEngine.keyListener();
     }
 
@@ -91,6 +105,7 @@ public class GameFirstLevelController {
             pauseScene.setCamera(newCam);
             pauseScene.setRoot(ap);
             pauseC.keyListenerPause();
+            pauseC.setInGanemTime();
             gameLevelEngine.removeKeyListener();
         } catch (IOException e) {
             e.printStackTrace();
@@ -123,13 +138,37 @@ public class GameFirstLevelController {
         }
     }
 
-    public void endLevel() {
+    public void endLevel(int points, double elapsedTime, int velocityY) {
         tr.cancel();
         trGenerate.cancel();
+        EntityManager em = Main.getEntityManager();
+        Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
+        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+        if (score != null) {
+            score.setLevel(GameEngineHelper.levelCounter + 1);
+            score.setScore(score.getScore() + points);
+            score.setVelocityY(velocityY);
+            em.getTransaction().begin();
+            em.persist(score);
+            em.getTransaction().commit();
+            em.detach(score);
+        } else {
+            logger.error("Score value to {} has not been recorded!",
+                    Authenticate.getLoggedInUser().getUserName());
+        }
+        if(allTime != null){
+            int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+            allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+            em.getTransaction().begin();
+            em.persist(allTime);
+            em.getTransaction().commit();
+            em.detach(allTime);
+        }
+        em.close();
         gameLevelEngine.drawNextLevelText();
     }
 
-    public void nextLevel(){
+    public void nextLevel() {
         GameEngineHelper.levelCounter++;
         gameLevelEngine.resetLevel();
         gameLevelEngine.setLevelCounter(GameEngineHelper.levelCounter);
@@ -137,9 +176,25 @@ public class GameFirstLevelController {
         //TODO
     }
 
-    public void gameOver(){
+    public void gameOver(double elapsedTime) {
         tr.cancel();
         trGenerate.cancel();
+        EntityManager em = Main.getEntityManager();
+        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+        int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+        allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+        Score score = new Score();
+        score.setLevel(1);
+        score.setScore(0);
+        score.setVelocityY(Player.finalStartVelocityY);
+        score.setUserName(Authenticate.getLoggedInUser().getUserName());
+        em.getTransaction().begin();
+        em.persist(score);
+        em.persist(allTime);
+        em.getTransaction().commit();
+        em.detach(allTime);
+        em.detach(score);
+        em.close();
         gameLevelEngine.drawGameOverText();
         //TODO: call db, set game level to 0.
     }
