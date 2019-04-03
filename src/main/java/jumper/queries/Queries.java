@@ -1,4 +1,4 @@
-package jumper.Queries;
+package jumper.queries;
 
 import jumper.model.DB.AllTime;
 import jumper.model.DB.Score;
@@ -6,6 +6,8 @@ import jumper.model.DB.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Queries {
     public static User getUserByUserName(EntityManager em, String userName) {
@@ -40,6 +42,15 @@ public class Queries {
                 "ORDER BY at.id desc", AllTime.class);
         var allTimes = atQuery.setParameter("name", user).getResultList();
         return allTimes.isEmpty() ? null : allTimes.get(0);
+    }
+
+    public static List<Score> getTopTenScoreBoard(EntityManager em) {
+        TypedQuery<Score> sbQuery = em.createQuery("SELECT s FROM Score s " +
+                "LEFT JOIN User u ON u.userName = s.userName " +
+                "LEFT JOIN AllTime at ON at.userName = u.userName " +
+                "ORDER BY s.score desc", Score.class)
+                .setMaxResults(10);
+        return sbQuery.getResultList();
     }
 
 }

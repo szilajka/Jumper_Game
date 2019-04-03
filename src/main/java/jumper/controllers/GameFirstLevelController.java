@@ -6,7 +6,7 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import jumper.Queries.Queries;
+import jumper.queries.Queries;
 import jumper.authentication.Authenticate;
 import jumper.engine.GameLevelEngine;
 import jumper.helpers.GameEngineHelper;

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="labelScoreBoard" layoutX="219.0" layoutY="14.0" text="Scoreboard">
+         <font>
+            <Font name="System Bold" size="70.0" />
+         </font>
+      </Label>
+      <TableView fx:id="tableViewScoreBoard" layoutX="59.0" layoutY="231.0" prefHeight="500.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <columns>
+          <TableColumn fx:id="tvNum" prefWidth="100.0" text="Number" />
+          <TableColumn fx:id="tvUserName" prefWidth="350.0" text="Username" />
+            <TableColumn fx:id="tvScore" prefWidth="350.0" text="Score" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

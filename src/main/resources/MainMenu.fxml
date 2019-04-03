@@ -5,7 +5,8 @@
 
 <AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Button fx:id="btnStart" layoutX="250.0" layoutY="105.0" mnemonicParsing="false" onKeyPressed="#onBtnStartPressed" onMouseClicked="#onBtnStartClicked" prefHeight="90.0" prefWidth="280.0" text="Start" />
-      <Button fx:id="btnExit" layoutX="250.0" layoutY="362.0" mnemonicParsing="false" onKeyPressed="#onBtnExitPressed" onMouseClicked="#onBtnExitClicked" prefHeight="90.0" prefWidth="280.0" text="Exit" />
+      <Button fx:id="btnStart" layoutX="250.0" layoutY="63.0" mnemonicParsing="false" onKeyPressed="#onBtnStartPressed" onMouseClicked="#onBtnStartClicked" prefHeight="90.0" prefWidth="280.0" text="Start" />
+      <Button fx:id="btnExit" layoutX="250.0" layoutY="422.0" mnemonicParsing="false" onKeyPressed="#onBtnExitPressed" onMouseClicked="#onBtnExitClicked" prefHeight="90.0" prefWidth="280.0" text="Exit" />
+      <Button fx:id="btnScoreBoard" layoutX="250.0" layoutY="240.0" mnemonicParsing="false" onKeyPressed="#onBtnScoreBoardPressed" onMouseClicked="#onBtnScoreBoardClicked" prefHeight="90.0" prefWidth="280.0" text="Scoreboard" />
    </children>
 </AnchorPane>

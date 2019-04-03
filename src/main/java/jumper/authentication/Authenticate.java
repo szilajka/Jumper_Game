@@ -1,6 +1,6 @@
 package jumper.authentication;
 
-import jumper.Queries.Queries;
+import jumper.queries.Queries;
 import jumper.controllers.Main;
 import jumper.model.DB.User;
 import org.apache.commons.codec.DecoderException;
@@ -15,7 +15,6 @@ import javax.persistence.EntityManager;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
 
 public class Authenticate {
     private static final Logger logger = LogManager.getLogger("Authenticate");
@@ -35,8 +34,7 @@ public class Authenticate {
             PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, keyLength);
             SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
             SecretKey key = skf.generateSecret(spec);
-            byte[] res = key.getEncoded();
-            return res;
+            return key.getEncoded();
         } catch (NoSuchAlgorithmException e) {
             logger.error("NoSuchAlgorithException happened, throwing,", e);
             throw new RuntimeException(e);
@@ -56,9 +54,6 @@ public class Authenticate {
         byte[] hashedPwd = hashPassword(password, Hex.decodeHex(foundUser.getSalt().toCharArray()));
         String stringHashedPwd = String.valueOf(Hex.encodeHex(hashedPwd));
         if(foundUser.getHashedPassword().equals(stringHashedPwd)){
-            /*if(foundUser.getScore() == null){
-                foundUser.setScore(new ArrayList());
-            }*/
             loggedInUser = foundUser;
             return foundUser;
         }

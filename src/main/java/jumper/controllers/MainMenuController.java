@@ -67,6 +67,20 @@ public class MainMenuController {
         }
     }
 
+    public void onBtnScoreBoardClicked(MouseEvent mouseEvent) {
+        if (mouseEvent.getButton() == MouseButton.PRIMARY) {
+            logger.debug("BtnScoreBoard clicked.");
+            ScoreBoard();
+        }
+    }
+
+    public void onBtnScoreBoardPressed(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.ENTER) {
+            logger.debug("BtnScoreBoard pressed.");
+            ScoreBoard();
+        }
+    }
+
     /**
      * Handles the button click on button Exit.
      *
@@ -97,7 +111,6 @@ public class MainMenuController {
 
     /**
      * Implements the loading of the first level.
-     *
      */
     private void FirstLevelStart() {
         try {
@@ -121,6 +134,23 @@ public class MainMenuController {
         } catch (Exception ex) {
             logger.error("Some error occured, closing application.", ex);
             MenuExit();
+        }
+    }
+
+    public void ScoreBoard() {
+        try {
+            var stage = Main.getPrimaryStage();
+            FXMLLoader fl = new FXMLLoader(getClass().getClassLoader()
+                    .getResource("Scoreboard.fxml"));
+            ScoreboardController sbController = new ScoreboardController();
+            fl.setController(sbController);
+            AnchorPane ap = (AnchorPane) fl.load();
+            var sbScene = stage.getScene();
+            sbScene.setRoot(ap);
+            sbController.setListView();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
