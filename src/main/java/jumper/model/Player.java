@@ -3,6 +3,8 @@ package jumper.model;
 import javafx.scene.paint.Color;
 import org.tinylog.Logger;
 
+import java.util.Objects;
+
 /**
  * The player class, this represents the user in the game.
  */
@@ -217,5 +219,46 @@ public class Player extends Rect {
      */
     public void setCrashedSpike(int crashedSpike) {
         this.crashedSpike = crashedSpike;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        Player player = (Player) o;
+        return Double.compare(player.startVelocityY, startVelocityY) == 0 &&
+                Double.compare(player.decreaseStartVelocityY, decreaseStartVelocityY) == 0 &&
+                Double.compare(player.maxVelocityX, maxVelocityX) == 0 &&
+                Double.compare(player.startY, startY) == 0 &&
+                Double.compare(player.actualY, actualY) == 0 &&
+                jumping == player.jumping &&
+                falling == player.falling &&
+                crashedSpike == player.crashedSpike;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), startVelocityY, decreaseStartVelocityY, maxVelocityX, startY, actualY, jumping, falling, crashedSpike);
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "startVelocityY=" + startVelocityY +
+                ", decreaseStartVelocityY=" + decreaseStartVelocityY +
+                ", maxVelocityX=" + maxVelocityX +
+                ", startY=" + startY +
+                ", actualY=" + actualY +
+                ", jumping=" + jumping +
+                ", falling=" + falling +
+                ", crashedSpike=" + crashedSpike +
+                '}';
     }
 }

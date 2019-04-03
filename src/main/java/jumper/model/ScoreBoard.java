@@ -2,6 +2,8 @@ package jumper.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
+import java.util.Objects;
+
 /**
  * Model class of the {@link jumper.controllers.ScoreboardController}.
  */
@@ -135,5 +137,33 @@ public class ScoreBoard {
      */
     public void setScore(String score) {
         this.score.set(score);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ScoreBoard that = (ScoreBoard) o;
+        return Objects.equals(rowNumber, that.rowNumber) &&
+                Objects.equals(userName, that.userName) &&
+                Objects.equals(score, that.score);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rowNumber, userName, score);
+    }
+
+    @Override
+    public String toString() {
+        return "ScoreBoard{" +
+                "rowNumber=" + rowNumber +
+                ", userName=" + userName +
+                ", score=" + score +
+                '}';
     }
 }

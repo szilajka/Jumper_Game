@@ -459,8 +459,9 @@ public class GameLevelEngine {
         boolean inPlayersRightX = Math.abs(playerWidth - fallingRectangle.getX()) < radiusX;
 
         if (playerLowerY && (inPlayersLeftX || inPlayersRightX)) {
-            Logger.debug("stopEnemy() method finished.");
-            Logger.info("The enemy object should be stopped: {}", fallingRectangle);
+            if (fallingRectangle.getVelocityY() != 0) {
+                Logger.info("The enemy object should be stopped: {}", fallingRectangle);
+            }
             return true;
         }
         return false;

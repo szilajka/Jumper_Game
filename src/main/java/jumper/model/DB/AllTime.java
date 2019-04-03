@@ -1,6 +1,7 @@
 package jumper.model.DB;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "all_time", schema = "jumper_app")
@@ -49,5 +50,33 @@ public class AllTime {
 
     public void setElapsedTime(int elapsedTime) {
         this.elapsedTime = elapsedTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AllTime allTime = (AllTime) o;
+        return id == allTime.id &&
+                elapsedTime == allTime.elapsedTime &&
+                Objects.equals(userName, allTime.userName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userName, elapsedTime);
+    }
+
+    @Override
+    public String toString() {
+        return "AllTime{" +
+                "id=" + id +
+                ", userName=" + userName +
+                ", elapsedTime=" + elapsedTime +
+                '}';
     }
 }

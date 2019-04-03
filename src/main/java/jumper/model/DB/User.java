@@ -5,6 +5,7 @@ import org.apache.commons.codec.binary.Hex;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "jumper_user", schema = "jumper_app")
@@ -82,5 +83,37 @@ public class User implements Serializable {
 
     public void setAllTime(AllTime allTime) {
         this.allTime = allTime;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(userName, user.userName) &&
+                Objects.equals(hashedPassword, user.hashedPassword) &&
+                Objects.equals(salt, user.salt) &&
+                Objects.equals(score, user.score) &&
+                Objects.equals(allTime, user.allTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userName, hashedPassword, salt, score, allTime);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userName='" + userName + '\'' +
+                ", hashedPassword='" + hashedPassword + '\'' +
+                ", salt='" + salt + '\'' +
+                ", score=" + score +
+                ", allTime=" + allTime +
+                '}';
     }
 }

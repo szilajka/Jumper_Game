@@ -3,6 +3,8 @@ package jumper.model;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+import java.util.Objects;
+
 /**
  * The superior class of the {@link Player} and the {@link FallingRectangle} classes.
  */
@@ -151,5 +153,37 @@ public abstract class Rect extends Rectangle {
      */
     public void setOldVelocityY(double oldVelocityY) {
         this.oldVelocityY = oldVelocityY;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Rect rect = (Rect) o;
+        return Double.compare(rect.velocityX, velocityX) == 0 &&
+                Double.compare(rect.velocityY, velocityY) == 0 &&
+                Double.compare(rect.oldVelocityX, oldVelocityX) == 0 &&
+                Double.compare(rect.oldVelocityY, oldVelocityY) == 0 &&
+                Objects.equals(color, rect.color);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color, velocityX, velocityY, oldVelocityX, oldVelocityY);
+    }
+
+    @Override
+    public String toString() {
+        return "Rect{" +
+                "color=" + color +
+                ", velocityX=" + velocityX +
+                ", velocityY=" + velocityY +
+                ", oldVelocityX=" + oldVelocityX +
+                ", oldVelocityY=" + oldVelocityY +
+                '}';
     }
 }

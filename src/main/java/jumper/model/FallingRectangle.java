@@ -4,6 +4,8 @@ import javafx.scene.paint.Color;
 import jumper.helpers.EnemyType;
 import org.tinylog.Logger;
 
+import java.util.Objects;
+
 /**
  * The enemy class.
  */
@@ -136,5 +138,34 @@ public class FallingRectangle extends Rect {
      */
     public EnemyType getEnemyType() {
         return enemyType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        FallingRectangle that = (FallingRectangle) o;
+        return Double.compare(that.startY, startY) == 0 &&
+                enemyType == that.enemyType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), startY, enemyType);
+    }
+
+    @Override
+    public String toString() {
+        return "FallingRectangle{" +
+                "startY=" + startY +
+                ", enemyType=" + enemyType +
+                '}';
     }
 }
