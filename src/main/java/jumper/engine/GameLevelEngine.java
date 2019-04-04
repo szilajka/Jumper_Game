@@ -29,7 +29,6 @@ import jumper.model.FallingRectangle;
 import jumper.model.Player;
 import jumper.model.Rect;
 import jumper.queries.Queries;
-import org.hibernate.annotations.common.util.impl.Log;
 import org.tinylog.Logger;
 
 import javax.persistence.EntityManager;
