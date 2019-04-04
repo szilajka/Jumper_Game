@@ -414,12 +414,17 @@ public class GameLevelEngine {
         if (enemies.size() == 0) {
             enemyPositionX = Math.floor(GameEngineHelper.WIDTH / 5);
             enemyPositionY = camera.getLayoutY() - enemyDistanceY;
+            if (enemyPositionY >= player.getActualY()
+                    && enemyPositionY <= player.getActualY() + player.getHeight()) {
+                enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
+            }
             return new FallingRectangle(enemyPositionX, enemyPositionY,
                     enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
         } else {
             FallingRectangle latestEnemy = enemies.get(enemies.size() - 1);
             double ifDistance = (latestEnemy.getWidth() * 1.2) + enemyDistanceX;
-            if (GameEngineHelper.WIDTH - (latestEnemy.getX() + latestEnemy.getWidth()) > ifDistance) {
+            if (GameEngineHelper.WIDTH -
+                    (latestEnemy.getX() + latestEnemy.getWidth()) > ifDistance) {
                 enemyPositionX = latestEnemy.getX() + latestEnemy.getWidth() + enemyDistanceX;
             } else if (latestEnemy.getX() > ifDistance) {
                 enemyPositionX = enemyDistanceX;
@@ -429,8 +434,18 @@ public class GameLevelEngine {
 
             if (latestEnemy.getY() - enemyDistanceY > levelEndY) {
                 enemyPositionY = latestEnemy.getStartY() - enemyDistanceY;
+                if (enemyPositionY + enemyDistanceY >= player.getActualY()
+                        && enemyPositionY - enemyDistanceY
+                        <= player.getActualY() + player.getHeight()) {
+                    enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
+                }
             } else {
                 enemyPositionY = levelEndY;
+                if (enemyPositionY + enemyDistanceY >= player.getActualY()
+                        && enemyPositionY - enemyDistanceY
+                        <= player.getActualY() + player.getHeight()) {
+                    enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
+                }
             }
             FallingRectangle newEnemy = new FallingRectangle(enemyPositionX, enemyPositionY,
                     enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);

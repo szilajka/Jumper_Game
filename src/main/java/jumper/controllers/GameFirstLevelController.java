@@ -121,7 +121,7 @@ public class GameFirstLevelController {
         timerUpdate = new Timer();
         timerUpdate.schedule(tsUpdate, 0, 17);
         timerEnemyGen = new Timer();
-        timerEnemyGen.schedule(tsEnemyGen, 0, 4000);
+        timerEnemyGen.schedule(tsEnemyGen, 0, 2000);
         Stage stage = Main.getPrimaryStage();
         stage.setOnCloseRequest(windowEvent -> {
             timerUpdate.cancel();
@@ -183,6 +183,7 @@ public class GameFirstLevelController {
             newCam.setLayoutY(0);
             mainScene.setCamera(newCam);
             mainScene.setRoot(ap);
+            mainController.setInGameTime();
             gameLevelEngine.removeKeyListener();
             Logger.debug("errorGoToMainMenu() method finished.");
         } catch (IOException io) {
@@ -220,7 +221,8 @@ public class GameFirstLevelController {
             em.persist(score);
             em.getTransaction().commit();
             em.detach(score);
-            Logger.debug("Score {} has been saved to {} user", score.getScore(),
+            Logger.debug("Score {} and next level {} has been saved to {} user",
+                    score.getScore(), score.getLevel(),
                     Authenticate.getLoggedInUser().getUserName());
         } else {
             Logger.error("Score value to {} has not been recorded!",

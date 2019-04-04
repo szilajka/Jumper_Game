@@ -11,6 +11,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import jumper.authentication.Authenticate;
+import jumper.helpers.GameEngineHelper;
 import jumper.model.DB.User;
 import org.apache.commons.codec.DecoderException;
 import org.tinylog.Logger;
@@ -103,6 +104,10 @@ public class LoginController {
             User findUser = Authenticate.Login(userName, password);
             if (findUser != null) {
                 Logger.debug("Login() method finished.");
+                GameEngineHelper.levelCounter =
+                        findUser.getScore().get(findUser.getScore().size() - 1).getLevel();
+                Logger.info("Game level {} set to {} user.",
+                        GameEngineHelper.levelCounter, findUser.getUserName());
                 GoToMainMenu();
             } else {
                 Logger.debug("Username or password is incorrect!");
