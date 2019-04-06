@@ -256,6 +256,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <!--These are the controller and model classes-->
+                <configuration>
+                    <excludes>
+                        <exclude>jumper/controllers/**/*</exclude>
+                        <exclude>jumper/model/**/*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
 
             <plugin>
