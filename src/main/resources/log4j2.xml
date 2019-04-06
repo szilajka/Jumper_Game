@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="debug">
     <Appenders>
-        <RollingFile name="MyRollingFileAppender" fileName="./logs/jumper_game.log" filePattern="./logs/jumper_game.%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="MyRollingFileAppender" fileName="./logs/jumper_game.log"
+                     filePattern="./logs/jumper_game.%d{yyyy-MM-dd}-%i.log">
             <PatternLayout
-                    pattern="%d{HH:mm:ss,SSS} %c{3} [%t] %-5level: %msg%n%throwable" />
+                    pattern="%d{HH:mm:ss,SSS} %c{3} [%t] %-5level: %msg%n%throwable"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="256 KB"/>
                 <TimeBasedTriggeringPolicy interval="8"/>
@@ -12,7 +13,7 @@
     </Appenders>
     <Loggers>
         <Root level="debug">
-            <AppenderRef ref="MyRollingFileAppender" />
+            <AppenderRef ref="MyRollingFileAppender"/>
         </Root>
     </Loggers>
 </Configuration>

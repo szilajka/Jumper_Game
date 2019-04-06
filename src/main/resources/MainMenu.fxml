@@ -5,20 +5,26 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <Button fx:id="btnStart" layoutX="250.0" layoutY="104.0" mnemonicParsing="false" onKeyPressed="#onBtnStartPressed" onMouseClicked="#onBtnStartClicked" prefHeight="90.0" prefWidth="280.0" text="Start" />
-      <Button fx:id="btnExit" layoutX="250.0" layoutY="442.0" mnemonicParsing="false" onKeyPressed="#onBtnExitPressed" onMouseClicked="#onBtnExitClicked" prefHeight="90.0" prefWidth="280.0" text="Exit" />
-      <Button fx:id="btnScoreBoard" layoutX="250.0" layoutY="265.0" mnemonicParsing="false" onKeyPressed="#onBtnScoreBoardPressed" onMouseClicked="#onBtnScoreBoardClicked" prefHeight="90.0" prefWidth="280.0" text="Scoreboard" />
-      <Label fx:id="lblTime" layoutX="45.0" layoutY="27.0" text="Time in game:">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
-      <Label fx:id="lblTimeQuery" layoutX="292.0" layoutY="27.0" prefHeight="44.0" prefWidth="449.0">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
-   </children>
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <Button fx:id="btnStart" layoutX="250.0" layoutY="104.0" mnemonicParsing="false"
+                onKeyPressed="#onBtnStartPressed" onMouseClicked="#onBtnStartClicked" prefHeight="90.0"
+                prefWidth="280.0" text="Start"/>
+        <Button fx:id="btnExit" layoutX="250.0" layoutY="442.0" mnemonicParsing="false" onKeyPressed="#onBtnExitPressed"
+                onMouseClicked="#onBtnExitClicked" prefHeight="90.0" prefWidth="280.0" text="Exit"/>
+        <Button fx:id="btnScoreBoard" layoutX="250.0" layoutY="265.0" mnemonicParsing="false"
+                onKeyPressed="#onBtnScoreBoardPressed" onMouseClicked="#onBtnScoreBoardClicked" prefHeight="90.0"
+                prefWidth="280.0" text="Scoreboard"/>
+        <Label fx:id="lblTime" layoutX="45.0" layoutY="27.0" text="Time in game:">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+        <Label fx:id="lblTimeQuery" layoutX="292.0" layoutY="27.0" prefHeight="44.0" prefWidth="449.0">
+            <font>
+                <Font size="24.0"/>
+            </font>
+        </Label>
+    </children>
 </AnchorPane>
