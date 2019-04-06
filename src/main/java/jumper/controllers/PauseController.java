@@ -48,9 +48,9 @@ public class PauseController {
      */
     public Label lblTimeQuery;
     /**
-     * Instance of the caller {@link GameFirstLevelController}.
+     * Instance of the caller {@link GameLevelController}.
      */
-    private GameFirstLevelController gameFirstLC;
+    private GameLevelController gameFirstLC;
     /**
      * A {@code boolean} used to really load this view.
      */
@@ -65,11 +65,11 @@ public class PauseController {
      * We give the game level controller as parameter, so later we can continue the game
      * from where we paused.
      *
-     * @param gameFirstLevelController The {@link GameFirstLevelController} that paused the game.
+     * @param gameLevelController The {@link GameLevelController} that paused the game.
      */
-    public PauseController(GameFirstLevelController gameFirstLevelController) {
+    public PauseController(GameLevelController gameLevelController) {
         Logger.debug("PauseController constructor started.");
-        this.gameFirstLC = gameFirstLevelController;
+        this.gameFirstLC = gameLevelController;
         this.keyEventHandlerMap = new HashMap<>();
         Logger.debug("PauseController constructor finished.");
     }
@@ -264,7 +264,7 @@ public class PauseController {
         try {
             Logger.debug("continueFirstLevel() method called.");
             var stage = Main.getPrimaryStage();
-            var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameFirstLevel.fxml"));
+            var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameLevel.fxml"));
             fl.setController(gameFirstLC);
             var ap = (AnchorPane) fl.load();
             var gameScene = stage.getScene();
@@ -273,7 +273,7 @@ public class PauseController {
             gameFirstLC.getEngine().letsContinue(ap);
             Logger.debug("continueFirstLevel() method finished.");
         } catch (IOException io) {
-            Logger.error("GameFirstLevel.fxml has not founded, closing the application.", io);
+            Logger.error("GameLevel.fxml has not founded, closing the application.", io);
             loadMainMenu();
         } catch (Exception ex) {
             Logger.error("Some error occurred during loading the main menu, closing the application.", ex);

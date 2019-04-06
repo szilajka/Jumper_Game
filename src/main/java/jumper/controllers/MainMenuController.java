@@ -149,8 +149,8 @@ public class MainMenuController {
             Stage stage = Main.getPrimaryStage();
 
             var fl = new FXMLLoader(getClass().getClassLoader()
-                    .getResource("GameFirstLevel.fxml"));
-            var gameFirstLC = new GameFirstLevelController();
+                    .getResource("GameLevel.fxml"));
+            var gameFirstLC = new GameLevelController();
             fl.setController(gameFirstLC);
             var root = (AnchorPane) fl.load();
             Scene gameScene = stage.getScene();
@@ -159,7 +159,7 @@ public class MainMenuController {
             gameFirstLC.runGameLevelEngine();
             Logger.debug("FirstLevelStart() method has finished.");
         } catch (IOException io) {
-            Logger.error("GameFirstLevel.fxml has not found, closing application.", io);
+            Logger.error("GameLevel.fxml has not found, closing application.", io);
             MenuExit();
         } catch (Exception ex) {
             Logger.error("Some error occurred, closing application.", ex);

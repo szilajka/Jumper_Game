@@ -6,9 +6,9 @@ import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import jumper.engine.GameEngine;
 import jumper.queries.Queries;
 import jumper.authentication.Authenticate;
-import jumper.engine.GameLevelEngine;
 import jumper.helpers.GameEngineHelper;
 import jumper.model.DB.AllTime;
 import jumper.model.DB.Score;
@@ -23,7 +23,7 @@ import java.util.TimerTask;
 /**
  * {@code Controller} of the {@code GameFirstLevel} view.
  */
-public class GameFirstLevelController {
+public class GameLevelController {
     /**
      * A {@link Timer} that starts the screen updating.
      */
@@ -48,33 +48,33 @@ public class GameFirstLevelController {
     protected boolean paused = false;
 
     /**
-     * The {@link GameLevelEngine} object that computes the updates.
+     * The {@link GameEngine} object that computes the updates.
      */
-    private GameLevelEngine gameLevelEngine;
+    private GameEngine gameEngine;
 
     //region Constructor
 
     /**
      * An empty {@code constructor} of the class.
      */
-    public GameFirstLevelController() {
-        Logger.debug("GameFirstLevelController constructor called.");
-        gameLevelEngine = new GameLevelEngine(GameFirstLevelController.this,
+    public GameLevelController() {
+        Logger.debug("GameLevelController constructor called.");
+        gameEngine = new GameEngine(GameLevelController.this,
                 GameEngineHelper.levelCounter);
     }
 
     //endregion Constructor
 
-    //region GameLevelEngine
+    //region GameEngine
 
     /**
-     * Gets the {@link GameLevelEngine} that computes the updates.
+     * Gets the {@link GameEngine} that computes the updates.
      *
      * @return the {@code Game Level Engine} object
      */
-    public GameLevelEngine getEngine() {
+    public GameEngine getEngine() {
         Logger.debug("getEngine() method called.");
-        return this.gameLevelEngine;
+        return this.gameEngine;
     }
 
     /**
@@ -90,11 +90,11 @@ public class GameFirstLevelController {
         em.close();
         if (score != null) {
             Logger.debug("No score found with the current user.");
-            gameLevelEngine.setLevelCounter(score.getLevel());
+            gameEngine.setLevelCounter(score.getLevel());
         }
         int velocityY = (score == null ? Player.finalStartVelocityY : score.getVelocityY());
-        gameLevelEngine.init(ap, velocityY);
-        gameLevelEngine.keyListener();
+        gameEngine.init(ap, velocityY);
+        gameEngine.keyListener();
         Logger.debug("initGameEngineLevel() method finished.");
     }
 
@@ -107,14 +107,14 @@ public class GameFirstLevelController {
         tsUpdate = new TimerTask() {
             @Override
             public synchronized void run() {
-                gameLevelEngine.runTask();
+                gameEngine.runTask();
             }
         };
 
         tsEnemyGen = new TimerTask() {
             @Override
             public synchronized void run() {
-                gameLevelEngine.generateEnemyTask();
+                gameEngine.generateEnemyTask();
             }
         };
 
@@ -140,14 +140,14 @@ public class GameFirstLevelController {
     public void escPressed() {
         Logger.debug("escPressed() method called.");
         paused = true;
-        gameLevelEngine.setLeftReleased(true);
-        gameLevelEngine.setRightReleased(true);
+        gameEngine.setLeftReleased(true);
+        gameEngine.setRightReleased(true);
         timerUpdate.cancel();
         timerEnemyGen.cancel();
         try {
             var stage = Main.getPrimaryStage();
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("Pause.fxml"));
-            var pauseC = new PauseController(GameFirstLevelController.this);
+            var pauseC = new PauseController(GameLevelController.this);
             fl.setController(pauseC);
             var ap = (AnchorPane) fl.load();
             Scene pauseScene = stage.getScene();
@@ -157,7 +157,7 @@ public class GameFirstLevelController {
             pauseScene.setRoot(ap);
             pauseC.keyListenerPause();
             pauseC.setInGameTime();
-            gameLevelEngine.removeKeyListener();
+            gameEngine.removeKeyListener();
             Logger.debug("escPressed() method finished.");
         } catch (IOException io) {
             Logger.error("Pause.fxml not found, going back to Main Menu.", io);
@@ -184,15 +184,15 @@ public class GameFirstLevelController {
             mainScene.setCamera(newCam);
             mainScene.setRoot(ap);
             mainController.setInGameTime();
-            gameLevelEngine.removeKeyListener();
+            gameEngine.removeKeyListener();
             Logger.debug("errorGoToMainMenu() method finished.");
         } catch (IOException io) {
             Logger.error("MainMenu.fxml not founded, closing application.", io);
-            gameLevelEngine.removeKeyListener();
+            gameEngine.removeKeyListener();
             Main.getPrimaryStage().close();
         } catch (Exception ex) {
             Logger.error("Something bad happened, closing application.", ex);
-            gameLevelEngine.removeKeyListener();
+            gameEngine.removeKeyListener();
             Main.getPrimaryStage().close();
         }
     }
@@ -240,7 +240,7 @@ public class GameFirstLevelController {
         }
         em.close();
         Logger.debug("Saving to database finished.");
-        gameLevelEngine.drawNextLevelText();
+        gameEngine.drawNextLevelText();
         Logger.debug("endLevel() method finished.");
     }
 
@@ -250,8 +250,8 @@ public class GameFirstLevelController {
     public void nextLevel() {
         Logger.debug("nextLevel() method called.");
         GameEngineHelper.levelCounter++;
-        gameLevelEngine.resetLevel();
-        gameLevelEngine.setLevelCounter(GameEngineHelper.levelCounter);
+        gameEngine.resetLevel();
+        gameEngine.setLevelCounter(GameEngineHelper.levelCounter);
         runGameLevelEngine();
         Logger.debug("nextLevel() method finished.");
     }
@@ -287,10 +287,10 @@ public class GameFirstLevelController {
         em.detach(score);
         em.close();
         Logger.debug("Saving to database finished.");
-        gameLevelEngine.drawGameOverText();
+        gameEngine.drawGameOverText();
         Logger.debug("gameOver() method finished.");
     }
 
-    //endregion GameLevelEngine
+    //endregion GameEngine
 
 }

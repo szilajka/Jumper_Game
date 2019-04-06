@@ -1,8 +1,7 @@
 package jumper.authentication;
 
-import jumper.queries.Queries;
-import jumper.controllers.Main;
 import jumper.model.DB.User;
+import jumper.queries.Queries;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.tinylog.Logger;

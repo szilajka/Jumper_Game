@@ -4,7 +4,6 @@ package jumper.engine;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -23,7 +22,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 import jumper.authentication.Authenticate;
-import jumper.controllers.GameFirstLevelController;
+import jumper.controllers.GameLevelController;
 import jumper.controllers.Main;
 import jumper.helpers.EnemyType;
 import jumper.helpers.GameEngineHelper;
@@ -39,13 +38,12 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
-import static jumper.helpers.GameEngineHelper.tolerance;
 
 /**
  * The {@code game's engine}.
  * This class is responsible to calculate the positions of the player, enemies and the walls.
  */
-public class GameLevelEngine {
+public class GameEngine {
     /**
      * A constant to declare the end of each level.
      */
@@ -100,9 +98,9 @@ public class GameLevelEngine {
      */
     private List<FallingRectangle> removeEnemies;
     /**
-     * The {@link GameFirstLevelController} that initialized this engine.
+     * The {@link GameLevelController} that initialized this engine.
      */
-    private GameFirstLevelController gameFirstLevelController;
+    private GameLevelController gameLevelController;
     /**
      * This {@link Map} stores the event handlers for key presses.
      */
@@ -258,15 +256,15 @@ public class GameLevelEngine {
     /**
      * Constructor of the class.
      *
-     * @param gameFirstLevelController the {@link GameFirstLevelController} that initialized this
+     * @param gameLevelController the {@link GameLevelController} that initialized this
      *                                 engine.
      * @param levelCounter             the actual level's value
      */
-    public GameLevelEngine(GameFirstLevelController gameFirstLevelController, int levelCounter) {
-        Logger.debug("GameLevelEngine object is creating.");
+    public GameEngine(GameLevelController gameLevelController, int levelCounter) {
+        Logger.debug("GameEngine object is creating.");
         this.removeEnemies = new ArrayList<>();
         this.keyEventHandlerMap = new HashMap<>();
-        this.gameFirstLevelController = gameFirstLevelController;
+        this.gameLevelController = gameLevelController;
         this.levelCounter = levelCounter;
     }
 
@@ -369,7 +367,7 @@ public class GameLevelEngine {
         } catch (Exception ex) {
             Logger.error("Something bad happened while resetting objects, " +
                     "go to Main Menu.", ex);
-            gameFirstLevelController.errorGoToMainMenu();
+            gameLevelController.errorGoToMainMenu();
         }
     }
 
@@ -383,7 +381,7 @@ public class GameLevelEngine {
         double endTime = System.nanoTime();
         elapsedTime += (endTime - startTime);
         elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
-        gameFirstLevelController.gameOver(elapsedTime);
+        gameLevelController.gameOver(elapsedTime);
         elapsedTime = 0.0;
         Logger.debug("gameOver() method finished.");
     }
@@ -474,7 +472,7 @@ public class GameLevelEngine {
         Logger.info("Level {} finished with {} points, player Y velocity: {}",
                 levelCounter, points, player.getStartVelocityY());
 
-        gameFirstLevelController.endLevel((int) points, elapsedTime,
+        gameLevelController.endLevel((int) points, elapsedTime,
                 Math.toIntExact(Double.valueOf(player.getStartVelocityY()).longValue()));
         elapsedTime = 0.0;
         Logger.debug("endGame() method finished.");
@@ -653,7 +651,7 @@ public class GameLevelEngine {
             if (keyCode == KeyCode.ESCAPE && !paused) {
                 if (gameOverGoToMain) {
                     Logger.info("Game over, going to main menu.");
-                    gameFirstLevelController.errorGoToMainMenu();
+                    gameLevelController.errorGoToMainMenu();
                 } else {
                     Logger.info("The game is paused.");
                     double pauseTime = System.nanoTime();
@@ -682,13 +680,13 @@ public class GameLevelEngine {
                     Logger.debug("Transaction finished.");
                     //------------------------------------------Entity manager end---------
                     elapsedTime = 0;
-                    gameFirstLevelController.escPressed();
+                    gameLevelController.escPressed();
                 }
             }
             if (keyCode == KeyCode.ENTER && startNextLevel) {
                 Logger.info("Enter pressed. Continuing with next level: {}.",
                         levelCounter + 1);
-                gameFirstLevelController.nextLevel();
+                gameLevelController.nextLevel();
             }
         };
 
@@ -745,11 +743,11 @@ public class GameLevelEngine {
             player.setOldVelocityX(0.0);
             player.setOldVelocityY(0.0);
             paused = false;
-            gameFirstLevelController.initGameEngineLevel(ap);
-            gameFirstLevelController.runGameLevelEngine();
+            gameLevelController.initGameEngineLevel(ap);
+            gameLevelController.runGameLevelEngine();
         } catch (Exception ex) {
             Logger.error("Can not continue the game, due to error.", ex);
-            gameFirstLevelController.errorGoToMainMenu();
+            gameLevelController.errorGoToMainMenu();
         }
     }
 
