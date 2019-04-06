@@ -17,6 +17,9 @@ import org.tinylog.Logger;
 import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
 import static jumper.helpers.GameEngineHelper.tolerance;
 
+/**
+ * This class implements the methods those are used by the engine.
+ */
 public class EngineMethods {
 
     /**

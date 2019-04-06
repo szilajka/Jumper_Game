@@ -6,5 +6,12 @@ package jumper.helpers;
  * This {@code enum} contains two {@code enemy types}: A {@code Basic} and a {@code Spike} enemy.
  */
 public enum EnemyType {
-    BasicEnemy, SpikeEnemy
+    /**
+     * The basic enemy type.
+     */
+    BasicEnemy,
+    /**
+     * The spike enemy type.
+     */
+    SpikeEnemy
 }

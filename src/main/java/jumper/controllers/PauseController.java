@@ -41,7 +41,7 @@ public class PauseController {
      */
     public Button btnMenu;
     /**
-     * Label for text: {@code 'Time in game:'}
+     * Label for text: {@code 'Time in game:'}.
      */
     public Label lblTime;
     /**

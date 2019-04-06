@@ -480,7 +480,7 @@ public class GameEngine {
 
 
     /**
-     * Draws the current frame to the {@link Canvas}
+     * Draws the current frame to the {@link Canvas}.
      */
     private void draw() {
         if (canvas != null) {
@@ -510,7 +510,7 @@ public class GameEngine {
     }
 
     /**
-     * A helper method to draw an {@link Image} to the {@code canvas}
+     * A helper method to draw an {@link Image} to the {@code canvas}.
      *
      * @param canvas the {@code canvas} that will be drawn on
      */

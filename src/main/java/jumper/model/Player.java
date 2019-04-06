@@ -62,7 +62,7 @@ public class Player extends Rect {
     private int crashedSpike = 0;
 
     /**
-     * {@code Player}'s constructor
+     * {@code Player}'s constructor.
      *
      * @param x      {@code Player}'s upper left X coordinate
      * @param y      {@code Player}'s upper left Y coordinate
@@ -75,7 +75,7 @@ public class Player extends Rect {
     }
 
     /**
-     * {@code Player}'s constructor
+     * {@code Player}'s constructor.
      *
      * @param x      {@code Player}'s upper left X coordinate
      * @param y      {@code Player}'s upper left Y coordinate

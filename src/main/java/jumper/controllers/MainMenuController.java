@@ -29,7 +29,7 @@ public class MainMenuController {
      */
     public Button btnStart;
     /**
-     * The Scoreboard button
+     * The Scoreboard button.
      */
     public Button btnScoreBoard;
     /**
@@ -37,7 +37,7 @@ public class MainMenuController {
      */
     public Button btnExit;
     /**
-     * Label for text: {@code 'Time in game:'}
+     * Label for text: {@code 'Time in game:'}.
      */
     public Label lblTime;
     /**

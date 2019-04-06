@@ -30,7 +30,7 @@ import org.tinylog.Logger;
  */
 public class ScoreboardController {
     /**
-     * {@link Label} for text: {@code Scoreboard}
+     * {@link Label} for text: {@code Scoreboard}.
      */
     public Label labelScoreBoard;
     /**
@@ -61,7 +61,7 @@ public class ScoreboardController {
     private Map<EventType<KeyEvent>, EventHandler<KeyEvent>> keyEventHandlerMap;
 
     /**
-     * Creates an empty {@code ScoreboardController}
+     * Creates an empty {@code ScoreboardController}.
      */
     public ScoreboardController() {
         this.keyEventHandlerMap = new HashMap<>();
