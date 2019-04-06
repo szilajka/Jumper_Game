@@ -40,78 +40,94 @@ public class EngineMethods {
                                                     final double enemyDistanceY,
                                                     FallingRectangle latestEnemy,
                                                     final double levelEndY) {
-        Logger.debug("generateEnemy() method called.");
-        double enemyPositionX;
-        double enemyPositionY;
-        double enemyWidth;
-        double enemyHeight;
-        double enemyFallingSpeed;
-        EnemyType enemyType;
-        if (level < 3) {
-            enemyWidth = FallingRectangle.basicEnemyWidth;
-            enemyHeight = FallingRectangle.basicEnemyHeight;
-            enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
-            enemyType = EnemyType.BasicEnemy;
-        } else if (level < 5) {
-            if (whichEnemyToGenerate % 2 == 0) {
+        try {
+            Logger.debug("generateEnemy() method called.");
+            double enemyPositionX;
+            double enemyPositionY;
+            double enemyWidth;
+            double enemyHeight;
+            double enemyFallingSpeed;
+            EnemyType enemyType;
+            if (level < 3) {
                 enemyWidth = FallingRectangle.basicEnemyWidth;
                 enemyHeight = FallingRectangle.basicEnemyHeight;
                 enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
                 enemyType = EnemyType.BasicEnemy;
+            } else if (level < 5) {
+                if (whichEnemyToGenerate % 2 == 0) {
+                    enemyWidth = FallingRectangle.basicEnemyWidth;
+                    enemyHeight = FallingRectangle.basicEnemyHeight;
+                    enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
+                    enemyType = EnemyType.BasicEnemy;
+                } else {
+                    enemyWidth = FallingRectangle.spikeEnemyWidth;
+                    enemyHeight = FallingRectangle.spikeEnemyHeight;
+                    enemyFallingSpeed = FallingRectangle.spikeEnemyVelocityY;
+                    enemyType = EnemyType.SpikeEnemy;
+                }
             } else {
                 enemyWidth = FallingRectangle.spikeEnemyWidth;
                 enemyHeight = FallingRectangle.spikeEnemyHeight;
                 enemyFallingSpeed = FallingRectangle.spikeEnemyVelocityY;
                 enemyType = EnemyType.SpikeEnemy;
             }
-        } else {
-            enemyWidth = FallingRectangle.spikeEnemyWidth;
-            enemyHeight = FallingRectangle.spikeEnemyHeight;
-            enemyFallingSpeed = FallingRectangle.spikeEnemyVelocityY;
-            enemyType = EnemyType.SpikeEnemy;
-        }
-        if (enemiesSize == 0) {
-            enemyPositionX = Math.floor(GameEngineHelper.WIDTH / 5);
-            enemyPositionY = camera.getLayoutY() - enemyDistanceY;
+            if (enemiesSize == 0) {
+                enemyPositionX = Math.floor(GameEngineHelper.WIDTH / 5);
+                enemyPositionY = camera.getLayoutY() - enemyDistanceY;
+                if (enemyPositionY >= player.getActualY()
+                        && enemyPositionY <= player.getActualY() + player.getHeight()) {
+                    enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
+                }
+                return new FallingRectangle(enemyPositionX, enemyPositionY,
+                        enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
+            } else {
+                double ifDistance = (latestEnemy.getWidth() * 1.2) + enemyDistanceX;
+                if (GameEngineHelper.WIDTH -
+                        (latestEnemy.getX() + latestEnemy.getWidth()) > ifDistance) {
+                    enemyPositionX = latestEnemy.getX() + latestEnemy.getWidth() + enemyDistanceX;
+                } else if (latestEnemy.getX() > ifDistance) {
+                    enemyPositionX = enemyDistanceX;
+                } else {
+                    enemyPositionX = 20;
+                }
+
+                if (latestEnemy.getY() - enemyDistanceY > levelEndY) {
+                    enemyPositionY = latestEnemy.getStartY() - enemyDistanceY;
+                    if (enemyPositionY + enemyDistanceY >= player.getActualY()
+                            && enemyPositionY - enemyDistanceY
+                            <= player.getActualY() + player.getHeight()) {
+                        enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
+                    }
+                } else {
+                    enemyPositionY = levelEndY;
+                    if (enemyPositionY + enemyDistanceY >= player.getActualY()
+                            && enemyPositionY - enemyDistanceY
+                            <= player.getActualY() + player.getHeight()) {
+                        enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
+                    }
+                }
+                FallingRectangle newEnemy = new FallingRectangle(enemyPositionX, enemyPositionY,
+                        enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
+
+                Logger.debug("generateEnemy() method finished.");
+                Logger.info("Method returned with enemy: {}, level: {}", newEnemy, level);
+
+                return newEnemy;
+            }
+        } catch (NullPointerException np) {
+            Logger.debug("Some NullPointer exception, latest enemy: {}", latestEnemy);
+            double enemyWidth = FallingRectangle.basicEnemyWidth;
+            double enemyHeight = FallingRectangle.basicEnemyHeight;
+            double enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
+            EnemyType enemyType = EnemyType.BasicEnemy;
+            double enemyPositionX = Math.floor(GameEngineHelper.WIDTH / 5);
+            double enemyPositionY = camera.getLayoutY() - enemyDistanceY;
             if (enemyPositionY >= player.getActualY()
                     && enemyPositionY <= player.getActualY() + player.getHeight()) {
                 enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
             }
             return new FallingRectangle(enemyPositionX, enemyPositionY,
                     enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
-        } else {
-            double ifDistance = (latestEnemy.getWidth() * 1.2) + enemyDistanceX;
-            if (GameEngineHelper.WIDTH -
-                    (latestEnemy.getX() + latestEnemy.getWidth()) > ifDistance) {
-                enemyPositionX = latestEnemy.getX() + latestEnemy.getWidth() + enemyDistanceX;
-            } else if (latestEnemy.getX() > ifDistance) {
-                enemyPositionX = enemyDistanceX;
-            } else {
-                enemyPositionX = 20;
-            }
-
-            if (latestEnemy.getY() - enemyDistanceY > levelEndY) {
-                enemyPositionY = latestEnemy.getStartY() - enemyDistanceY;
-                if (enemyPositionY + enemyDistanceY >= player.getActualY()
-                        && enemyPositionY - enemyDistanceY
-                        <= player.getActualY() + player.getHeight()) {
-                    enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
-                }
-            } else {
-                enemyPositionY = levelEndY;
-                if (enemyPositionY + enemyDistanceY >= player.getActualY()
-                        && enemyPositionY - enemyDistanceY
-                        <= player.getActualY() + player.getHeight()) {
-                    enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
-                }
-            }
-            FallingRectangle newEnemy = new FallingRectangle(enemyPositionX, enemyPositionY,
-                    enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
-
-            Logger.debug("generateEnemy() method finished.");
-            Logger.info("Method returned with enemy: {}, level: {}", newEnemy, level);
-
-            return newEnemy;
         }
     }
 
