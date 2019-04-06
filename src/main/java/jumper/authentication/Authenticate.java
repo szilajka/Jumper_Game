@@ -75,27 +75,33 @@ public class Authenticate {
      *
      * @param userName the {@code user}'s username that is stored in the database
      * @param password the {@code user}'s password
+     * @param em       the {@link EntityManager} that connects to database
      * @return If the {@code user} is not found in the database, null, else the found {@code user}.
      * @throws DecoderException if the hashed password contains illegal characters
      */
-    public static User Login(final String userName, final String password) throws DecoderException {
-        Logger.debug("Login() method called.");
-        EntityManager em = Main.getEntityManager();
-        User foundUser = Queries.getUserByUserName(em, userName);
-        if (foundUser == null) {
-            Logger.debug("Returning null value, the {} user not exists.", userName);
-            return null;
-        }
+    public static User Login(final String userName, final String password, EntityManager em)
+            throws DecoderException {
+        try {
+            Logger.debug("Login() method called.");
+            User foundUser = Queries.getUserByUserName(em, userName);
+            if (foundUser == null) {
+                Logger.debug("Returning null value, the {} user not exists.", userName);
+                return null;
+            }
 
-        byte[] hashedPwd = hashPassword(password, Hex.decodeHex(foundUser.getSalt().toCharArray()));
-        String stringHashedPwd = String.valueOf(Hex.encodeHex(hashedPwd));
-        if (foundUser.getHashedPassword().equals(stringHashedPwd)) {
-            Logger.debug("{} user has been found.", userName);
-            loggedInUser = foundUser;
-            return foundUser;
-        } else {
-            Logger.debug("Returning null value, " +
-                    "the {} user's password not matching the real password", userName);
+            byte[] hashedPwd = hashPassword(password, Hex.decodeHex(foundUser.getSalt().toCharArray()));
+            String stringHashedPwd = String.valueOf(Hex.encodeHex(hashedPwd));
+            if (foundUser.getHashedPassword().equals(stringHashedPwd)) {
+                Logger.debug("{} user has been found.", userName);
+                loggedInUser = foundUser;
+                return foundUser;
+            } else {
+                Logger.debug("Returning null value, " +
+                        "the {} user's password not matching the real password", userName);
+                return null;
+            }
+        } catch (NullPointerException np) {
+            Logger.debug("username or password is null.");
             return null;
         }
     }

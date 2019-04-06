@@ -261,6 +261,7 @@
                     <excludes>
                         <exclude>jumper/controllers/**/*</exclude>
                         <exclude>jumper/model/**/*</exclude>
+                        <exclude>jumper/engine/GameLevelEngine.class</exclude>
                     </excludes>
                 </configuration>
             </plugin>

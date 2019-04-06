@@ -16,6 +16,7 @@ import jumper.model.DB.User;
 import org.apache.commons.codec.DecoderException;
 import org.tinylog.Logger;
 
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.io.IOException;
 
@@ -94,6 +95,7 @@ public class LoginController {
     private void Login() {
         try {
             Logger.debug("Login() method called.");
+            EntityManager em = Main.getEntityManager();
             final String userName = inputUserName.getText().trim();
             final String password = passwordField.getText().trim();
             if (userName.trim().length() == 0 || password.trim().length() == 0) {
@@ -101,7 +103,7 @@ public class LoginController {
                 labelErrorUserPwd.setText("Username or password is incorrect!");
                 return;
             }
-            User findUser = Authenticate.Login(userName, password);
+            User findUser = Authenticate.Login(userName, password, em);
             if (findUser != null) {
                 Logger.debug("Login() method finished.");
                 GameEngineHelper.levelCounter =
