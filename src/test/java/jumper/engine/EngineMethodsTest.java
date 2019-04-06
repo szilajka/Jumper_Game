@@ -2,6 +2,7 @@ package jumper.engine;
 
 import javafx.scene.Camera;
 import javafx.scene.ParallelCamera;
+import javafx.scene.shape.Line;
 import jumper.helpers.EnemyType;
 import jumper.model.FallingRectangle;
 import jumper.model.Player;
@@ -10,8 +11,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EngineMethodsTest {
@@ -25,6 +28,7 @@ class EngineMethodsTest {
     private static Camera camera;
     private static List<FallingRectangle> enemies;
     private static List<FallingRectangle> remove;
+    private static List<Line> borders;
 
     @BeforeAll
     static void setup() {
@@ -37,6 +41,19 @@ class EngineMethodsTest {
         camera = new ParallelCamera();
         enemies = new ArrayList<>();
         remove = new ArrayList<>();
+        borders = new ArrayList<>();
+        Line baseLine = new Line(0.0, 2000, 800,
+                2000);
+        Line leftLine = new Line(0.0, 0.0, 0.0, 2000);
+        Line rightLine = new Line(800, 0.0, 800,
+                2000);
+
+        baseLine.setStrokeWidth(3);
+        leftLine.setStrokeWidth(100);
+        rightLine.setStrokeWidth(100);
+
+
+        borders.addAll(Arrays.asList(baseLine, leftLine, rightLine));
     }
 
     @Test
@@ -123,7 +140,7 @@ class EngineMethodsTest {
     }
 
     @Test
-    void emptyEnemies(){
+    void emptyEnemies() {
         enemies.clear();
         remove.clear();
         EngineMethods.moveEnemy(enemies, remove, player);
@@ -133,7 +150,7 @@ class EngineMethodsTest {
     }
 
     @Test
-    void noStop(){
+    void noStop() {
         enemies.clear();
         remove.clear();
         frS.setX(100.0);
@@ -148,7 +165,7 @@ class EngineMethodsTest {
     }
 
     @Test
-    void stopMovingEnemies(){
+    void stopMovingEnemies() {
         enemies.clear();
         remove.clear();
         frStop.setX(100.0);
@@ -210,11 +227,110 @@ class EngineMethodsTest {
         assertFalse(EngineMethods.isEndGame(player, levelEndY), "player.actualY should be higher than levelEndY");
     }
 
-    /*@Test
-    void calculatePlayerX() {
+    @Test
+    void calculatePlayerXWithoutCrash() {
+        player.setVelocityX(50.0);
+        player.setX(100);
+        player.setY(1000);
+        player.setActualY(1000);
+        player.setVelocityY(-50.0);
+        double pX = player.getX();
+        EngineMethods.calculatePlayerX(false, false, false, false,
+                null, null, player, false, true, null);
+        assertNotEquals(pX, player.getX(), "Player should be moved to left");
+        pX = player.getX();
+        EngineMethods.calculatePlayerX(false, false, false, false,
+                null, null, player, true, false, null);
+        assertNotEquals(pX, player.getX(), "Player should be moved to right");
     }
 
     @Test
+    void calculatePlayerXWithLeftCrash() {
+        player.setVelocityX(50.0);
+        player.setX(100);
+        player.setY(1000);
+        player.setActualY(1000);
+        player.setVelocityY(-50.0);
+        EngineMethods.calculatePlayerX(true, false, false, false,
+                null, null, player, false, true, borders);
+        assertEquals(borders.get(1).getStartX() + borders.get(1).getStrokeWidth() / 2 + 0.5,
+                player.getX(), "Player X should be the left line + tolerance");
+        player.setX(300);
+        fr.setX(200);
+        EngineMethods.calculatePlayerX(true, false, true, false,
+                fr, null, player, false, true, null);
+        assertEquals(fr.getX() + fr.getWidth() + 0.5,
+                player.getX(), "Player X should be enemy width + tolerance");
+    }
+
+    @Test
+    void calculatePlayerXWithRightCrash() {
+        player.setVelocityX(50.0);
+        player.setX(600);
+        player.setY(1000);
+        player.setActualY(1000);
+        player.setVelocityY(-50.0);
+        EngineMethods.calculatePlayerX(false, true, false, false,
+                null, null, player, true, false, borders);
+        assertEquals(borders.get(2).getStartX() - borders.get(2).getStrokeWidth() / 2 -
+                        player.getWidth() - 0.5, player.getX(),
+                "Player width should be the right line - tolerance");
+        player.setX(300);
+        fr.setX(400);
+        EngineMethods.calculatePlayerX(false, true, false, false,
+                null, fr, player, true, false, null);
+        assertEquals(fr.getX() - 0.5,
+                player.getX() + player.getWidth(), "Player width should be " +
+                        "enemy X - tolerance");
+    }
+
+    @Test
+    void calculatePlayerXWithCrashesReleases() {
+        player.setX(300);
+        player.setVelocityX(-50);
+        double sixtyVX = -50 * sixtyFpsSeconds;
+        EngineMethods.calculatePlayerX(false, true, false,
+                false, null, null, player, false,
+                true, null);
+        assertEquals(300 + sixtyVX, player.getX(), "Player X should be moved to left.");
+        player.setX(300);
+        player.setVelocityX(50);
+        sixtyVX = 50 * sixtyFpsSeconds;
+        EngineMethods.calculatePlayerX(true, false, false,
+                false, null, null, player, true,
+                false, null);
+        assertEquals(300 + sixtyVX, player.getX(), "Player X should be moved to right.");
+    }
+
+    @Test
+    void calculatePlayerXTwoCrashes() {
+        player.setX(500);
+        fr.setX(300);
+        EngineMethods.calculatePlayerX(true, true, true,
+                false, fr, null, player,
+                false, false, borders);
+        assertEquals(borders.get(1).getStartX() + borders.get(1).getStrokeWidth() / 2 + 0.5,
+                player.getX(), "Player X should be the left line + tolerance.");
+
+        EngineMethods.calculatePlayerX(true, true, false,
+                true, fr, null, player,
+                false, false, borders);
+        assertEquals(borders.get(2).getStartX() - borders.get(2).getStrokeWidth() / 2 -
+                        player.getWidth() - 0.5, player.getX(),
+                "Player width should be the right line - tolerance");
+        EngineMethods.calculatePlayerX(true, true, false,
+                false, fr, null, player,
+                false, false, borders);
+        assertEquals(fr.getX() + fr.getWidth() + 0.5, player.getX(),
+                "Player x should be enemy width + tolerance.");
+        EngineMethods.calculatePlayerX(true, true, false,
+                false, null, fr, player,
+                false, false, borders);
+        assertEquals(borders.get(1).getStartX() + borders.get(1).getStrokeWidth() / 2 + 0.5,
+                player.getX(), "Player X should be left wall + tolerance");
+    }
+
+    /*@Test
     void calculatePlayerY() {
     }*/
 

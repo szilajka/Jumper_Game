@@ -264,7 +264,7 @@ public class EngineMethods {
                 }
             } else {
                 Logger.info("Player stuck between left wall and enemy.");
-                player.setX(borders.get(1).getStartX() + borders.get(1).getStrokeWidth()
+                player.setX(borders.get(1).getStartX() + borders.get(1).getStrokeWidth() / 2
                         + tolerance);
             }
         }
