@@ -266,6 +266,7 @@ public class GameFirstLevelController {
         Logger.debug("gameOver() method called.");
         timerUpdate.cancel();
         timerEnemyGen.cancel();
+        GameEngineHelper.levelCounter = 1;
         EntityManager em = Main.getEntityManager();
         AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
         int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());

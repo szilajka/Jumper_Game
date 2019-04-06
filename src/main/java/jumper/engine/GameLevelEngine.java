@@ -4,6 +4,9 @@ package jumper.engine;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -87,7 +90,7 @@ public class GameLevelEngine {
     /**
      * This is used to calculate the {@code player}'s actual Y coordinate.
      */
-    private double collapsedTime = 0.0;
+    private SimpleDoubleProperty collapsedTime = new SimpleDoubleProperty(0.0);
     /**
      * A constant that is used to calculate the {@code player}'s actual Y coordinate.
      */
@@ -107,7 +110,7 @@ public class GameLevelEngine {
     /**
      * This is used to calculate whether the {@code player} has crashed with something.
      */
-    private double actualVelocityY = 0.0;
+    private SimpleDoubleProperty actualVelocityY = new SimpleDoubleProperty(0.0);
     /**
      * This is used to calculate whether the {@code player} has crashed with something.
      */
@@ -136,7 +139,7 @@ public class GameLevelEngine {
     /**
      * The number of the {@code enemies} that the {@code player} stepped on.
      */
-    private int steppedEnemies = 0;
+    private SimpleIntegerProperty steppedEnemies = new SimpleIntegerProperty(0);
     /**
      * The level counter.
      */
@@ -152,7 +155,7 @@ public class GameLevelEngine {
     /**
      * Used to decide whether a player is jumped to a new enemy or to an old one.
      */
-    private boolean steppedOnThisEnemy = false;
+    private SimpleBooleanProperty steppedOnThisEnemy = new SimpleBooleanProperty(false);
     /**
      * If true, the next level starts when the ENTER key pressed.
      */
@@ -359,7 +362,7 @@ public class GameLevelEngine {
             canvas.getGraphicsContext2D().clearRect(0, 0,
                     canvas.getWidth(), canvas.getHeight());
             generatedEnemies = 0;
-            steppedEnemies = 0;
+            steppedEnemies.set(0);
             elapsedTime = 0;
             startTime = System.nanoTime();
             Logger.debug("resetObjects() method finished.");
@@ -367,142 +370,6 @@ public class GameLevelEngine {
             Logger.error("Something bad happened while resetting objects, " +
                     "go to Main Menu.", ex);
             gameFirstLevelController.errorGoToMainMenu();
-        }
-    }
-
-    /**
-     * Generates enemies regarding to the actual level.
-     *
-     * @param level the game level
-     * @return the created enemy
-     */
-    private FallingRectangle generateEnemy(int level) {
-        Logger.debug("generateEnemy() method called.");
-        double enemyPositionX;
-        double enemyPositionY;
-        double enemyWidth;
-        double enemyHeight;
-        double enemyFallingSpeed;
-        EnemyType enemyType;
-        generatedEnemies++;
-        if (level < 3) {
-            enemyWidth = FallingRectangle.basicEnemyWidth;
-            enemyHeight = FallingRectangle.basicEnemyHeight;
-            enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
-            enemyType = EnemyType.BasicEnemy;
-        } else if (level < 5) {
-            if (whichEnemyToGenerate % 2 == 0) {
-                whichEnemyToGenerate = 1;
-                enemyWidth = FallingRectangle.basicEnemyWidth;
-                enemyHeight = FallingRectangle.basicEnemyHeight;
-                enemyFallingSpeed = FallingRectangle.basicEnemyVelocitiyY;
-                enemyType = EnemyType.BasicEnemy;
-            } else {
-                whichEnemyToGenerate = 0;
-                enemyWidth = FallingRectangle.spikeEnemyWidth;
-                enemyHeight = FallingRectangle.spikeEnemyHeight;
-                enemyFallingSpeed = FallingRectangle.spikeEnemyVelocityY;
-                enemyType = EnemyType.SpikeEnemy;
-            }
-        } else {
-            enemyWidth = FallingRectangle.spikeEnemyWidth;
-            enemyHeight = FallingRectangle.spikeEnemyHeight;
-            enemyFallingSpeed = FallingRectangle.spikeEnemyVelocityY;
-            enemyType = EnemyType.SpikeEnemy;
-        }
-        if (enemies.size() == 0) {
-            enemyPositionX = Math.floor(GameEngineHelper.WIDTH / 5);
-            enemyPositionY = camera.getLayoutY() - enemyDistanceY;
-            if (enemyPositionY >= player.getActualY()
-                    && enemyPositionY <= player.getActualY() + player.getHeight()) {
-                enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
-            }
-            return new FallingRectangle(enemyPositionX, enemyPositionY,
-                    enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
-        } else {
-            FallingRectangle latestEnemy = enemies.get(enemies.size() - 1);
-            double ifDistance = (latestEnemy.getWidth() * 1.2) + enemyDistanceX;
-            if (GameEngineHelper.WIDTH -
-                    (latestEnemy.getX() + latestEnemy.getWidth()) > ifDistance) {
-                enemyPositionX = latestEnemy.getX() + latestEnemy.getWidth() + enemyDistanceX;
-            } else if (latestEnemy.getX() > ifDistance) {
-                enemyPositionX = enemyDistanceX;
-            } else {
-                enemyPositionX = 20;
-            }
-
-            if (latestEnemy.getY() - enemyDistanceY > levelEndY) {
-                enemyPositionY = latestEnemy.getStartY() - enemyDistanceY;
-                if (enemyPositionY + enemyDistanceY >= player.getActualY()
-                        && enemyPositionY - enemyDistanceY
-                        <= player.getActualY() + player.getHeight()) {
-                    enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
-                }
-            } else {
-                enemyPositionY = levelEndY;
-                if (enemyPositionY + enemyDistanceY >= player.getActualY()
-                        && enemyPositionY - enemyDistanceY
-                        <= player.getActualY() + player.getHeight()) {
-                    enemyPositionY = player.getActualY() + player.getHeight() * 1.2;
-                }
-            }
-            FallingRectangle newEnemy = new FallingRectangle(enemyPositionX, enemyPositionY,
-                    enemyWidth, enemyHeight, Color.BLUE, enemyFallingSpeed, enemyType);
-
-            Logger.debug("generateEnemy() method finished.");
-            Logger.info("Method returned with enemy: {}, level: {}", newEnemy, level);
-
-            return newEnemy;
-        }
-    }
-
-    /**
-     * Decides whether an enemy object should be stopped or not.
-     *
-     * @param fallingRectangle the enemy object that should be examined
-     * @return the value whether the enemy should be stopped or not
-     */
-    private boolean stopEnemy(FallingRectangle fallingRectangle) {
-        double radiusX = 100.0 + tolerance;
-        double playerHeight = player.getY() + player.getHeight();
-        double fallingRectangleWidth = fallingRectangle.getX() + fallingRectangle.getWidth();
-        double playerWidth = player.getX() + player.getWidth();
-
-        boolean playerLowerY = playerHeight - fallingRectangle.getY() < -tolerance;
-        boolean inPlayersLeftX = Math.abs(player.getX() - (fallingRectangleWidth)) < radiusX;
-        boolean inPlayersRightX = Math.abs(playerWidth - fallingRectangle.getX()) < radiusX;
-
-        if (playerLowerY && (inPlayersLeftX || inPlayersRightX)) {
-            if (fallingRectangle.getVelocityY() != 0) {
-                Logger.info("The enemy object should be stopped: {}", fallingRectangle);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Calculates the coordinates of the enemies.
-     */
-    private void moveEnemy() {
-        for (int i = 0; i < enemies.size(); i++) {
-            enemies.get(i).setY(enemies.get(i).getY() +
-                    (enemies.get(i).getVelocityY() * sixtyFpsSeconds));
-            if (stopEnemy(enemies.get(i))) {
-                enemies.get(i).setVelocityY(0.0);
-            }
-
-            if (Intersection.upIntersection(player, enemies.get(i))) {
-                removeEnemies.add(enemies.get(i));
-            }
-
-            for (int j = 0; j < enemies.size(); j++) {
-                if (i != j && Intersection.upIntersection(enemies.get(i), enemies.get(j))) {
-                    removeEnemies.add(enemies.get(i));
-                    break;
-                }
-            }
-
         }
     }
 
@@ -531,9 +398,9 @@ public class GameLevelEngine {
         FallingRectangle enemyUnderPlayer = null, enemyLeftPlayer = null, enemyRightPlayer = null;
         player.setY(player.getActualY());
         actualVelocityX = Math.abs(player.getVelocityX() * sixtyFpsSeconds);
-        actualVelocityY = Math.abs(actualVelocityY);
+        actualVelocityY.set(Math.abs(actualVelocityY.get()));
         for (int i = 0; i < enemies.size(); i++) {
-            if (Intersection.upIntersection(player, enemies.get(i), actualVelocityY)) {
+            if (Intersection.upIntersection(player, enemies.get(i), actualVelocityY.get())) {
                 crashed = true;
                 if (enemies.get(i).getEnemyType() == EnemyType.SpikeEnemy) {
                     player.setCrashedSpike(player.getCrashedSpike() + 1);
@@ -546,7 +413,7 @@ public class GameLevelEngine {
                 i--;
                 continue;
             } else if (Intersection.bottomIntersection(player,
-                    enemies.get(i), actualVelocityY)
+                    enemies.get(i), actualVelocityY.get())
                 /*&& player.getActualY() >= player.getStartY()*/) {
                 enemyUnderPlayer = enemies.get(i);
                 standingOnEnemy = true;
@@ -554,9 +421,9 @@ public class GameLevelEngine {
                     player.setJumping(false);
                 }
             } else if ((player.getActualY() + player.getHeight())
-                    < (borders.get(0).getStartY() + actualVelocityY)
+                    < (borders.get(0).getStartY() + actualVelocityY.get())
                     && (player.getActualY() + player.getHeight())
-                    >= (borders.get(0).getStartY() - actualVelocityY)
+                    >= (borders.get(0).getStartY() - actualVelocityY.get())
                     && player.getActualY() > player.getStartY()) {
                 standingOnLine = true;
                 if (upReleased) {
@@ -581,12 +448,14 @@ public class GameLevelEngine {
             }
         }
 
-        calculatePlayerY(crashed, standingOnEnemy, standingOnLine, enemyUnderPlayer);
+        EngineMethods.calculatePlayerY(crashed, standingOnEnemy, standingOnLine, enemyUnderPlayer,
+                player, borders, steppedOnThisEnemy, upReleased, steppedEnemies, actualVelocityY,
+                collapsedTime, g);
 
-        calculatePlayerX(leftCrashed, rightCrashed, leftCrashedLine, rightCrashedLine,
-                enemyLeftPlayer, enemyRightPlayer);
+        EngineMethods.calculatePlayerX(leftCrashed, rightCrashed, leftCrashedLine, rightCrashedLine,
+                enemyLeftPlayer, enemyRightPlayer, player, leftReleased, rightReleased, borders);
 
-        if (isEndGame()) {
+        if (EngineMethods.isEndGame(player, levelEndY)) {
             endGame();
         }
     }
@@ -599,7 +468,7 @@ public class GameLevelEngine {
         double endTime = System.nanoTime();
         elapsedTime += (endTime - startTime);
         elapsedTime = TimeUnit.NANOSECONDS.toSeconds(Double.valueOf(elapsedTime).longValue());
-        double points = GameEngineHelper.calculatePoints(generatedEnemies, steppedEnemies,
+        double points = GameEngineHelper.calculatePoints(generatedEnemies, steppedEnemies.get(),
                 elapsedTime);
 
         Logger.info("Level {} finished with {} points, player Y velocity: {}",
@@ -611,167 +480,9 @@ public class GameLevelEngine {
         Logger.debug("endGame() method finished.");
     }
 
-    /**
-     * Calculates the {@code player}'s X coordinates.
-     *
-     * @param leftCrashed      whether the {@code player}'s left side crashed
-     * @param rightCrashed     whether the {@code player}'s right side crashed
-     * @param leftCrashedLine  whether the {@code player}'s left side crashed with the left wall
-     * @param rightCrashedLine whether the {@code player}'s right side crashed with the right wall
-     * @param enemyLeftPlayer  the enemy that crashed with the {@code player}'s left side
-     * @param enemyRightPlayer the enemy that crashed with the {@code player}'s right side
-     */
-    private void calculatePlayerX(boolean leftCrashed, boolean rightCrashed,
-                                  boolean leftCrashedLine, boolean rightCrashedLine,
-                                  FallingRectangle enemyLeftPlayer,
-                                  FallingRectangle enemyRightPlayer) {
-        if (!leftCrashed && !rightCrashed &&
-                ((!leftReleased && rightReleased) ||
-                        (leftReleased && !rightReleased))) {
-            player.setX(player.getX() + (player.getVelocityX() * sixtyFpsSeconds));
-        } else if (leftCrashed && !rightCrashed && rightReleased) {
-            player.setVelocityX(0.0);
-            if (enemyLeftPlayer != null) {
-                Logger.info("Player's left side crashed with enemy.");
-                player.setX(enemyLeftPlayer.getX() + enemyLeftPlayer.getWidth()
-                        + tolerance);
-            } else {
-                Logger.info("Player's left side crashed with line.");
-                player.setX(borders.get(1).getStartX() + borders.get(1).getStrokeWidth() / 2
-                        + tolerance);
-            }
-        } else if (!leftCrashed && rightCrashed && leftReleased) {
-            player.setVelocityX(0.0);
-            if (enemyRightPlayer != null) {
-                Logger.info("Player's right side crashed with enemy.");
-                player.setX(enemyRightPlayer.getX() - player.getWidth() - tolerance);
-            } else {
-                Logger.info("Player's right side crashed with line.");
-                player.setX(borders.get(2).getStartX() - borders.get(2).getStrokeWidth() / 2
-                        - player.getWidth() - tolerance);
-            }
-        } else if (!leftCrashed && rightCrashed && !leftReleased) {
-            Logger.info("Player's right side crashed.");
-            player.setX(player.getX() + (player.getVelocityX() * sixtyFpsSeconds));
-        } else if (leftCrashed && !rightCrashed && !rightReleased) {
-            Logger.info("Player's left side crashed.");
-            player.setX(player.getX() + (player.getVelocityX() * sixtyFpsSeconds));
-        } else if (leftCrashed && rightCrashed) {
-            player.setVelocityX(0.0);
-            if (enemyLeftPlayer != null) {
-                if (leftCrashedLine) {
-                    player.setX(borders.get(1).getStartX() + borders.get(1).getStrokeWidth() / 2
-                            + tolerance);
-                } else if (rightCrashedLine) {
-                    player.setX(borders.get(2).getStartX() - borders.get(2).getStrokeWidth() / 2
-                            - player.getWidth() - tolerance);
-                } else {
-                    player.setX(enemyLeftPlayer.getX() + enemyLeftPlayer.getWidth() + tolerance);
-                }
-            } else {
-                Logger.info("Player stuck between left wall and enemy.");
-                player.setX(borders.get(1).getStartX() + borders.get(1).getStrokeWidth()
-                        + tolerance);
-            }
-        }
-    }
 
-    /**
-     * Calculates the {@code player}'s Y coordinate.
-     *
-     * @param crashed         whether the {@code player} crashed with something
-     * @param standingOnEnemy whether the {@code player} standing on {@code enemy}
-     * @param standingOnLine  whether the {@code player} standing on {@code line}
-     * @param enemy           the {@code enemy} that the {@code player} crashed with
-     */
-    private void calculatePlayerY(boolean crashed, boolean standingOnEnemy, boolean standingOnLine,
-                                  FallingRectangle enemy) {
-        if (crashed && standingOnEnemy) {
-            if (!steppedOnThisEnemy) {
-                steppedOnThisEnemy = true;
-                steppedEnemies++;
-            }
-            player.setStartVelocityY(player.getStartVelocityY()
-                    + player.getDecreaseStartVelocityY());
-            player.setStartY(enemy.getY() - tolerance);
-            actualVelocityY = tolerance;
-            player.setFalling(false);
-            Logger.info("Player standing on enemy and crashed with enemy. " +
-                    "New Y velocity: {}", player.getStartVelocityY());
-        } else if (crashed && standingOnLine) {
-            player.setStartVelocityY(player.getStartVelocityY()
-                    + player.getDecreaseStartVelocityY());
-            player.setStartY(borders.get(0).getStartY() - tolerance);
-            actualVelocityY = tolerance;
-            player.setFalling(false);
-            steppedOnThisEnemy = false;
-            Logger.info("Player standing on line and crashed with enemy. " +
-                    "New Y velocity: {}", player.getStartVelocityY());
-        } else if (crashed && player.isJumping()) {
-            player.setStartVelocityY(player.getStartVelocityY()
-                    + player.getDecreaseStartVelocityY());
-            collapsedTime = 0.0;
-            player.setStartY(player.getActualY());
-            double fallingVelocity = g / 2 * Math.pow(collapsedTime, 2);
-            actualVelocityY = tolerance;
-            player.setActualY(player.getStartY() + (fallingVelocity));
-            player.setFalling(true);
-            steppedOnThisEnemy = false;
-            Logger.info("Player was jumping when crashed with enemy. " +
-                    "New Y velocity: {}", player.getStartVelocityY());
-        } else if (standingOnEnemy && !player.isJumping()) {
-            if (!steppedOnThisEnemy) {
-                steppedOnThisEnemy = true;
-                steppedEnemies++;
-            }
-            player.setStartY(enemy.getY() - player.getHeight() - tolerance);
-            actualVelocityY = tolerance;
-            if (upReleased) {
-                player.setFalling(false);
-            } else {
-                player.setJumping(true);
-            }
-        } else if (standingOnLine && !player.isJumping()) {
-            player.setVelocityY(0.0);
-            actualVelocityY = tolerance;
-            player.setStartY(borders.get(0).getStartY() - player.getHeight() - tolerance);
-            player.setFalling(false);
-            steppedOnThisEnemy = false;
-        } else if (player.isJumping() && !player.isFalling()) {
-            double jumpingHeight = ((player.getStartVelocityY() * collapsedTime)
-                    + (g / 2 * Math.pow(collapsedTime, 2)));
-            actualVelocityY = player.getStartY() + jumpingHeight - player.getActualY();
-            player.setActualY(player.getStartY() + jumpingHeight);
-            player.setFalling(false);
-            steppedOnThisEnemy = false;
-        } else if (player.isFalling()) {
-            double fallingVelocity = g / 2 * Math.pow(collapsedTime, 2);
-            actualVelocityY = player.getStartY() + fallingVelocity - player.getActualY();
-            player.setActualY(player.getStartY() + (fallingVelocity));
-            steppedOnThisEnemy = false;
-        } else if (!standingOnLine && !standingOnEnemy) {
-            double fallingVelocity = g / 2 * Math.pow(collapsedTime, 2);
-            actualVelocityY = tolerance;
-            player.setActualY(player.getStartY() + (fallingVelocity));
-            player.setFalling(true);
-            steppedOnThisEnemy = false;
-        }
 
-        if (player.getActualY() + player.getHeight() > borders.get(0).getStartY() + tolerance) {
-            player.setActualY(borders.get(0).getStartY() - player.getHeight() - tolerance);
-            player.setStartY(player.getActualY());
-            player.setY(player.getActualY());
-            player.setJumping(false);
-            player.setFalling(false);
-            actualVelocityY = 0.0;
-        }
 
-        if (player.isJumping() || player.isFalling()) {
-            collapsedTime += sixtyFpsSeconds;
-        } else {
-            collapsedTime = 0.0;
-        }
-    }
 
     /**
      * Draws the current frame to the {@link Canvas}
@@ -873,7 +584,7 @@ public class GameLevelEngine {
             startTime = System.nanoTime();
         }
         synchronized (enemies) {
-            moveEnemy();
+            EngineMethods.moveEnemy(enemies, removeEnemies, player);
             movePlayer();
             draw();
             for (int i = 0; i < removeEnemies.size(); i++) {
@@ -891,8 +602,25 @@ public class GameLevelEngine {
      */
     public void generateEnemyTask() {
         synchronized (enemies) {
-            enemies.add(generateEnemy(levelCounter));
+            int enemiesSize = enemies.size();
+            if (enemiesSize > 0) {
+                enemies.add(EngineMethods.generateEnemy(levelCounter,
+                        whichEnemyToGenerate, player, enemiesSize, camera, enemyDistanceX,
+                        enemyDistanceY, enemies.get(enemies.size() - 1), levelEndY));
+            } else {
+                enemies.add(EngineMethods.generateEnemy(levelCounter,
+                        whichEnemyToGenerate, player, enemiesSize, camera, enemyDistanceX,
+                        enemyDistanceY, null, levelEndY));
+            }
+            generatedEnemies++;
+            if(whichEnemyToGenerate % 2 == 0){
+                whichEnemyToGenerate = 1;
+            }
+            else{
+                whichEnemyToGenerate = 0;
+            }
         }
+
     }
 
     /**
@@ -1025,14 +753,7 @@ public class GameLevelEngine {
         }
     }
 
-    /**
-     * Decides whether the {@code player} has reached the end of the level or not.
-     *
-     * @return the {@code player} has reached the end of the level or not
-     */
-    public boolean isEndGame() {
-        return player.getActualY() <= levelEndY;
-    }
+
 
     /**
      * Draws the game over text to the screen.
