@@ -1,5 +1,8 @@
 package jumper.engine;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Camera;
 import javafx.scene.ParallelCamera;
 import javafx.scene.shape.Line;
@@ -29,6 +32,12 @@ class EngineMethodsTest {
     private static List<FallingRectangle> enemies;
     private static List<FallingRectangle> remove;
     private static List<Line> borders;
+    private static SimpleIntegerProperty steppedEnemies;
+    private static SimpleBooleanProperty steppedOnThisEnemy;
+    private static SimpleDoubleProperty actualVelocityY;
+    private static SimpleDoubleProperty collapsedTime;
+    private static double g;
+
 
     @BeforeAll
     static void setup() {
@@ -52,8 +61,13 @@ class EngineMethodsTest {
         leftLine.setStrokeWidth(100);
         rightLine.setStrokeWidth(100);
 
-
         borders.addAll(Arrays.asList(baseLine, leftLine, rightLine));
+
+        steppedEnemies = new SimpleIntegerProperty(0);
+        steppedOnThisEnemy = new SimpleBooleanProperty(false);
+        actualVelocityY = new SimpleDoubleProperty(0.0);
+        collapsedTime = new SimpleDoubleProperty(0.0);
+        g = 50.0;
     }
 
     @Test
@@ -330,9 +344,68 @@ class EngineMethodsTest {
                 player.getX(), "Player X should be left wall + tolerance");
     }
 
-    /*@Test
-    void calculatePlayerY() {
-    }*/
+    @Test
+    void calculatePlayerYWithCrash() {
+        player.setStartVelocityY(-250);
+        player.setStartY(600);
+        steppedEnemies.set(0);
+        steppedOnThisEnemy.set(false);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(10.0);
+        fr.setY(800.0);
+        EngineMethods.calculatePlayerY(true, true, false,
+                fr, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, 50);
+        assertTrue(steppedOnThisEnemy.get(), "Player should step on this enemy.");
+        assertEquals(-200, player.getStartVelocityY(), "Player SVY should decrease to -200");
+        assertEquals(fr.getY() - 0.5, player.getStartY(), "Player startY should be enemy Y - tolerance");
+        assertEquals(0.5, actualVelocityY.get(), "Actual VY should be tolerance");
+        assertFalse(player.isFalling(), "Player should not falling.");
+        assertNotEquals(0, steppedEnemies.get(), "Stepped enemies should not be zero.");
+        assertEquals(0.0, collapsedTime.get(), "Collapsed time should be zero.");
+    }
+
+    @Test
+    void calculatePlayerYCrashedLine() {
+        player.setStartVelocityY(-250);
+        player.setStartY(600);
+        steppedEnemies.set(0);
+        steppedOnThisEnemy.set(false);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(10.0);
+        EngineMethods.calculatePlayerY(true, false, true,
+                null, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertFalse(steppedOnThisEnemy.get(), "Player should not step on this enemy.");
+        assertEquals(-200, player.getStartVelocityY(), "Player SVY should decrease to -200");
+        assertEquals(borders.get(0).getStartY() - 0.5, player.getStartY(), "Player should stand on base line");
+        assertEquals(0.5, actualVelocityY.get(), "Actual VY should be tolerance");
+        assertFalse(player.isFalling(), "Player should not falling.");
+        assertEquals(0, steppedEnemies.get(), "Stepped enemies should be zero.");
+        assertEquals(0.0, collapsedTime.get(), "Collapsed time should be zero.");
+    }
+
+    @Test
+    void calculatePlayerYCrashedJumping() {
+        player.setStartVelocityY(-250);
+        player.setStartY(600);
+        player.setJumping(true);
+        steppedEnemies.set(0);
+        steppedOnThisEnemy.set(false);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(10.0);
+        double playerAY = player.getActualY();
+        EngineMethods.calculatePlayerY(true, false, false,
+                null, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertFalse(steppedOnThisEnemy.get(), "Player should not step on this enemy.");
+        assertEquals(-200, player.getStartVelocityY(), "Player SVY should decrease to -200");
+        assertEquals(0.5, actualVelocityY.get(), "Actual VY should be tolerance");
+        assertTrue(player.isFalling(), "Player should fall.");
+        assertEquals(playerAY, player.getActualY(), "Player should be moving.");
+        assertEquals(playerAY, player.getStartY(), "Player start Y should be the past AY.");
+        assertEquals(sixtyFpsSeconds, collapsedTime.get(), "Collapsed time should not be zero.");
+    }
 
     @AfterAll
     static void tearDown() {
@@ -344,5 +417,9 @@ class EngineMethodsTest {
         camera = null;
         enemies = null;
         remove = null;
+        steppedEnemies = null;
+        steppedOnThisEnemy = null;
+        actualVelocityY = null;
+        collapsedTime = null;
     }
 }
