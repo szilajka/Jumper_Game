@@ -369,6 +369,7 @@ class EngineMethodsTest {
     void calculatePlayerYCrashedLine() {
         player.setStartVelocityY(-250);
         player.setStartY(600);
+        player.setJumping(false);
         steppedEnemies.set(0);
         steppedOnThisEnemy.set(false);
         actualVelocityY.set(20.0);
@@ -406,6 +407,145 @@ class EngineMethodsTest {
         assertEquals(playerAY, player.getStartY(), "Player start Y should be the past AY.");
         assertEquals(sixtyFpsSeconds, collapsedTime.get(), "Collapsed time should not be zero.");
     }
+
+    @Test
+    void calculatePlayerYEnemyNotJumping() {
+        player.setStartY(600);
+        player.setJumping(false);
+        steppedEnemies.set(0);
+        steppedOnThisEnemy.set(false);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(10.0);
+        fr.setY(700);
+        double playerAY = player.getActualY();
+        EngineMethods.calculatePlayerY(false, true, false,
+                fr, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertTrue(steppedOnThisEnemy.get(), "Player should not step on this enemy.");
+        assertEquals(1, steppedEnemies.get(), "Player should have stepped on enemy.");
+        assertEquals(0.5, actualVelocityY.get(), "Actual VY should be tolerance");
+        assertFalse(player.isFalling(), "Player should fall.");
+        assertEquals(playerAY, player.getActualY(), "Player should not be moving.");
+        assertEquals(fr.getY() - player.getHeight() - 0.5, player.getStartY(),
+                "Player should be moving.");
+        assertEquals(10 + sixtyFpsSeconds, collapsedTime.get(), "Collapsed time should not be zero.");
+        player.setJumping(false);
+        EngineMethods.calculatePlayerY(false, true, false,
+                fr, player, borders, steppedOnThisEnemy, true, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertFalse(player.isFalling(), "Player should not fall.");
+    }
+
+    @Test
+    void calculatePlayerYLineNotJumping() {
+        player.setStartY(600);
+        player.setJumping(false);
+        steppedOnThisEnemy.set(true);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(10.0);
+        fr.setY(700);
+        EngineMethods.calculatePlayerY(false, false, true,
+                fr, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertFalse(steppedOnThisEnemy.get(), "Player should not step on this enemy.");
+        assertEquals(0.5, actualVelocityY.get(), "Actual VY should be tolerance");
+        assertEquals(0.0, player.getVelocityY(), "Player VY should be zero.");
+        assertEquals(borders.get(0).getStartY() - player.getHeight() - 0.5,
+                player.getStartY(), "Player SY should be base line - height - tolerance.");
+        assertEquals(0.0, collapsedTime.get(), "Collapsed time should not be zero.");
+        assertFalse(player.isFalling(), "Player should not fall.");
+    }
+
+    @Test
+    void calculatePlayerYJumpingNotFalling() {
+        player.setStartVelocityY(-250);
+        player.setStartY(600);
+        player.setActualY(600);
+        player.setJumping(true);
+        player.setFalling(false);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(3.0);
+        steppedOnThisEnemy.set(false);
+        steppedEnemies.set(0);
+        EngineMethods.calculatePlayerY(false, false, false,
+                null, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertNotEquals(20.0, actualVelocityY.get(), "Actual VY should not be 20.");
+        assertNotEquals(600, player.getActualY(),
+                "Player AY should not be SY.");
+        assertEquals(3.0 + sixtyFpsSeconds, collapsedTime.get(), "Collapsed time should not be zero.");
+        assertFalse(player.isFalling(), "Player should not fall.");
+    }
+
+    @Test
+    void calculatePlayerYFallingNotJumping() {
+        player.setStartVelocityY(-250);
+        player.setStartY(1000);
+        player.setActualY(900);
+        player.setJumping(false);
+        player.setFalling(true);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(3.0);
+        steppedOnThisEnemy.set(false);
+        steppedEnemies.set(0);
+        EngineMethods.calculatePlayerY(false, false, false,
+                null, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertEquals(325, actualVelocityY.get(), "Actual VY should not be tolerance");
+        assertEquals(1225, player.getActualY(),
+                "Player AY should not be SY.");
+        assertEquals(3.0 + sixtyFpsSeconds, collapsedTime.get(), "Collapsed time should not be zero.");
+        assertFalse(steppedOnThisEnemy.get(), "Should not step on enemy.");
+    }
+
+    @Test
+    void calculatePlayerYNotStanding() {
+        player.setStartVelocityY(-250);
+        player.setStartY(1000);
+        player.setActualY(900);
+        player.setJumping(false);
+        player.setFalling(false);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(3.0);
+        steppedOnThisEnemy.set(false);
+        steppedEnemies.set(0);
+        EngineMethods.calculatePlayerY(false, false, false,
+                null, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertEquals(0.5, actualVelocityY.get(), "Actual VY should be tolerance");
+        assertEquals(1225, player.getActualY(),
+                "Player AY should not be SY.");
+        assertEquals(3.0 + sixtyFpsSeconds, collapsedTime.get(), "Collapsed time should not be zero.");
+        assertFalse(steppedOnThisEnemy.get(), "Should not step on enemy.");
+        assertTrue(player.isFalling(), "Player should fall.");
+    }
+
+
+    @Test
+    void calculatePlayerYUnderBaseLine() {
+        player.setStartVelocityY(-250);
+        player.setStartY(1900);
+        player.setActualY(2001);
+        player.setJumping(false);
+        player.setFalling(true);
+        actualVelocityY.set(20.0);
+        collapsedTime.set(3.0);
+        steppedOnThisEnemy.set(false);
+        steppedEnemies.set(0);
+        EngineMethods.calculatePlayerY(false, false, false,
+                null, player, borders, steppedOnThisEnemy, false, steppedEnemies,
+                actualVelocityY, collapsedTime, g);
+        assertEquals(0.0, actualVelocityY.get(), "Actual VY should be zero");
+        assertEquals(borders.get(0).getStartY() - player.getHeight() - 0.5,
+                player.getActualY(), "Player AY should be base line - height - tolerance.");
+        assertEquals(borders.get(0).getStartY() - player.getHeight() - 0.5,
+                player.getStartY(), "Player SY should be base line - height - tolerance");
+        assertEquals(0.0, collapsedTime.get(), "Collapsed time should be zero.");
+        assertFalse(steppedOnThisEnemy.get(), "Should not step on enemy.");
+        assertFalse(player.isFalling(), "Player should not fall.");
+        assertFalse(player.isJumping(), "Player should not jump.");
+    }
+
 
     @AfterAll
     static void tearDown() {
