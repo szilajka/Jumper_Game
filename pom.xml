@@ -235,7 +235,7 @@
                 <version>3.7.1</version>
             </plugin>
 
-            <plugin>
+            <!--<plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>1.19</version>
@@ -253,7 +253,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -266,20 +266,19 @@
                         <version>8.18</version>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <!--<configLocation>./src/main/resources/checkstyle.xml</configLocation>-->
-                    <configLocation>./src/main/resources/google_checks.xml</configLocation>
-                    <encoding>UTF-8</encoding>
-                    <failsOnError>false</failsOnError>
-                    <violationSeverity>error</violationSeverity>
-                    <failOnViolation>false</failOnViolation>
-                </configuration>
                 <executions>
                     <execution>
                         <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
+                        <configuration>
+                            <configLocation>${basedir}/src/main/resources/checkstyle.xml</configLocation>
+                            <encoding>UTF-8</encoding>
+                            <failsOnError>false</failsOnError>
+                            <violationSeverity>error</violationSeverity>
+                            <failOnViolation>false</failOnViolation>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -347,7 +346,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <configLocation>./src/main/resources/google_checks.xml</configLocation>
+                    <configLocation>${basedir}/src/main/resources/checkstyle.xml</configLocation>
                     <encoding>UTF-8</encoding>
                 </configuration>
                 <reportSets>

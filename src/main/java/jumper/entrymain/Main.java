@@ -9,12 +9,12 @@ import jumper.controllers.MainJFX;
  * <a href="https://github.com/javafxports/openjdk-jfx/issues/236#issuecomment-426583174" target="_blank">The link</a>.
  */
 public class Main {
-  /**
-   * The main method of the main class.
-   *
-   * @param args arguments the user wants to pass.
-   */
-  public static void main(String[] args) {
-    MainJFX.main(args);
-  }
+    /**
+     * The main method of the main class.
+     *
+     * @param args arguments the user wants to pass.
+     */
+    public static void main(String[] args) {
+        MainJFX.main(args);
+    }
 }
