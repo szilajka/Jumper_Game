@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class QueriesTest {
 
     private static EntityManagerFactory emf;
-    private EntityManager em;
 
     @BeforeAll
     static void setup() {
@@ -26,7 +25,7 @@ class QueriesTest {
 
     @Test
     void getUserByUserName() {
-        em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         User foundUser = Queries.getUserByUserName(em, "testuser");
         assertNotNull(foundUser, "testuser should not be null.");
         assertEquals("testuser", foundUser.getUserName(), "testuser username should be testuser.");
@@ -39,7 +38,7 @@ class QueriesTest {
 
     @Test
     void getScoreByUserName() {
-        em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         User foundUser = Queries.getUserByUserName(em, "testuser");
         Score foundScore = Queries.getScoreByUserName(em, foundUser);
         assertNotNull(foundScore, "testuser should have score.");
@@ -52,7 +51,7 @@ class QueriesTest {
 
     @Test
     void getAllTimeByUserName() {
-        em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         User foundUser = Queries.getUserByUserName(em, "testuser");
         AllTime foundAllTime = Queries.getAllTimeByUserName(em, foundUser);
         assertEquals(37230, foundAllTime.getElapsedTime(), "testuser alltime should be 37230.");
@@ -63,7 +62,7 @@ class QueriesTest {
 
     @Test
     void getTopTenScoreBoard() {
-        em = emf.createEntityManager();
+        EntityManager em = emf.createEntityManager();
         List<Score> foundSL = Queries.getTopTenScoreBoard(em);
         assertNotNull(foundSL);
         assertNotEquals(0, foundSL.size(), "Scoreboard size should be greater, than 0.");

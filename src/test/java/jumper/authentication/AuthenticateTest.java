@@ -20,7 +20,7 @@ public class AuthenticateTest {
     @BeforeAll
     static void setup() {
         username = "testuser";
-        password = "testuser";
+        password = "alma";
         emf = Persistence.createEntityManagerFactory("jumper");
     }
 
