@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code GameFirstLevel} view.

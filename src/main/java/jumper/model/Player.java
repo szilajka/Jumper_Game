@@ -4,7 +4,7 @@ import javafx.scene.paint.Color;
 
 import java.util.Objects;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 
 /**
  * The player class, this represents the user in the game.

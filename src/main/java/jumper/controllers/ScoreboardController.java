@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code Scoreboard} view.

@@ -18,7 +18,7 @@ import jumper.queries.Queries;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code MainMenu view}.

@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code Pause} view.

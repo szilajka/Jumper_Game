@@ -13,7 +13,7 @@ import jumper.model.Player;
 
 import java.util.List;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
 import static jumper.helpers.GameEngineHelper.tolerance;
 

@@ -5,7 +5,7 @@ import jumper.helpers.EnemyType;
 
 import java.util.Objects;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 
 /**
  * The enemy class.

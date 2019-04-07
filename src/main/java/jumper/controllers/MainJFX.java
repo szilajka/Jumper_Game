@@ -10,7 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
-import org.tinylog.Logger;
+import org.pmw.tinylog.Logger;
 
 /**
  * The main class of the application.
