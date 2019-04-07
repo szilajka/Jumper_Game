@@ -7,19 +7,19 @@ import java.util.Objects;
  * This class is the model of the {@code Score} database table.
  */
 @Entity
-@Table(name = "score", schema = "jumper_app")
+@Table(name = "score", schema = "u_mzhc44")
 public class Score {
     /**
      * The id of the stored or created {@code Score} object.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "score_id", nullable = false)
     private int id;
     /**
      * The level that the {@link User} is actually playing.
      */
-    @Column(name = "level", nullable = false)
+    @Column(name = "score_level", nullable = false)
     private int level;
     /**
      * The score that the {@link User} achieved.

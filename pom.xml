@@ -116,10 +116,17 @@
         </dependency>
 
         <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc14</artifactId>
+            <version>10.2.0.4.0</version>
+        </dependency>
+
+        <!--Uni's oracle db replaced my poor postgre sql db :/  -->
+        <!--<dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>
-        </dependency>
+        </dependency>-->
 
         <!-- For hashed passwords to string and back -->
         <dependency>

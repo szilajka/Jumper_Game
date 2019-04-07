@@ -11,7 +11,7 @@ import org.apache.commons.codec.binary.Hex;
  * This class is the model of the {@code User} database table.
  */
 @Entity
-@Table(name = "jumper_user", schema = "jumper_app")
+@Table(name = "jumper_user", schema = "u_mzhc44")
 public class User implements Serializable {
     /**
      * The {@code username} of the current {@code User}.
@@ -19,7 +19,7 @@ public class User implements Serializable {
      * This is the identifier of the {@code User} class.
      */
     @Id
-    @Column(name = "name", nullable = false)
+    @Column(name = "u_name", nullable = false)
     private String userName;
     /**
      * The {@code user}'s {@code hashed password}.

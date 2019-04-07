@@ -7,14 +7,14 @@ import java.util.Objects;
  * This class is the model of the {@code All time} database table.
  */
 @Entity
-@Table(name = "all_time", schema = "jumper_app")
+@Table(name = "all_time", schema = "u_mzhc44")
 public class AllTime {
     /**
      * The id of the stored or created {@code AllTime} object.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "at_id")
     public int id;
 
     /**
