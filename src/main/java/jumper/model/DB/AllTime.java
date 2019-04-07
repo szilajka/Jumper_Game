@@ -7,7 +7,7 @@ import java.util.Objects;
  * This class is the model of the {@code All time} database table.
  */
 @Entity
-@Table(name = "all_time", schema = "u_mzhc44")
+@Table(name = "all_time")
 public class AllTime {
     /**
      * The id of the stored or created {@code AllTime} object.
@@ -21,7 +21,7 @@ public class AllTime {
      * The username of the {@link User} that this time belongs to.
      */
     @OneToOne
-    @JoinColumn(name = "user_name", referencedColumnName = "name")
+    @JoinColumn(name = "user_name", referencedColumnName = "u_name")
     public User userName;
 
     /**

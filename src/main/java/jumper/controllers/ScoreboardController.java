@@ -78,6 +78,7 @@ public class ScoreboardController {
             Logger.debug("setTableView() method started.");
             EntityManager em = MainJFX.getEntityManager();
             List<Score> scoreList = Queries.getTopTenScoreBoard(em);
+            em.close();
             List<ScoreBoard> sbList = new ArrayList<>();
             for (int i = 0; i < scoreList.size(); i++) {
                 Score score = scoreList.get(i);

@@ -7,7 +7,7 @@ import java.util.Objects;
  * This class is the model of the {@code Score} database table.
  */
 @Entity
-@Table(name = "score", schema = "u_mzhc44")
+@Table(name = "score")
 public class Score {
     /**
      * The id of the stored or created {@code Score} object.

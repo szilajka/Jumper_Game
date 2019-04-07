@@ -134,6 +134,7 @@ public class PauseController {
         Logger.debug("setInGameTime() method called.");
         EntityManager em = MainJFX.getEntityManager();
         AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+        em.close();
         int elapsedSecs = allTime == null ? 0 : allTime.getElapsedTime();
         String formattedTime = TimeHelper.convertSecondsToDuration(elapsedSecs);
         lblTimeQuery.setText(formattedTime);

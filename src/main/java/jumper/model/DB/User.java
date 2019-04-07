@@ -11,7 +11,7 @@ import org.apache.commons.codec.binary.Hex;
  * This class is the model of the {@code User} database table.
  */
 @Entity
-@Table(name = "jumper_user", schema = "u_mzhc44")
+@Table(name = "jumper_user")
 public class User implements Serializable {
     /**
      * The {@code username} of the current {@code User}.
@@ -38,13 +38,13 @@ public class User implements Serializable {
     /**
      * The {@link List} of the {@link Score} objects that belongs to the current {@code user}.
      */
-    @OneToMany(targetEntity = Score.class, mappedBy = "userName")
+    @OneToMany(targetEntity = Score.class, mappedBy = "userName", fetch = FetchType.EAGER)
     private List<Score> score;
 
     /**
      * The {@link AllTime} object that belongs to the current {@code user}.
      */
-    @OneToOne(mappedBy = "userName")
+    @OneToOne(mappedBy = "userName", fetch = FetchType.EAGER)
     private AllTime allTime;
 
     /**

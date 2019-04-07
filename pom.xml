@@ -116,9 +116,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc14</artifactId>
-            <version>10.2.0.4.0</version>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>18.3.0.0</version>
         </dependency>
 
         <!--Uni's oracle db replaced my poor postgre sql db :/  -->
@@ -231,6 +231,8 @@
                 </executions>
                 <configuration>
                     <mainClass>jumper.entrymain.Main</mainClass>
+                    <!--Connection pool error at closing if set to true-->
+                    <!--<cleanupDaemonThreads>false</cleanupDaemonThreads>-->
                 </configuration>
             </plugin>
 

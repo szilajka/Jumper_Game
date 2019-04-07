@@ -7,6 +7,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import org.apache.commons.codec.DecoderException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +50,12 @@ public class AuthenticateTest {
         assertNull(Authenticate.Login("almafa", "almafa", em), "user should not be in db.");
         assertNull(Authenticate.Login(username, "almafa", em), "testuser password should not be almafa.");
         assertNotNull(Authenticate.getLoggedInUser(), "testuser should be logged in.");
+        em.close();
+    }
 
+    @AfterAll
+    static void tearDown(){
+        emf.close();
     }
 
 }

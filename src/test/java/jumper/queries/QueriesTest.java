@@ -72,6 +72,6 @@ class QueriesTest {
 
     @AfterAll
     static void tearDown() {
-        emf = null;
+        emf.close();
     }
 }

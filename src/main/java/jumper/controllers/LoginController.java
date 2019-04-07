@@ -105,6 +105,7 @@ public class LoginController {
                 return;
             }
             User findUser = Authenticate.Login(userName, password, em);
+            em.close();
             if (findUser != null) {
                 Logger.debug("Login() method finished.");
                 GameEngineHelper.levelCounter =

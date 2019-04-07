@@ -125,6 +125,11 @@ public class RegisterController {
             } else {
                 labelErrorPassword.setText("");
             }
+            if(userName.equals(password)){
+                labelErrorUserName.setText("Password must not be the username.");
+                labelErrorPassword.setText("Password must not be the username.");
+                return;
+            }
             byte[] salt = Authenticate.generateSalt();
             byte[] hashedPassword = Authenticate.hashPassword(password, salt);
             saveUser(userName, salt, hashedPassword);
