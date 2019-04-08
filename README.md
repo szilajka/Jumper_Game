@@ -19,13 +19,11 @@ This game requires [Java](https://openjdk.java.net/ "OpenJDK") 11 or above.
     - If you want to change the db, edit the `jumper.modl.DB` package's files (if needed) and set the correct `persistence.xml` file in the `src/main/resources/META-INF` directory.
 		1. Before you run this game, you need to download the _**[Oracle JDBC Driver](https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html "Oracle JDBC download page")**_.
 		2. After you downloaded it, you need to install it to your locale maven repository, as you see it:
->
 		```
 		mvn install:install-file -Dfile=<path-to-ojdbc8.jar> -DgroupId=com.oracle.jdbc \
 		-DartifactId=ojdbc8 -Dversion=18.3.0.0 -Dpackaging=jar
 		```
->
-		    - If you want to change the version number, ie. to 12.3.0.0, then write it to the -Dversion and change it in the pom.xml too.
+		- If you want to change the version number, ie. to `12.3.0.0`, then write it to the `-Dversion` and change it in the `pom.xml` too.
 ---
 ## Run
 -    To generate jar packages, run the following commands:
