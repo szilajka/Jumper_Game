@@ -84,19 +84,26 @@ public class GameLevelController {
      * @param ap the {@link AnchorPane} that the engine will draw on
      */
     public void initGameEngineLevel(AnchorPane ap) {
-        Logger.debug("initGameEngineLevel() method called.");
         EntityManager em = MainJFX.getEntityManager();
-        em.getTransaction().begin();
-        Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
-        em.close();
-        if (score != null) {
-            Logger.debug("No score found with the current user.");
-            gameEngine.setLevelCounter(score.getLevel());
+        try {
+            Logger.debug("initGameEngineLevel() method called.");
+            em.getTransaction().begin();
+            Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
+            if (score != null) {
+                Logger.debug("No score found with the current user.");
+                gameEngine.setLevelCounter(score.getLevel());
+            }
+            int velocityY = (score == null ? Player.finalStartVelocityY : score.getVelocityY());
+            gameEngine.init(ap, velocityY);
+            gameEngine.keyListener();
+            Logger.debug("initGameEngineLevel() method finished.");
+        } catch (Exception ex) {
+            Logger.error("Some error occurred during initializing Game Engine Level.", ex);
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
-        int velocityY = (score == null ? Player.finalStartVelocityY : score.getVelocityY());
-        gameEngine.init(ap, velocityY);
-        gameEngine.keyListener();
-        Logger.debug("initGameEngineLevel() method finished.");
     }
 
     /**
@@ -207,42 +214,49 @@ public class GameLevelController {
      * @param velocityY   the Y velocity of the user at the end of the {@code level}
      */
     public void endLevel(int points, double elapsedTime, int velocityY) {
-        Logger.debug("endLevel() method called.");
-        timerUpdate.cancel();
-        timerEnemyGen.cancel();
-        Logger.debug("Saving to database started.");
         EntityManager em = MainJFX.getEntityManager();
-        Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
-        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
-        if (score != null) {
-            score.setLevel(GameEngineHelper.levelCounter + 1);
-            score.setScore(score.getScore() + points);
-            score.setVelocityY(velocityY);
-            em.getTransaction().begin();
-            em.persist(score);
-            em.getTransaction().commit();
-            em.detach(score);
-            Logger.debug("Score {} and next level {} has been saved to {} user",
-                score.getScore(), score.getLevel(),
-                Authenticate.getLoggedInUser().getUserName());
-        } else {
-            Logger.error("Score value to {} has not been recorded!",
-                Authenticate.getLoggedInUser().getUserName());
+        try {
+            Logger.debug("endLevel() method called.");
+            timerUpdate.cancel();
+            timerEnemyGen.cancel();
+            Logger.debug("Saving to database started.");
+            Score score = Queries.getScoreByUserName(em, Authenticate.getLoggedInUser());
+            AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+            if (score != null) {
+                score.setLevel(GameEngineHelper.levelCounter + 1);
+                score.setScore(score.getScore() + points);
+                score.setVelocityY(velocityY);
+                em.getTransaction().begin();
+                em.persist(score);
+                em.getTransaction().commit();
+                em.detach(score);
+                Logger.debug("Score {} and next level {} has been saved to {} user",
+                    score.getScore(), score.getLevel(),
+                    Authenticate.getLoggedInUser().getUserName());
+            } else {
+                Logger.error("Score value to {} has not been recorded!",
+                    Authenticate.getLoggedInUser().getUserName());
+            }
+            if (allTime != null) {
+                int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+                allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+                em.getTransaction().begin();
+                em.persist(allTime);
+                em.getTransaction().commit();
+                em.detach(allTime);
+                Logger.debug("{} elapsed seconds has been saved to {} user.",
+                    allTime.getElapsedTime(), Authenticate.getLoggedInUser().getUserName());
+            }
+            Logger.debug("Saving to database finished.");
+            gameEngine.drawNextLevelText();
+            Logger.debug("endLevel() method finished.");
+        } catch (Exception ex) {
+            Logger.error("Some error occurred during ending level.", ex);
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
-        if (allTime != null) {
-            int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
-            allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
-            em.getTransaction().begin();
-            em.persist(allTime);
-            em.getTransaction().commit();
-            em.detach(allTime);
-            Logger.debug("{} elapsed seconds has been saved to {} user.",
-                allTime.getElapsedTime(), Authenticate.getLoggedInUser().getUserName());
-        }
-        em.close();
-        Logger.debug("Saving to database finished.");
-        gameEngine.drawNextLevelText();
-        Logger.debug("endLevel() method finished.");
     }
 
     /**
@@ -264,32 +278,40 @@ public class GameLevelController {
      *                    while completing this {@code level}
      */
     public void gameOver(double elapsedTime) {
-        Logger.debug("gameOver() method called.");
-        timerUpdate.cancel();
-        timerEnemyGen.cancel();
-        GameEngineHelper.levelCounter = 1;
         EntityManager em = MainJFX.getEntityManager();
-        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
-        int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
-        if (allTime != null) {
-            allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+        try {
+
+            Logger.debug("gameOver() method called.");
+            timerUpdate.cancel();
+            timerEnemyGen.cancel();
+            GameEngineHelper.levelCounter = 1;
+            AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+            int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+            if (allTime != null) {
+                allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+            }
+            Score score = new Score();
+            score.setLevel(1);
+            score.setScore(0);
+            score.setVelocityY(Player.finalStartVelocityY);
+            score.setUserName(Authenticate.getLoggedInUser().getUserName());
+            Logger.debug("Saving to database started.");
+            em.getTransaction().begin();
+            em.persist(score);
+            em.persist(allTime);
+            em.getTransaction().commit();
+            em.detach(allTime);
+            em.detach(score);
+            Logger.debug("Saving to database finished.");
+            gameEngine.drawGameOverText();
+            Logger.debug("gameOver() method finished.");
+        } catch (Exception ex) {
+            Logger.error("Some error occurred during gameOver().", ex);
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
-        Score score = new Score();
-        score.setLevel(1);
-        score.setScore(0);
-        score.setVelocityY(Player.finalStartVelocityY);
-        score.setUserName(Authenticate.getLoggedInUser().getUserName());
-        Logger.debug("Saving to database started.");
-        em.getTransaction().begin();
-        em.persist(score);
-        em.persist(allTime);
-        em.getTransaction().commit();
-        em.detach(allTime);
-        em.detach(score);
-        em.close();
-        Logger.debug("Saving to database finished.");
-        gameEngine.drawGameOverText();
-        Logger.debug("gameOver() method finished.");
     }
 
     //endregion GameEngine

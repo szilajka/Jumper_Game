@@ -94,9 +94,9 @@ public class LoginController {
      * else gets some error message on the {@code label}.
      */
     private void Login() {
+        EntityManager em = MainJFX.getEntityManager();
         try {
             Logger.debug("Login() method called.");
-            EntityManager em = MainJFX.getEntityManager();
             final String userName = inputUserName.getText().trim();
             final String password = passwordField.getText().trim();
             if (userName.trim().length() == 0 || password.trim().length() == 0) {
@@ -105,7 +105,6 @@ public class LoginController {
                 return;
             }
             User findUser = Authenticate.Login(userName, password, em);
-            em.close();
             if (findUser != null) {
                 Logger.debug("Login() method finished.");
                 GameEngineHelper.levelCounter =
@@ -124,6 +123,10 @@ public class LoginController {
         } catch (NoResultException ex) {
             Logger.debug("No user found with username: {}", inputUserName.getText());
             labelErrorUserPwd.setText("No user with this username.");
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
     }
 

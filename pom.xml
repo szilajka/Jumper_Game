@@ -71,36 +71,12 @@
             <version>11.0.2</version>
         </dependency>
 
-        <!--Changing log4j 2 to Tinylog 2, because there wasn't mentioned log4j 2
-                            in the pdf at section #Logging-->
-        <!--<dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.11.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.11.2</version>
-        </dependency>-->
-
         <!--Using a stable version instead of a milestone version-->
         <dependency>
             <groupId>org.tinylog</groupId>
             <artifactId>tinylog</artifactId>
             <version>1.3.6</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-api</artifactId>
-            <version>2.0.0-M4.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-impl</artifactId>
-            <version>2.0.0-M4.2</version>
-        </dependency>-->
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -118,15 +94,8 @@
         <dependency>
             <groupId>com.oracle.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>18.3.0.0</version>
+            <version>12.2.0.1</version>
         </dependency>
-
-        <!--Uni's oracle db replaced my poor postgre sql db :/  -->
-        <!--<dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.2.5</version>
-        </dependency>-->
 
         <!-- For hashed passwords to string and back -->
         <dependency>

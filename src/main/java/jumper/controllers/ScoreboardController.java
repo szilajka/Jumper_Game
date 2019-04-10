@@ -74,11 +74,10 @@ public class ScoreboardController {
      * Sets the scoreboard's values with the Top 10 {@link jumper.model.DB.User} score.
      */
     public void setTableView() {
+        EntityManager em = MainJFX.getEntityManager();
         try {
             Logger.debug("setTableView() method started.");
-            EntityManager em = MainJFX.getEntityManager();
             List<Score> scoreList = Queries.getTopTenScoreBoard(em);
-            em.close();
             List<ScoreBoard> sbList = new ArrayList<>();
             for (int i = 0; i < scoreList.size(); i++) {
                 Score score = scoreList.get(i);
@@ -94,7 +93,11 @@ public class ScoreboardController {
             tableViewScoreBoard.setItems(FXCollections.observableList(sbList));
             Logger.debug("setTableView() method finished.");
         } catch (Exception ex) {
-            Logger.error("Some error occured during during setting ListView.", ex);
+            Logger.error("Some error occurred during during setting ListView.", ex);
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
     }
 

@@ -131,14 +131,21 @@ public class PauseController {
      * Sets the {@link Label}'s text for the in game time.
      */
     public void setInGameTime() {
-        Logger.debug("setInGameTime() method called.");
         EntityManager em = MainJFX.getEntityManager();
-        AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
-        em.close();
-        int elapsedSecs = allTime == null ? 0 : allTime.getElapsedTime();
-        String formattedTime = TimeHelper.convertSecondsToDuration(elapsedSecs);
-        lblTimeQuery.setText(formattedTime);
-        Logger.debug("setInGameTime() method finished.");
+        try {
+            Logger.debug("setInGameTime() method called.");
+            AllTime allTime = Queries.getAllTimeByUserName(em, Authenticate.getLoggedInUser());
+            int elapsedSecs = allTime == null ? 0 : allTime.getElapsedTime();
+            String formattedTime = TimeHelper.convertSecondsToDuration(elapsedSecs);
+            lblTimeQuery.setText(formattedTime);
+            Logger.debug("setInGameTime() method finished.");
+        } catch (Exception ex) {
+            Logger.error("Some error occurred in setInGameTime().", ex);
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
+        }
     }
 
     /**

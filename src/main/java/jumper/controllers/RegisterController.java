@@ -125,7 +125,7 @@ public class RegisterController {
             } else {
                 labelErrorPassword.setText("");
             }
-            if(userName.equals(password)){
+            if (userName.equals(password)) {
                 labelErrorUserName.setText("Password must not be the username.");
                 labelErrorPassword.setText("Password must not be the username.");
                 return;
@@ -157,38 +157,47 @@ public class RegisterController {
      * @param hashedPassword the hashed password that will be stored in database
      */
     private void saveUser(String userName, byte[] salt, byte[] hashedPassword) {
-        Logger.debug("saveUser() method called.");
         EntityManager em = MainJFX.getEntityManager();
+        try {
+            Logger.debug("saveUser() method called.");
 
-        User storeUser = new User();
-        storeUser.setUserName(userName);
-        storeUser.setHashedPassword(hashedPassword);
-        storeUser.setSalt(salt);
 
-        Score storeScore = new Score();
-        storeScore.setScore(0);
-        storeScore.setLevel(1);
-        storeScore.setVelocityY(Player.finalStartVelocityY);
-        storeScore.setUserName(storeUser.getUserName());
+            User storeUser = new User();
+            storeUser.setUserName(userName);
+            storeUser.setHashedPassword(hashedPassword);
+            storeUser.setSalt(salt);
 
-        AllTime storeAllTime = new AllTime();
-        storeAllTime.setElapsedTime(0);
-        storeAllTime.setUserName(storeUser);
+            Score storeScore = new Score();
+            storeScore.setScore(0);
+            storeScore.setLevel(1);
+            storeScore.setVelocityY(Player.finalStartVelocityY);
+            storeScore.setUserName(storeUser.getUserName());
 
-        em.getTransaction().begin();
+            AllTime storeAllTime = new AllTime();
+            storeAllTime.setElapsedTime(0);
+            storeAllTime.setUserName(storeUser);
 
-        em.persist(storeUser);
-        em.persist(storeScore);
-        em.persist(storeAllTime);
+            em.getTransaction().begin();
 
-        em.getTransaction().commit(); //ez egy nagy szar!!!! - by zig
+            em.persist(storeUser);
+            em.persist(storeScore);
+            em.persist(storeAllTime);
 
-        em.detach(storeUser);
-        em.detach(storeScore);
-        em.detach(storeAllTime);
+            em.getTransaction().commit(); //ez egy nagy szar!!!! - by zig
 
-        em.close();
-        Logger.debug("saveUser() method finished.");
+            em.detach(storeUser);
+            em.detach(storeScore);
+            em.detach(storeAllTime);
+
+            em.close();
+            Logger.debug("saveUser() method finished.");
+        } catch (Exception ex) {
+            Logger.error("Some error occurred in saveUser()", ex);
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
+        }
     }
 
     /**

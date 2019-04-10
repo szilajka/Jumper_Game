@@ -48,8 +48,10 @@ public class MainJFX extends Application {
 
     @Override
     public void stop() throws Exception {
+        if (emf.isOpen()) {
+            emf.close();
+        }
         super.stop();
-        emf.close();
     }
 
     /**

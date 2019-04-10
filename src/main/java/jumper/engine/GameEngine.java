@@ -649,7 +649,7 @@ public class GameEngine {
                     Logger.info("Game over, going to main menu.");
                     gameLevelController.errorGoToMainMenu();
                 } else {
-                    Logger.info("The game is paused.");
+                    Logger.info("The game is pem.close();aused.");
                     double pauseTime = System.nanoTime();
                     elapsedTime += (pauseTime - startTime);
                     elapsedTime = TimeUnit.NANOSECONDS
@@ -664,15 +664,26 @@ public class GameEngine {
                     //------------------------------------------Entity manager start---------
                     Logger.debug("Saving the elapsed time to database.");
                     EntityManager em = MainJFX.getEntityManager();
-                    AllTime allTime = Queries.getAllTimeByUserName(em,
-                        Authenticate.getLoggedInUser());
-                    int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
-                    allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
-                    em.getTransaction().begin();
-                    em.persist(allTime);
-                    em.getTransaction().commit();
-                    em.detach(allTime);
-                    em.close();
+                    try {
+                        AllTime allTime = Queries.getAllTimeByUserName(em,
+                            Authenticate.getLoggedInUser());
+                        int elapsedSecs = Math.toIntExact(Double.valueOf(elapsedTime).longValue());
+                        allTime.setElapsedTime(allTime.getElapsedTime() + elapsedSecs);
+                        em.getTransaction().begin();
+                        em.persist(allTime);
+                        em.getTransaction().commit();
+                        em.detach(allTime);
+                    }catch (NullPointerException np){
+                        Logger.error("Probably allTime object is null.", np);
+                    }
+                    catch (Exception ex) {
+                        Logger.error("Some error occurred in keyListener().", ex);
+                    } finally {
+                        if (em.isOpen()) {
+                            em.close();
+                        }
+                    }
+
                     Logger.debug("Transaction finished.");
                     //------------------------------------------Entity manager end---------
                     elapsedTime = 0;
