@@ -36,7 +36,7 @@ import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import org.pmw.tinylog.Logger;
+import org.tinylog.Logger;
 import static jumper.helpers.GameEngineHelper.sixtyFpsSeconds;
 
 /**

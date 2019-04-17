@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.pmw.tinylog.Logger;
+import org.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code Scoreboard} view.
@@ -93,7 +93,7 @@ public class ScoreboardController {
             tableViewScoreBoard.setItems(FXCollections.observableList(sbList));
             Logger.debug("setTableView() method finished.");
         } catch (Exception ex) {
-            Logger.error("Some error occurred during during setting ListView.", ex);
+            Logger.error("Some error occurred during during setting TableView.", ex);
         } finally {
             if (em.isOpen()) {
                 em.close();

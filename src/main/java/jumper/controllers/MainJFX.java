@@ -6,11 +6,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
+import javax.persistence.*;
 
-import org.pmw.tinylog.Logger;
+import org.tinylog.Logger;
 
 /**
  * The main class of the application.

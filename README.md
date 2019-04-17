@@ -21,7 +21,7 @@ This game requires [Java](https://openjdk.java.net/ "OpenJDK") 11 or above.
 		2. After you downloaded it, you need to install it to your locale maven repository, as you see it:
 		```
 		mvn install:install-file -Dfile=<path-to-ojdbc8.jar> -DgroupId=com.oracle.jdbc \
-		-DartifactId=ojdbc8 -Dversion=18.3.0.0 -Dpackaging=jar
+		-DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar
 		```
 		- If you want to change the version number, ie. to `12.3.0.0`, then write it to the `-Dversion` and change it in the `pom.xml` too.
 ---

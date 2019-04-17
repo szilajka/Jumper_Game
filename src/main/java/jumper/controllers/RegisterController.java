@@ -20,7 +20,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import java.io.IOException;
 
-import org.pmw.tinylog.Logger;
+import org.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code Register} view.
@@ -189,7 +189,6 @@ public class RegisterController {
             em.detach(storeScore);
             em.detach(storeAllTime);
 
-            em.close();
             Logger.debug("saveUser() method finished.");
         } catch (Exception ex) {
             Logger.error("Some error occurred in saveUser()", ex);

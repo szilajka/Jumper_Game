@@ -13,7 +13,7 @@ import java.security.spec.InvalidKeySpecException;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.pmw.tinylog.Logger;
+import org.tinylog.Logger;
 
 /**
  * Authenticates the {@code user}.

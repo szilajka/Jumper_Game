@@ -19,7 +19,7 @@ import javax.persistence.NoResultException;
 import java.io.IOException;
 
 import org.apache.commons.codec.DecoderException;
-import org.pmw.tinylog.Logger;
+import org.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code Login} view.

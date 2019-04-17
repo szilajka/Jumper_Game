@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-import org.pmw.tinylog.Logger;
+import org.tinylog.Logger;
 
 /**
  * {@code Controller} of the {@code Welcome} view.
