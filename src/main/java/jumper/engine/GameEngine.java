@@ -649,7 +649,7 @@ public class GameEngine {
                     Logger.info("Game over, going to main menu.");
                     gameLevelController.errorGoToMainMenu();
                 } else {
-                    Logger.info("The game is pem.close();aused.");
+                    Logger.info("The game is paused.");
                     double pauseTime = System.nanoTime();
                     elapsedTime += (pauseTime - startTime);
                     elapsedTime = TimeUnit.NANOSECONDS

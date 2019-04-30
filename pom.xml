@@ -97,10 +97,11 @@
         </dependency>
 
         <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>12.2.0.1</version>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.16</version>
         </dependency>
+
 
         <!-- For hashed passwords to string and back -->
         <dependency>
@@ -205,8 +206,7 @@
                 </executions>
                 <configuration>
                     <mainClass>jumper.entrymain.Main</mainClass>
-                    <!--Connection pool error at closing if set to true-->
-                    <!--<cleanupDaemonThreads>false</cleanupDaemonThreads>-->
+                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
                 </configuration>
             </plugin>
 
@@ -224,26 +224,6 @@
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.7.1</version>
             </plugin>
-
-            <!--<plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.19</version>
-                <configuration>
-                    <licenseName>mit</licenseName>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                        <configuration>
-                            <licenseName>mit</licenseName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -297,6 +277,7 @@
                         <exclude>jumper/controllers/**/*</exclude>
                         <exclude>jumper/model/**/*</exclude>
                         <exclude>jumper/engine/GameEngine.class</exclude>
+                        <exclude>jumper/queries/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -308,6 +289,15 @@
             </plugin>
 
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <filters>
+            <filter>db.properties</filter>
+        </filters>
     </build>
 
     <reporting>

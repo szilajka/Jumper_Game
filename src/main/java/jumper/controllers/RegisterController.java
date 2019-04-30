@@ -183,7 +183,7 @@ public class RegisterController {
             em.persist(storeScore);
             em.persist(storeAllTime);
 
-            em.getTransaction().commit(); //ez egy nagy szar!!!! - by zig
+            em.getTransaction().commit();
 
             em.detach(storeUser);
             em.detach(storeScore);
