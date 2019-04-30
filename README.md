@@ -8,22 +8,6 @@ This is an application for Programming Technologies (Programozási technológiá
 For running you need to install [Apache Maven](https://maven.apache.org/download.cgi "Apache Maven Download Page") 3.6.0 or above.<br/>
 This game requires [Java](https://openjdk.java.net/ "OpenJDK") 11 or above.
 
-#_**IMPORTANT NOTE!**_
-**DO NOT SHARE THE OJDBC DRIVER!**<br/>
-**DUE TO ORACLE LICENSE, IT CANNOT BE SHARED, SO ONLY INSTALL IT TO YOUR COMPUTER AND NOT IN OTHER COMPUTERS AND NEVER EVER UPLOAD IT TO ANYWHERE!**
-
-
----
-## Preparations
--    This game uses a database to store the user's score and datas.
-    - If you want to change the db, edit the `jumper.modl.DB` package's files (if needed) and set the correct `persistence.xml` file in the `src/main/resources/META-INF` directory.
-		1. Before you run this game, you need to download the _**[Oracle JDBC Driver](https://www.oracle.com/technetwork/database/application-development/jdbc/downloads/index.html "Oracle JDBC download page")**_.
-		2. After you downloaded it, you need to install it to your locale maven repository, as you see it:
-		```
-		mvn install:install-file -Dfile=<path-to-ojdbc8.jar> -DgroupId=com.oracle.jdbc \
-		-DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar
-		```
-		- If you want to change the version number, ie. to `12.3.0.0`, then write it to the `-Dversion` and change it in the `pom.xml` too.
 ---
 ## Run
 -    To generate jar packages, run the following commands:
