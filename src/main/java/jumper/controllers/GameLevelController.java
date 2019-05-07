@@ -1,6 +1,5 @@
 package jumper.controllers;
 
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
@@ -134,8 +133,9 @@ public class GameLevelController {
         stage.setOnCloseRequest(windowEvent -> {
             timerUpdate.cancel();
             timerEnemyGen.cancel();
+            MainJFX.stopEMF();
             stage.close();
-            Platform.exit();
+            //Platform.exit();
         });
         Logger.debug("runGameLevelEngine() method finished.");
     }
@@ -154,6 +154,11 @@ public class GameLevelController {
         timerEnemyGen.cancel();
         try {
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("Pause.fxml"));
             var pauseC = new PauseController(GameLevelController.this);
             fl.setController(pauseC);
@@ -182,6 +187,11 @@ public class GameLevelController {
             timerUpdate.cancel();
             timerEnemyGen.cancel();
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
             var mainController = new MainMenuController();
             fl.setController(mainController);

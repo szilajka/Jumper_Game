@@ -142,6 +142,11 @@ public class LoginController {
             fl.setController(mainMenuController);
             AnchorPane ap = (AnchorPane) fl.load();
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             var mainMenuScene = stage.getScene();
             mainMenuScene.setRoot(ap);
             mainMenuController.setInGameTime();
@@ -161,6 +166,11 @@ public class LoginController {
         try {
             Logger.debug("GoToWelcomeMenu() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             AnchorPane ap = (AnchorPane) FXMLLoader.load(getClass().getClassLoader()
                 .getResource("Welcome.fxml"));
             var welcomeScene = stage.getScene();
@@ -179,6 +189,7 @@ public class LoginController {
     private void AppExit() {
         Logger.debug("AppExit() method called.");
         Stage stage = MainJFX.getPrimaryStage();
+        MainJFX.stopEMF();
         stage.close();
     }
 

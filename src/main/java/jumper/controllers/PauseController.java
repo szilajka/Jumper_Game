@@ -83,6 +83,11 @@ public class PauseController {
     private void removeKeyListener() {
         Logger.debug("removeKeyListener() method called.");
         var stage = MainJFX.getPrimaryStage();
+        stage.setOnCloseRequest(windowEvent -> {
+            MainJFX.stopEMF();
+            stage.close();
+            //Platform.exit();
+        });
         if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
             stage.removeEventHandler(KeyEvent.KEY_PRESSED,
                 keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
@@ -105,6 +110,11 @@ public class PauseController {
                 if (kc == KeyCode.ESCAPE && !paused) {
                     Logger.info("Continuing the game.");
                     var stage = MainJFX.getPrimaryStage();
+                    stage.setOnCloseRequest(windowEvent -> {
+                        MainJFX.stopEMF();
+                        stage.close();
+                        //Platform.exit();
+                    });
                     continueFirstLevel();
                     stage.removeEventHandler(KeyEvent.KEY_PRESSED, this);
 
@@ -123,6 +133,11 @@ public class PauseController {
         removeKeyListener();
         keyEventHandlerMap.put(KeyEvent.KEY_PRESSED, pauseEH);
         var stage = MainJFX.getPrimaryStage();
+        stage.setOnCloseRequest(windowEvent -> {
+            MainJFX.stopEMF();
+            stage.close();
+            //Platform.exit();
+        });
         stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
         Logger.debug("keyListenerPause() method finished.");
     }
@@ -232,6 +247,7 @@ public class PauseController {
     private void AppExit() {
         Logger.debug("AppExit() method called.");
         Stage stage = MainJFX.getPrimaryStage();
+        MainJFX.stopEMF();
         stage.close();
     }
 
@@ -244,6 +260,11 @@ public class PauseController {
         try {
             Logger.debug("loadMainMenu() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("MainMenu.fxml"));
             var mainController = new MainMenuController();
             fl.setController(mainController);
@@ -273,6 +294,11 @@ public class PauseController {
         try {
             Logger.debug("continueFirstLevel() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             var fl = new FXMLLoader(getClass().getClassLoader().getResource("GameLevel.fxml"));
             fl.setController(gameFirstLC);
             var ap = (AnchorPane) fl.load();

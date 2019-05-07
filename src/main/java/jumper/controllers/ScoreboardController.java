@@ -109,6 +109,11 @@ public class ScoreboardController {
     private void removeKeyListener() {
         Logger.debug("removeKeyListener() method called.");
         var stage = MainJFX.getPrimaryStage();
+        stage.setOnCloseRequest(windowEvent -> {
+            MainJFX.stopEMF();
+            stage.close();
+            //Platform.exit();
+        });
         if (keyEventHandlerMap.get(KeyEvent.KEY_PRESSED) != null) {
             stage.removeEventHandler(KeyEvent.KEY_PRESSED,
                 keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
@@ -128,6 +133,11 @@ public class ScoreboardController {
                 if (kc == KeyCode.ESCAPE) {
                     Logger.info("ESCAPE has been pressed.");
                     var stage = MainJFX.getPrimaryStage();
+                    stage.setOnCloseRequest(windowEvent -> {
+                        MainJFX.stopEMF();
+                        stage.close();
+                        //Platform.exit();
+                    });
                     stage.removeEventHandler(KeyEvent.KEY_PRESSED,
                         keyEventHandlerMap.get(KeyEvent.KEY_PRESSED));
                     GoToMainMenu();
@@ -149,6 +159,11 @@ public class ScoreboardController {
         try {
             Logger.debug("GoToMainMenu() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             FXMLLoader fl = new FXMLLoader(getClass().getClassLoader()
                 .getResource("MainMenu.fxml"));
             var mainMenuController = new MainMenuController();
@@ -170,6 +185,7 @@ public class ScoreboardController {
     private void MenuExit() {
         Logger.debug("MenuExit() method called.");
         Stage stage = MainJFX.getPrimaryStage();
+        MainJFX.stopEMF();
         stage.close();
     }
 

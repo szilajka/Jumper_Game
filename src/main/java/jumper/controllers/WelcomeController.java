@@ -95,6 +95,11 @@ public class WelcomeController {
         try {
             Logger.debug("GoToLoginMenu() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             AnchorPane ap = (AnchorPane) FXMLLoader.load(getClass().getClassLoader()
                 .getResource("Login.fxml"));
             var loginScreen = stage.getScene();
@@ -113,6 +118,11 @@ public class WelcomeController {
         try {
             Logger.debug("GoToRegisterMenu() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             AnchorPane ap = (AnchorPane) FXMLLoader.load(getClass().getClassLoader()
                 .getResource("Register.fxml"));
             var registerScene = stage.getScene();
@@ -130,6 +140,7 @@ public class WelcomeController {
     private void AppExit() {
         Logger.debug("AppExit() method called.");
         Stage stage = MainJFX.getPrimaryStage();
+        MainJFX.stopEMF();
         stage.close();
     }
 }

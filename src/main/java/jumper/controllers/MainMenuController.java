@@ -156,7 +156,11 @@ public class MainMenuController {
         try {
             Logger.debug("FirstLevelStart() method called.");
             Stage stage = MainJFX.getPrimaryStage();
-
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             var fl = new FXMLLoader(getClass().getClassLoader()
                 .getResource("GameLevel.fxml"));
             var gameFirstLC = new GameLevelController();
@@ -183,6 +187,11 @@ public class MainMenuController {
         try {
             Logger.debug("ScoreBoard() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             FXMLLoader fl = new FXMLLoader(getClass().getClassLoader()
                 .getResource("Scoreboard.fxml"));
             ScoreboardController sbController = new ScoreboardController();
@@ -205,6 +214,7 @@ public class MainMenuController {
     private void MenuExit() {
         Logger.debug("MenuExit() method called.");
         Stage stage = MainJFX.getPrimaryStage();
+        MainJFX.stopEMF();
         stage.close();
     }
 

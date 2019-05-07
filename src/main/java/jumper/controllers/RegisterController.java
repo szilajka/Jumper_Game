@@ -206,6 +206,11 @@ public class RegisterController {
         try {
             Logger.debug("GoToWelcomeMenu() method called.");
             var stage = MainJFX.getPrimaryStage();
+            stage.setOnCloseRequest(windowEvent -> {
+                MainJFX.stopEMF();
+                stage.close();
+                //Platform.exit();
+            });
             AnchorPane ap = (AnchorPane) FXMLLoader.load(getClass().getClassLoader()
                 .getResource("Welcome.fxml"));
             var welcomeScene = stage.getScene();
@@ -226,6 +231,7 @@ public class RegisterController {
     private void AppExit() {
         Logger.debug("AppExit() method called.");
         Stage stage = MainJFX.getPrimaryStage();
+        MainJFX.stopEMF();
         stage.close();
     }
 
