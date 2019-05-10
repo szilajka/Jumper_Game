@@ -50,6 +50,9 @@ public class MainJFX extends Application {
         super.stop();
     }
 
+	/**
+	* Stops the {@link EntityManagerFactory}.
+	*/
     public static void stopEMF(){
         if(emf.isOpen()){
             emf.close();
