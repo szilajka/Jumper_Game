@@ -40,6 +40,7 @@ public class MainJFX extends Application {
         stage.show();
         stage.setOnCloseRequest((event) -> {
             Logger.debug("Application closes.");
+            stopEMF();
             stage.close();
         });
     }
